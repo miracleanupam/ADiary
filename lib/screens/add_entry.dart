@@ -61,7 +61,8 @@ class _AddEntryState extends State<AddEntry> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Let's record that good feeling..."),
+        title: Text('🌸🌸 Recording Happiness... 🌸🌸'),
+        titleSpacing: 0.0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -79,6 +80,7 @@ class _AddEntryState extends State<AddEntry> {
                       ? "Pick a Date"
                       : DateFormat.yMMMd().format(_selectedDate!),
                 )),
+            SizedBox(height: 16),
             Expanded(
               child: TextField(
                 controller: _journalController,

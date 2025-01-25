@@ -32,7 +32,8 @@ class _DisplayEntryState extends State<DisplayEntry> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Remember this?"),
+        title: Text("🌸💝 Remember this?"),
+        titleSpacing: 0.0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
