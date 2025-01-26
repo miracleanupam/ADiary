@@ -1,7 +1,7 @@
 import 'package:adiary/screens/home.dart';
 import 'package:adiary/screens/unauthenticated_screen.dart';
+import 'package:adiary/services/authentication.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:flutter/services.dart';
 
 void main() {
@@ -16,7 +16,7 @@ class MeroApp extends StatefulWidget {
 }
 
 class _MeroAppState extends State<MeroApp> {
-  final LocalAuthentication auth = LocalAuthentication();
+  final ADauthenticationService auth = ADauthenticationService();
 
   String _authorized = 'Not Authorized';
 
@@ -25,23 +25,18 @@ class _MeroAppState extends State<MeroApp> {
   @override
   void initState() {
     super.initState();
-    auth.isDeviceSupported().then((bool isSupported) {
-      _authenticate();
-    });
+    _authenticate();
   }
 
   Future<void> _authenticate() async {
     bool authenticated = false;
+
     try {
       setState(() {
         _isAuthenticating = true;
         _authorized = 'Authenticating';
       });
-      authenticated = await auth.authenticate(
-          localizedReason: 'Please Authenticate to Access ADiary',
-          options: const AuthenticationOptions(
-            stickyAuth: true,
-          ));
+      authenticated = await auth.authenticate();
 
       setState(() {
         _isAuthenticating = false;

@@ -1,3 +1,4 @@
+import 'package:adiary/services/authentication.dart';
 import 'package:adiary/services/password.dart';
 import 'package:flutter/material.dart';
 
@@ -9,11 +10,34 @@ class PasswordManager extends StatefulWidget {
 }
 
 class _PasswordManagerState extends State<PasswordManager> {
-  void _promptForPassword() {
-    if (mounted) {
+  void _promptForPassword() async {
+    final ADauthenticationService auth = ADauthenticationService();
+    bool authenticated = await auth.authenticate();
+
+    if (authenticated && mounted) {
       ADiaryPasswordService passwordService =
           ADiaryPasswordService(context: context);
+
       passwordService.promptForPassword(true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Success!")),
+      );
+    } else {
+      mounted ? ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Could not authenticate")),
+      ) : (){};
+    }
+  }
+
+  void _showPassword() async {
+    final ADauthenticationService auth = ADauthenticationService();
+    bool authenticated = await auth.authenticate();
+
+    if (authenticated && mounted) {
+      ADiaryPasswordService passwordService =
+          ADiaryPasswordService(context: context);
+
+      passwordService.showPassword();
     }
   }
 
@@ -25,6 +49,16 @@ class _PasswordManagerState extends State<PasswordManager> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          ElevatedButton(
+            onPressed: _showPassword,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(Icons.visibility),
+                Text('Show Password'),
+              ],
+            ),
+          ),
           ElevatedButton(
             onPressed: _promptForPassword,
             child: const Row(

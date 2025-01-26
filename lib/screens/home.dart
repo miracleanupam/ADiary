@@ -21,55 +21,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _checkPassword() async {
     if (mounted) {
     ADiaryPasswordService passwordService = ADiaryPasswordService(context: context);
-    String? storedPassword = await passwordService.getPasswod();
+    String? storedPassword = await passwordService.getPassword();
 
     if (storedPassword == null && mounted) {
     passwordService.promptForPassword(false);
     }
     }
   }
-
-  // void _promptForPassword() {
-  //   TextEditingController passwordController = TextEditingController();
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //           title: const Text(
-  //               "Set Password and do NOT forget it! It will be used to encrypt data."),
-  //           content: TextField(
-  //             controller: passwordController,
-  //             obscureText: true,
-  //             decoration: const InputDecoration(labelText: "Enter a Password"),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //                 onPressed: () async {
-  //                   String password = passwordController.text;
-  //                   if (password.isNotEmpty) {
-  //                     Storages().writeNewPassword(password);
-  //                     Navigator.pop(context);
-  //                   }
-  //                 },
-  //                 child: const Text('Save')),
-  //           ]);
-  //     },
-  //   );
-  // }
-
-  // Widget changePasswordButton() {
-  //   return ElevatedButton(
-  //     onPressed: _promptForPassword,
-  //     child: const Row(
-  //       mainAxisSize: MainAxisSize.min,
-  //       children: <Widget>[
-  //         Icon(Icons.key),
-  //         Text('Change Password'),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   String _drawerScreen = 'dashboard';
 

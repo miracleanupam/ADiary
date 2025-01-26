@@ -5,11 +5,18 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class ADiaryPasswordService {
   final BuildContext context;
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
-  
+  final TextEditingController passwordController = TextEditingController();
+
   ADiaryPasswordService({required this.context});
+  void _changePassword() async {
+    String password = passwordController.text;
+    if (password.isNotEmpty) {
+      Storages().writeNewPassword(password);
+      Navigator.pop(context);
+    }
+  }
 
   void promptForPassword(bool cancelable) {
-    TextEditingController passwordController = TextEditingController();
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -23,26 +30,55 @@ class ADiaryPasswordService {
               decoration: const InputDecoration(labelText: "Enter a Password"),
             ),
             actions: [
-              TextButton(
-                  onPressed: () async {
-                    String password = passwordController.text;
-                    if (password.isNotEmpty) {
-                      Storages().writeNewPassword(password);
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Save')),
-              cancelable ? TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Cancle')) : SizedBox()
+              TextButton(onPressed: _changePassword, child: const Text('Save')),
+              cancelable
+                  ? TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel'))
+                  : SizedBox()
             ]);
       },
     );
   }
 
-  Future<String?> getPasswod() async {
+  void showPassword() async {
+
+    showDialog(context: context, 
+    barrierDismissible: false,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('I know you\'re a boss but you need to remember this:'),
+        content: FutureBuilder(future: Storages().readSavedPassword(), builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else if (snapshot.hasData) {
+            return Text(snapshot.data ?? '');
+          } else {
+            return Text('');
+          }
+        }),
+        actions: [
+          TextButton(onPressed: () { Navigator.pop(context); }, child: const Text('Sorry, I\'ll remember'))
+        ]
+      );
+    }
+    );
+  }
+
+  Future<String?> getPassword() async {
     return await secureStorage.read(key: 'password');
   }
 }
+// FutureBuilder<String>(
+//           future: _fetchData(), // Call the async function
+//           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+//             if (snapshot.connectionState == ConnectionState.waiting) {
+//               return CircularProgressIndicator(); // Show loading indicator
+//             } else if (snapshot.hasError) {
+//               return Text("Error: ${snapshot.error}"); // Handle errors
+//             } else {
+//               return Text(snapshot.data ?? "No Data"); // Show fetched data
+//             }
+//           }
