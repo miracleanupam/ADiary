@@ -71,14 +71,3 @@ class ADiaryPasswordService {
     return await secureStorage.read(key: 'password');
   }
 }
-// FutureBuilder<String>(
-//           future: _fetchData(), // Call the async function
-//           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-//             if (snapshot.connectionState == ConnectionState.waiting) {
-//               return CircularProgressIndicator(); // Show loading indicator
-//             } else if (snapshot.hasError) {
-//               return Text("Error: ${snapshot.error}"); // Handle errors
-//             } else {
-//               return Text(snapshot.data ?? "No Data"); // Show fetched data
-//             }
-//           }

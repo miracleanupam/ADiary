@@ -110,6 +110,14 @@ class EntryProvider {
     return null;
   }
 
+  Future<int> getCount() async {
+    await _open();
+    int? count = Sqflite
+    .firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM $tableEntry'));
+    db.close();
+    return count ?? 0;
+  }
+
   Future<String> export() async {
     String dbPath = await getDatabasesPath();
     String path = join(dbPath, 'happy_journal.db');

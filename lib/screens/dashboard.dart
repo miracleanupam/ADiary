@@ -1,3 +1,4 @@
+import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/add_entry.dart';
 import 'package:adiary/screens/display_entry.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,52 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  int _entryCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _countEntries();
+  }
+
+  void _countEntries() async {
+    int count = await EntryProvider().getCount();
+    setState(() {
+      _entryCount = count;
+    });
+  }
+
+  Widget showCount() {
+    return Column(
+      children: [
+        Text('🌷🌷🌷'),
+        SizedBox(
+          height: 32,
+        ),
+        Text.rich(
+          TextSpan(
+            text: 'You have collected',
+            children: [
+              TextSpan(
+                  text: ' $_entryCount',
+                  style: TextStyle(
+                      color: Colors.pink, fontWeight: FontWeight.bold)),
+              TextSpan(text: ' good memories so far...'),
+            ],
+            style: TextStyle(
+              fontSize: 32,
+            ),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(
+          height: 32,
+        ),
+        Text('🌸🌸🌸'),
+      ],
+    );
+  }
+
   Widget addEntryButton() {
     return ElevatedButton(
       onPressed: () {
@@ -21,7 +68,7 @@ class _DashboardState extends State<Dashboard> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Icon(Icons.favorite_border),
-          Text('Add an Entry'),
+          Text('Add More'),
         ],
       ),
     );
@@ -52,6 +99,10 @@ class _DashboardState extends State<Dashboard> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          showCount(),
+          SizedBox(
+            height: 64,
+          ),
           addEntryButton(),
           memoryButton(),
         ],
