@@ -1,5 +1,6 @@
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/add_entry.dart';
+import 'package:adiary/screens/alevated_button.dart';
 import 'package:adiary/screens/display_entry.dart';
 import 'package:flutter/material.dart';
 
@@ -44,8 +45,9 @@ class _DashboardState extends State<Dashboard> {
               TextSpan(text: ' good memories so far...'),
             ],
             style: TextStyle(
-              fontSize: 32,
-            ),
+                fontSize: 32,
+                color: Colors.pink.shade700,
+                fontFamily: 'IndieFlower'),
           ),
           textAlign: TextAlign.center,
         ),
@@ -58,36 +60,25 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget addEntryButton() {
-    return ElevatedButton(
+      return AlevatedButton(
       onPressed: () {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const AddEntry()),
+          MaterialPageRoute(builder: (context) => AddEntry(fn: _countEntries)),
         );
       },
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(Icons.favorite_border),
-          Text('Add More'),
-        ],
-      ),
+      icon: Icons.add,
+      text: 'Add More'
     );
   }
 
   Widget memoryButton() {
-    return ElevatedButton(
+    return AlevatedButton(
       onPressed: () {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => const DisplayEntry()),
-        );
-      },
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(Icons.sentiment_very_satisfied),
-          Text('Go down the memory lane.'),
-        ],
-      ),
+        );},
+      icon: Icons.sentiment_very_satisfied,
+      text: 'Go down the memory lane'
     );
   }
 

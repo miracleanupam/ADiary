@@ -51,6 +51,9 @@ class _PasswordManagerState extends State<PasswordManager> {
         children: [
           ElevatedButton(
             onPressed: _showPassword,
+                  style: ElevatedButton.styleFrom(
+          textStyle: TextStyle(
+              fontFamily: 'IndieFlower', fontWeight: FontWeight.bold)),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -61,6 +64,9 @@ class _PasswordManagerState extends State<PasswordManager> {
           ),
           ElevatedButton(
             onPressed: _promptForPassword,
+                  style: ElevatedButton.styleFrom(
+          textStyle: TextStyle(
+              fontFamily: 'IndieFlower', fontWeight: FontWeight.bold)),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[

@@ -40,7 +40,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
+        elevation: 1,
+        shadowColor: Colors.black,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("${constants.homePageWidgetTitleListsForAppBar[_drawerScreen]}"),
         titleSpacing: 0.0,

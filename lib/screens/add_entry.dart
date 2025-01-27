@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AddEntry extends StatefulWidget {
-  const AddEntry({super.key});
+  final Function fn;
+
+  const AddEntry({super.key, required this.fn});
 
   @override
   State<AddEntry> createState() => _AddEntryState();
@@ -43,6 +45,7 @@ class _AddEntryState extends State<AddEntry> {
       setState(() {
         _entryId = updatedEntry.id;
       });
+      await widget.fn();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +62,10 @@ class _AddEntryState extends State<AddEntry> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
+        elevation: 1,
+        shadowColor: Colors.black,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('🌸🌸 Recording Happiness... 🌸🌸'),
         titleSpacing: 0.0,

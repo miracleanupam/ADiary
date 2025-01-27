@@ -30,7 +30,10 @@ class _DisplayEntryState extends State<DisplayEntry> {
 
   Widget getJournalBody() {
     return Scaffold(
+      backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
+        elevation: 1,
+        shadowColor: Colors.black,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("🌸💝 Remember this?"),
         titleSpacing: 0.0,

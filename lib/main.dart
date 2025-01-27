@@ -65,6 +65,7 @@ class _MeroAppState extends State<MeroApp> {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        fontFamily: 'IndieFlower',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
         useMaterial3: true,
       ),
