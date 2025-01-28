@@ -16,15 +16,23 @@ class AlevatedButton extends StatelessWidget {
     return ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.pink.shade200,
+            foregroundColor: Colors.pink.shade900,
+            iconColor: Colors.pink.shade900,
+            iconSize: 24,
             textStyle: TextStyle(
-                fontFamily: 'IndieFlower', fontWeight: FontWeight.bold)),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'IndieFlower')),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18,),
-            SizedBox(width: 5,),
-            Text(text, style: TextStyle(fontSize: 18),),
+            Icon(icon),
+            SizedBox(
+              width: 5,
+            ),
+            Text(text),
           ],
         ));
   }

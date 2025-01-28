@@ -30,13 +30,23 @@ class ADiaryPasswordService {
               decoration: const InputDecoration(labelText: "Enter a Password"),
             ),
             actions: [
-              TextButton(onPressed: _changePassword, child: const Text('Save')),
+              TextButton(
+                  onPressed: _changePassword,
+                  child: const Text('Save',
+                      style: TextStyle(
+                          fontFamily: 'IndieFlower',
+                          fontSize: 24,
+                          color: Color(0xFF880E4F)))),
               cancelable
                   ? TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text('Cancel'))
+                      child: const Text('Cancel',
+                          style: TextStyle(
+                              fontFamily: 'IndieFlower',
+                              fontSize: 24,
+                              color: Color(0xFF880E4F))))
                   : SizedBox()
             ]);
       },
@@ -44,27 +54,37 @@ class ADiaryPasswordService {
   }
 
   void showPassword() async {
-
-    showDialog(context: context, 
-    barrierDismissible: false,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('I know you\'re a boss but you need to remember this:'),
-        content: FutureBuilder(future: Storages().readSavedPassword(), builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          } else if (snapshot.hasData) {
-            return Text(snapshot.data ?? '');
-          } else {
-            return Text('');
-          }
-        }),
-        actions: [
-          TextButton(onPressed: () { Navigator.pop(context); }, child: const Text('Sorry, I\'ll remember'))
-        ]
-      );
-    }
-    );
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+              title: const Text(
+                  'I know you\'re a boss but you need to remember this:'),
+              content: FutureBuilder(
+                  future: Storages().readSavedPassword(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasData) {
+                      return Text(snapshot.data ?? '');
+                    } else {
+                      return Text('');
+                    }
+                  }),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Sorry, I\'ll remember',
+                        style: TextStyle(
+                            fontFamily: 'IndieFlower',
+                            fontSize: 24,
+                            color: Color(0xFF880E4F))))
+              ]);
+        });
   }
 
   Future<String?> getPassword() async {

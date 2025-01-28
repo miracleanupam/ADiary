@@ -1,5 +1,7 @@
 import 'package:adiary/models/entry.dart';
+import 'package:adiary/screens/alevated_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class AddEntry extends StatefulWidget {
@@ -64,11 +66,8 @@ class _AddEntryState extends State<AddEntry> {
     return Scaffold(
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
-        elevation: 1,
-        shadowColor: Colors.black,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('🌸🌸 Recording Happiness... 🌸🌸'),
-        titleSpacing: 0.0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -80,7 +79,10 @@ class _AddEntryState extends State<AddEntry> {
                 icon: const Icon(Icons.calendar_month),
                 style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
-                    textStyle: TextStyle(fontSize: 18)),
+                    textStyle: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'IndieFlower',
+                        fontWeight: FontWeight.bold)),
                 label: Text(
                   _selectedDate == null
                       ? "Pick a Date"
@@ -89,6 +91,9 @@ class _AddEntryState extends State<AddEntry> {
             SizedBox(height: 16),
             Expanded(
               child: TextField(
+                onTap: () {
+                  HapticFeedback.heavyImpact();
+                },
                 controller: _journalController,
                 textAlignVertical: TextAlignVertical.top,
                 decoration: InputDecoration(
@@ -100,16 +105,10 @@ class _AddEntryState extends State<AddEntry> {
               ),
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _saveEntry,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(Icons.favorite_border),
-                  Text('Save Entry'),
-                ],
-              ),
-            ),
+            AlevatedButton(
+                onPressed: _saveEntry,
+                icon: Icons.favorite_border,
+                text: 'Save Memory')
           ],
         ),
       ),

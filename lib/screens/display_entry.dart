@@ -1,4 +1,5 @@
 import 'package:adiary/models/entry.dart';
+import 'package:adiary/screens/alevated_button.dart';
 import 'package:flutter/material.dart';
 
 class DisplayEntry extends StatefulWidget {
@@ -32,11 +33,8 @@ class _DisplayEntryState extends State<DisplayEntry> {
     return Scaffold(
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
-        elevation: 1,
-        shadowColor: Colors.black,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("🌸💝 Remember this?"),
-        titleSpacing: 0.0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -48,7 +46,10 @@ class _DisplayEntryState extends State<DisplayEntry> {
                 icon: const Icon(Icons.calendar_month),
                 style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
-                    textStyle: TextStyle(fontSize: 18)),
+                    textStyle: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'IndieFlower',
+                        fontWeight: FontWeight.bold)),
                 label: Text('${_entry?.date}')),
             Expanded(
               child: TextField(
@@ -64,16 +65,10 @@ class _DisplayEntryState extends State<DisplayEntry> {
               ),
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _getRandomEntry,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(Icons.cached),
-                  Text('See Another'),
-                ],
-              ),
-            ),
+            AlevatedButton(
+                onPressed: _getRandomEntry,
+                icon: Icons.cached,
+                text: 'See Another'),
           ],
         ),
       ),
@@ -98,18 +93,12 @@ class _DisplayEntryState extends State<DisplayEntry> {
               ),
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(Icons.home),
-                  Text('Go Back'),
-                ],
-              ),
-            ),
+            AlevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icons.home,
+                text: 'Go Back'),
           ],
         ),
       ),

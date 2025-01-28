@@ -11,7 +11,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   void initState() {
     super.initState();
@@ -20,12 +19,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _checkPassword() async {
     if (mounted) {
-    ADiaryPasswordService passwordService = ADiaryPasswordService(context: context);
-    String? storedPassword = await passwordService.getPassword();
+      ADiaryPasswordService passwordService =
+          ADiaryPasswordService(context: context);
+      String? storedPassword = await passwordService.getPassword();
 
-    if (storedPassword == null && mounted) {
-    passwordService.promptForPassword(false);
-    }
+      if (storedPassword == null && mounted) {
+        passwordService.promptForPassword(false);
+      }
     }
   }
 
@@ -42,13 +42,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
-        elevation: 1,
-        shadowColor: Colors.black,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("${constants.homePageWidgetTitleListsForAppBar[_drawerScreen]}"),
-        titleSpacing: 0.0,
+        title: Text(
+            "${constants.homePageWidgetTitleListsForAppBar[_drawerScreen]}"),
       ),
-      drawer: ADrawer(onTapCallback: _drawerItemTapped, selectedItem: _drawerScreen),
+      drawer: ADrawer(
+          onTapCallback: _drawerItemTapped, selectedItem: _drawerScreen),
       body: Center(
         child: constants.homePageWidgetListsForDrawer[_drawerScreen],
       ),

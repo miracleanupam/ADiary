@@ -1,9 +1,11 @@
+import 'package:adiary/screens/alevated_button.dart';
 import 'package:flutter/material.dart';
 
 class UnauthenticatedScreen extends StatelessWidget {
   final bool isAuthenticating;
   final VoidCallback authenticate;
-  const UnauthenticatedScreen({super.key, required this.authenticate, required this.isAuthenticating});
+  const UnauthenticatedScreen(
+      {super.key, required this.authenticate, required this.isAuthenticating});
 
   @override
   Widget build(BuildContext context) {
@@ -15,36 +17,24 @@ class UnauthenticatedScreen extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            if (isAuthenticating)
+              AlevatedButton(
+                  onPressed: () {},
+                  icon: Icons.more_horiz,
+                  text: 'Awaiting Authentication')
+            else
+              Column(
                 children: <Widget>[
-                  if (isAuthenticating)
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text('Awaiting Authentication'),
-                          Icon(Icons.more_horiz),
-                        ],
-                      ),
-                    )
-                  else
-                    Column(
-                      children: <Widget>[
-                        ElevatedButton(
-                          onPressed: authenticate,
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Text('Authenticate'),
-                              Icon(Icons.perm_device_information),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  AlevatedButton(
+                      onPressed: authenticate,
+                      icon: Icons.perm_device_information,
+                      text: 'Authenticate'),
                 ],
               ),
+          ],
+        ),
       ),
     );
   }

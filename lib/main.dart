@@ -67,6 +67,35 @@ class _MeroAppState extends State<MeroApp> {
       theme: ThemeData(
         fontFamily: 'IndieFlower',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
+        drawerTheme: DrawerThemeData(
+          backgroundColor: Colors.pink.shade100,
+          elevation: 1,
+        ),
+        listTileTheme: ListTileThemeData(
+          iconColor: Colors.pink.shade900,
+          selectedColor: Colors.pink.shade700,
+          textColor: Colors.pink.shade900,
+          titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'IndieFlower')
+        ),
+        dividerTheme: DividerThemeData(
+          color: Colors.pink.shade200
+        ),
+        dialogTheme: DialogTheme(
+          titleTextStyle: TextStyle(fontFamily: 'IndieFlower', color: Colors.pink.shade900, fontSize: 24),
+          contentTextStyle: TextStyle(fontFamily: 'IndieFlower', color: Colors.pink, fontSize: 24),
+        ),
+        appBarTheme: AppBarTheme(
+            elevation: 1,
+            shadowColor: Colors.black,
+            iconTheme: IconThemeData(
+              color: Colors.pink.shade900,
+            ),
+            titleSpacing: 0,
+            titleTextStyle: TextStyle(
+                fontFamily: 'IndieFlower',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.pink.shade900,)),
         useMaterial3: true,
       ),
       home: _authorized == 'Authorized'

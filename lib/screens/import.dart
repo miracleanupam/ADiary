@@ -12,6 +12,7 @@ class ImportData extends StatefulWidget {
 
 class _ImportDataState extends State<ImportData> {
   bool importing = false;
+  final ScrollController scrollController = ScrollController();
 
   Future<void> _import() async {
     setState(() {
@@ -45,32 +46,62 @@ class _ImportDataState extends State<ImportData> {
     return importing
         ? CircularProgressIndicator()
         : Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                StyledText(
-                    value:
-                        'This will import your data from existing sqlite db.'),
-                StyledText(
-                    value:
-                        'Choose the .db file you exported. If you do not see your exported .db file in the file picker, you can open the side drawer on it and choose file manager to select the .db file.'),
-                StyledText(
-                    value:
-                        'If the password set on the exported .db file does not match with the password set on the app, it will not show anything.'),
-                StyledText(
-                    value:
-                        'You can change the password in the app to match the password on exported .db file.'),
-                StyledText(
-                    value:
-                        'Careful: Importing will override the existing data.'),
-                StyledText(value: 'Begin import when ready.'),
-                SizedBox(
-                  height: 32,
+                Expanded(
+                  child: RawScrollbar(
+                    controller: scrollController,
+                    thumbVisibility: true,
+                    thickness: 1,
+                    thumbColor: Theme.of(context).colorScheme.primary,
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 2,
+                          children: [
+                            StyledText(
+                                value:
+                                    'This will import your data from existing sqlite db.'),
+                            StyledText(
+                                value:
+                                    'Choose the .db file you exported. If you do not see your exported .db file in the file picker, you can open the side drawer on it and choose file manager to select the .db file.'),
+                            StyledText(
+                                value:
+                                    'If the password set on the exported .db file does not match with the password set on the app, it will not show anything.'),
+                            StyledText(
+                                value:
+                                    'You can change the password in the app to match the password on exported .db file.'),
+                            StyledText(
+                                value:
+                                    'Careful: Importing will override the existing data.'),
+                            StyledText(value: 'Begin import when ready.'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                AlevatedButton(
-                    onPressed: _import, icon: Icons.upload, text: 'Import'),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 16,
+                      ),
+                      AlevatedButton(
+                          onPressed: _import,
+                          icon: Icons.upload,
+                          text: 'Import'),
+                    ],
+                  ),
+                ),
               ],
             ),
           );

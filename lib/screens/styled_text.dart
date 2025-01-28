@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 class StyledText extends StatelessWidget {
   final String value;
-  
-  const StyledText({super.key, required this.value});
 
+  const StyledText({super.key, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +13,9 @@ class StyledText extends StatelessWidget {
         value,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.pink.shade900,
         ),
       ),
     );

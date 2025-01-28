@@ -12,6 +12,7 @@ class ExportData extends StatefulWidget {
 
 class _ExportDataState extends State<ExportData> {
   bool exporting = false;
+  final ScrollController scrollController = ScrollController();
 
   Future<void> _export() async {
     setState(() {
@@ -41,23 +42,53 @@ class _ExportDataState extends State<ExportData> {
     return exporting
         ? CircularProgressIndicator()
         : Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                StyledText(
-                    value:
-                        'This will exported your data to a sqlite database. It will be encrypted with the password you set on the application.'),
-                StyledText(
-                    value:
-                        'If you do not remember the password, you can change it from the drawer.'),
-                StyledText(value: 'Begin export when ready.'),
-                SizedBox(
-                  height: 32,
+                Expanded(
+                  child: RawScrollbar(
+                    controller: scrollController,
+                    thumbVisibility: true,
+                    thickness: 1,
+                    thumbColor: Theme.of(context).colorScheme.primary,
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 2,
+                          children: [
+                            StyledText(
+                                value:
+                                    'This will export your data to a sqlite database. It will be encrypted with the password you set on the application.'),
+                            StyledText(
+                                value:
+                                    'If you do not remember the password, you can change it from the drawer.'),
+                            StyledText(value: 'Begin export when ready.'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                AlevatedButton(
-                    onPressed: _export, icon: Icons.download, text: 'Export'),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 16,
+                      ),
+                      AlevatedButton(
+                          onPressed: _export,
+                          icon: Icons.download,
+                          text: 'Export'),
+                    ],
+                  ),
+                )
               ],
             ),
           );

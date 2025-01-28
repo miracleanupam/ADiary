@@ -30,7 +30,14 @@ class _DashboardState extends State<Dashboard> {
   Widget showCount() {
     return Column(
       children: [
-        Text('🌷🌷🌷'),
+        Text(
+          '🌸',
+          style: TextStyle(
+              fontSize: 32,
+              color: Colors.pink.shade900,
+              fontFamily: 'IndieFlower',
+              fontWeight: FontWeight.bold),
+        ),
         SizedBox(
           height: 32,
         ),
@@ -40,46 +47,53 @@ class _DashboardState extends State<Dashboard> {
             children: [
               TextSpan(
                   text: ' $_entryCount',
-                  style: TextStyle(
-                      color: Colors.pink, fontWeight: FontWeight.bold)),
+                  style: TextStyle(color: Colors.pink.shade600)),
               TextSpan(text: ' good memories so far...'),
             ],
             style: TextStyle(
                 fontSize: 32,
-                color: Colors.pink.shade700,
-                fontFamily: 'IndieFlower'),
+                color: Colors.pink.shade900,
+                fontFamily: 'IndieFlower',
+                fontWeight: FontWeight.bold),
           ),
           textAlign: TextAlign.center,
         ),
         SizedBox(
           height: 32,
         ),
-        Text('🌸🌸🌸'),
+        Text(
+          '🌸🌸🌸',
+          style: TextStyle(
+              fontSize: 32,
+              color: Colors.pink.shade900,
+              fontFamily: 'IndieFlower',
+              fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
 
   Widget addEntryButton() {
-      return AlevatedButton(
-      onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => AddEntry(fn: _countEntries)),
-        );
-      },
-      icon: Icons.add,
-      text: 'Add More'
-    );
+    return AlevatedButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+                builder: (context) => AddEntry(fn: _countEntries)),
+          );
+        },
+        icon: Icons.add,
+        text: 'Add More');
   }
 
   Widget memoryButton() {
     return AlevatedButton(
-      onPressed: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const DisplayEntry()),
-        );},
-      icon: Icons.sentiment_very_satisfied,
-      text: 'Go down the memory lane'
-    );
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const DisplayEntry()),
+          );
+        },
+        icon: Icons.sentiment_very_satisfied,
+        text: 'Go down the memory lane');
   }
 
   @override

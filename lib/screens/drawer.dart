@@ -29,15 +29,17 @@ class _ADrawerState extends State<ADrawer> {
           child: Container(
               alignment: Alignment.centerLeft,
               child: Text(
-                'What\'s up Gorlie?.. xoxo',
-                style: TextStyle(fontSize: 20),
+                'What\'s up Gorlie?... xoxo',
+                style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade900),
               )),
         ),
         ListTile(
           leading: Icon(Icons.home),
           title: Text(
             'Home',
-            style: TextStyle(fontSize: 20),
           ),
           selected: currentSelection == 'dashboard',
           onTap: () {
@@ -52,7 +54,6 @@ class _ADrawerState extends State<ADrawer> {
           leading: Icon(Icons.download),
           title: Text(
             'Export Data',
-            style: TextStyle(fontSize: 20),
           ),
           selected: currentSelection == 'export',
           onTap: () {
@@ -67,7 +68,6 @@ class _ADrawerState extends State<ADrawer> {
           leading: Icon(Icons.upload),
           title: Text(
             'Import Data',
-            style: TextStyle(fontSize: 20),
           ),
           selected: currentSelection == 'import',
           onTap: () {
@@ -83,7 +83,6 @@ class _ADrawerState extends State<ADrawer> {
           leading: Icon(Icons.key),
           title: Text(
             'Password',
-            style: TextStyle(fontSize: 20),
           ),
           selected: currentSelection == 'password',
           onTap: () {
@@ -99,7 +98,6 @@ class _ADrawerState extends State<ADrawer> {
           leading: Icon(Icons.info),
           title: Text(
             'About App',
-            style: TextStyle(fontSize: 20),
           ),
           selected: currentSelection == 'about',
           onTap: () {
