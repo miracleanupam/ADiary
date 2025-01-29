@@ -12,7 +12,7 @@ class DisplayEntry extends StatefulWidget {
 class _DisplayEntryState extends State<DisplayEntry> {
   Entry? _entry;
   final EntryProvider entryProvider = EntryProvider();
-  final TextEditingController _journalController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
@@ -22,8 +22,6 @@ class _DisplayEntryState extends State<DisplayEntry> {
 
   void _getRandomEntry() async {
     Entry? randomEntry = await entryProvider.getRandomEntry(_entry?.id);
-    _journalController.value =
-        TextEditingValue(text: randomEntry == null ? '' : randomEntry.content);
     setState(() {
       _entry = randomEntry;
     });
@@ -34,7 +32,25 @@ class _DisplayEntryState extends State<DisplayEntry> {
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("🌸💝 Remember this?"),
+        title: Text.rich(TextSpan(children: [
+          TextSpan(
+              text: '🌸🌸',
+              style: TextStyle(shadows: [
+                Shadow(
+                    color: Colors.pink.shade900,
+                    blurRadius: 10,
+                    offset: Offset(0, 0))
+              ])),
+          TextSpan(text: ' Remember this? '),
+          TextSpan(
+              text: '🌸🌸',
+              style: TextStyle(shadows: [
+                Shadow(
+                    color: Colors.pink.shade900,
+                    blurRadius: 10,
+                    offset: Offset(0, 0))
+              ]))
+        ])),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -50,20 +66,33 @@ class _DisplayEntryState extends State<DisplayEntry> {
                         fontSize: 24,
                         fontFamily: 'IndieFlower',
                         fontWeight: FontWeight.bold)),
-                label: Text('${_entry?.date}')),
+                label: Text.rich(TextSpan(children: [
+                  TextSpan(text: '${_entry?.date} '),
+                  TextSpan(
+                      text: '🪷🪷',
+                      style: TextStyle(shadows: [
+                        Shadow(
+                            color: Colors.pink.shade900,
+                            blurRadius: 10,
+                            offset: Offset(0, 0))
+                      ]))
+                ]))),
+            Divider(),
             Expanded(
-              child: TextField(
-                controller: _journalController,
-                textAlignVertical: TextAlignVertical.top,
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: "A full heart...",
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: null,
-                expands: true,
-              ),
-            ),
+                child: RawScrollbar(
+                    controller: scrollController,
+                    thumbVisibility: true,
+                    thickness: 1,
+                    thumbColor: Theme.of(context).colorScheme.primary,
+                    child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              '${_entry?.content}',
+                              style: TextStyle(fontSize: 24),
+                            ))))),
+            Divider(),
             SizedBox(height: 16),
             AlevatedButton(
                 onPressed: _getRandomEntry,
@@ -77,6 +106,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
 
   Widget getNoJurnalBody() {
     return Scaffold(
+      backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("Oops! Didn't find happy memories."),
@@ -89,7 +119,10 @@ class _DisplayEntryState extends State<DisplayEntry> {
             Expanded(
               child: Text(
                 'You will find moments of happiness! It will pass. <3',
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade900),
               ),
             ),
             SizedBox(height: 16),

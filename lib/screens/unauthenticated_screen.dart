@@ -13,27 +13,33 @@ class UnauthenticatedScreen extends StatelessWidget {
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Please Authenticate...'),
+        title: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 0.0, 0.0, 0.0),
+          child: Text('Please Authenticate...'),
+        ),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (isAuthenticating)
-              AlevatedButton(
-                  onPressed: () {},
-                  icon: Icons.more_horiz,
-                  text: 'Awaiting Authentication')
-            else
-              Column(
-                children: <Widget>[
-                  AlevatedButton(
-                      onPressed: authenticate,
-                      icon: Icons.perm_device_information,
-                      text: 'Authenticate'),
-                ],
-              ),
-          ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (isAuthenticating)
+                AlevatedButton(
+                    onPressed: () {},
+                    icon: Icons.more_horiz,
+                    text: 'Awaiting Authentication')
+              else
+                Column(
+                  children: <Widget>[
+                    AlevatedButton(
+                        onPressed: authenticate,
+                        icon: Icons.perm_device_information,
+                        text: 'Authenticate'),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,7 +1,6 @@
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class AddEntry extends StatefulWidget {
@@ -51,7 +50,7 @@ class _AddEntryState extends State<AddEntry> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Saved saved!")),
+          SnackBar(content: Text("Memory Preserved!")),
         );
       }
     } else {
@@ -67,7 +66,25 @@ class _AddEntryState extends State<AddEntry> {
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('🌸🌸 Recording Happiness... 🌸🌸'),
+        title: Text.rich(TextSpan(children: [
+          TextSpan(
+              text: '🌸🌸',
+              style: TextStyle(shadows: [
+                Shadow(
+                    color: Colors.pink.shade900,
+                    blurRadius: 10,
+                    offset: Offset(0, 0))
+              ])),
+          TextSpan(text: ' Recording Happiness... '),
+          TextSpan(
+              text: '🌸🌸',
+              style: TextStyle(shadows: [
+                Shadow(
+                    color: Colors.pink.shade900,
+                    blurRadius: 10,
+                    offset: Offset(0, 0))
+              ]))
+        ])),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -91,14 +108,14 @@ class _AddEntryState extends State<AddEntry> {
             SizedBox(height: 16),
             Expanded(
               child: TextField(
-                onTap: () {
-                  HapticFeedback.heavyImpact();
-                },
                 controller: _journalController,
                 textAlignVertical: TextAlignVertical.top,
                 decoration: InputDecoration(
                   labelText: "What made you happy?",
                   border: OutlineInputBorder(),
+                ),
+                style: TextStyle(
+                  fontSize: 24,
                 ),
                 maxLines: null,
                 expands: true,

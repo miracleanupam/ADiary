@@ -33,6 +33,12 @@ class _DashboardState extends State<Dashboard> {
         Text(
           '🌸',
           style: TextStyle(
+              shadows: [
+                Shadow(
+                    color: Colors.pink.shade900,
+                    blurRadius: 10,
+                    offset: Offset(0, 0))
+              ],
               fontSize: 32,
               color: Colors.pink.shade900,
               fontFamily: 'IndieFlower',
@@ -64,6 +70,12 @@ class _DashboardState extends State<Dashboard> {
         Text(
           '🌸🌸🌸',
           style: TextStyle(
+              shadows: [
+                Shadow(
+                    color: Colors.pink.shade900,
+                    blurRadius: 10,
+                    offset: Offset(0, 0))
+              ],
               fontSize: 32,
               color: Colors.pink.shade900,
               fontFamily: 'IndieFlower',

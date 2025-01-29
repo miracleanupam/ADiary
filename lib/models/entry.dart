@@ -45,10 +45,15 @@ class EntryProvider {
 
   Future<void> _open() async {
     String? securePassword = await secureStorage.read(key: 'password');
+
+    if (securePassword == null) {
+      throw 'Password has not been set yet!';
+    }
+
     String dbPath = await getDatabasesPath();
     String path = join(dbPath, 'happy_journal.db');
 
-    db = await openDatabase(path, version: 1, password: '$securePassword',
+    db = await openDatabase(path, version: 1, password: securePassword,
         onCreate: (Database db, int version) async {
       await db.execute('''
             create table $tableEntry (
@@ -111,11 +116,15 @@ class EntryProvider {
   }
 
   Future<int> getCount() async {
-    await _open();
-    int? count = Sqflite
-    .firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM $tableEntry'));
-    db.close();
-    return count ?? 0;
+    try {
+      await _open();
+      int? count = Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM $tableEntry'));
+      db.close();
+      return count ?? 0;
+    } catch (_) {
+      return 0;
+    }
   }
 
   Future<String> export() async {
