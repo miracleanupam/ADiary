@@ -46,21 +46,20 @@ class _ImportDataState extends State<ImportData> {
     return importing
         ? CircularProgressIndicator()
         : Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: RawScrollbar(
-                    controller: scrollController,
-                    thumbVisibility: true,
-                    thickness: 1,
-                    thumbColor: Theme.of(context).colorScheme.primary,
-                    child: SingleChildScrollView(
+                  child: Center(
+                    child: RawScrollbar(
                       controller: scrollController,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      thumbVisibility: true,
+                      thickness: 1,
+                      thumbColor: Theme.of(context).colorScheme.primary,
+                      child: SingleChildScrollView(
+                        controller: scrollController,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -81,7 +80,7 @@ class _ImportDataState extends State<ImportData> {
                             StyledText(
                                 value:
                                     'Careful: Importing will override the existing data.'),
-                            StyledText(value: 'Begin import when ready.'),
+                            StyledText(value: 'Begin import when ready.'),           
                           ],
                         ),
                       ),

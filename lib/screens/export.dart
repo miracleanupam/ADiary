@@ -42,21 +42,20 @@ class _ExportDataState extends State<ExportData> {
     return exporting
         ? CircularProgressIndicator()
         : Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: RawScrollbar(
-                    controller: scrollController,
-                    thumbVisibility: true,
-                    thickness: 1,
-                    thumbColor: Theme.of(context).colorScheme.primary,
-                    child: SingleChildScrollView(
+                  child: Center(
+                    child: RawScrollbar(
                       controller: scrollController,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      thumbVisibility: true,
+                      thickness: 1,
+                      thumbColor: Theme.of(context).colorScheme.primary,
+                      child: SingleChildScrollView(
+                        controller: scrollController,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -68,7 +67,7 @@ class _ExportDataState extends State<ExportData> {
                             StyledText(
                                 value:
                                     'If you do not remember the password, you can change it from the drawer.'),
-                            StyledText(value: 'Begin export when ready.'),
+                            StyledText(value: 'Begin export when ready.'),                 
                           ],
                         ),
                       ),
