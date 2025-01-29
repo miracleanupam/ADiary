@@ -1,16 +1,35 @@
-# adiary
+# ADiary
+Record your best memories and relive them when you're down. Cause we tend to forgot the good times and get stuck on the bad ones.
 
-A new Flutter project.
+## Release Notes
+### Version 1.0.0
+
+## Features
+- Record your good memories
+- Export/Import your data
+- Encrypted data
+- Authentication with biometrics
+
+## Features coming soon:
+* Ability to add Images to record visuals
+* Rating for memories
+* And so much more
 
 ## Getting Started
+Install the latest APK package from Releases Section of this repository. And Enjoy
 
-This project is a starting point for a Flutter application.
+## To build it yourself
+1. Get the Flutter Developement Environment setup. There's lots of resource available online for this.
+2. Clone the repo
+3. Now build your app. 
+4. Enjoy
 
-A few resources to get you started if this is your first Flutter project:
+## Screenshots
+<img src='screenshots/01.jpg' width="200px"> <img src='screenshots/02.jpg' width="200px"> <img src='screenshots/03.jpg' width="200px">
+<img src='screenshots/04.jpg' width="200px"> <img src='screenshots/05.jpg' width="200px">
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Contributing
+I am accepting pull requests if you want to contribute.
+
+Cheers!!!

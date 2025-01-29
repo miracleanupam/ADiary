@@ -117,12 +117,14 @@ class _DisplayEntryState extends State<DisplayEntry> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Text(
-                'You will find moments of happiness! It will pass. <3',
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade900),
+              child: Center(
+                child: Text(
+                  'You will find moments of happiness! It will pass. <3',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.pink.shade900),
+                ),
               ),
             ),
             SizedBox(height: 16),

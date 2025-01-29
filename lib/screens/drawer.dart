@@ -50,6 +50,7 @@ class _ADrawerState extends State<ADrawer> {
             Navigator.pop(context);
           },
         ),
+        Divider(),
         ListTile(
           leading: Icon(Icons.download),
           title: Text(
