@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -8,15 +9,22 @@ import 'package:path/path.dart';
 final String columnId = '_id';
 final String columnContent = 'content';
 final String columnDate = 'date';
+final String columnImages = "images";
 final String tableEntry = 'entry';
 
 class Entry {
   int? id;
   String content;
   String date;
+  List<String> images;
 
   Map<String, Object?> toMap() {
-    var map = <String, Object?>{columnContent: content, columnDate: date};
+    var jsonImages = jsonEncode(images);
+    var map = <String, Object?>{
+      columnContent: content,
+      columnDate: date,
+      columnImages: jsonImages
+    };
 
     if (id != null) {
       map[columnId] = id;
@@ -25,13 +33,26 @@ class Entry {
     return map;
   }
 
-  Entry({this.id, required this.content, required this.date});
+  Entry(
+      {this.id,
+      required this.content,
+      required this.date,
+      this.images = const []});
 
   factory Entry.fromMap(Map<String, dynamic> map) {
+    String? jsonImages = map[columnImages];
+    List<String> images;
+    if (jsonImages == null || jsonImages == 'null') {
+      images = [];
+    } else {
+      images = List<String>.from(jsonDecode(jsonImages));
+    }
+
     return Entry(
       id: map[columnId] as int,
       content: map[columnContent] as String,
       date: map[columnDate] as String,
+      images: images,
     );
   }
 }
@@ -47,20 +68,27 @@ class EntryProvider {
     String? securePassword = await secureStorage.read(key: 'password');
 
     if (securePassword == null) {
-      throw 'Password has not been set yet!';
+      return;
     }
 
     String dbPath = await getDatabasesPath();
     String path = join(dbPath, 'happy_journal.db');
 
-    db = await openDatabase(path, version: 1, password: securePassword,
+    db = await openDatabase(path, version: 2, password: securePassword,
         onCreate: (Database db, int version) async {
       await db.execute('''
-            create table $tableEntry (
-              $columnId integer primary key autoincrement,
-              $columnContent text not null,
-              $columnDate text not null)
+                create table $tableEntry (
+                  $columnId integer primary key autoincrement,
+                  $columnContent text not null,
+                  $columnDate text not null,
+                  $columnImages images)
+              ''');
+    }, onUpgrade: (Database db, int oldVersion, int newVersion) async {
+      if (oldVersion < 2) {
+        await db.execute('''
+            alter table $tableEntry add column $columnImages text
           ''');
+      }
     });
   }
 
@@ -91,7 +119,8 @@ class EntryProvider {
       List<Map> maps = await db.rawQuery(
           '''select * from $tableEntry $whereCondition order by random() limit 1;''');
       if (maps.isNotEmpty) {
-        return Entry.fromMap(maps.first as Map<String, dynamic>);
+        Entry result = Entry.fromMap(maps.first as Map<String, dynamic>);
+        return result;
       }
       db.close();
       return null;

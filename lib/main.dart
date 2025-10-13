@@ -1,10 +1,13 @@
 import 'package:adiary/screens/home.dart';
 import 'package:adiary/screens/unauthenticated_screen.dart';
 import 'package:adiary/services/authentication.dart';
+import 'package:adiary/services/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(const MeroApp());
 }
 
@@ -17,6 +20,7 @@ class MeroApp extends StatefulWidget {
 
 class _MeroAppState extends State<MeroApp> {
   final ADauthenticationService auth = ADauthenticationService();
+  final NotificationService notificationService = NotificationService();
 
   String _authorized = 'Not Authorized';
 
@@ -26,6 +30,13 @@ class _MeroAppState extends State<MeroApp> {
   void initState() {
     super.initState();
     _authenticate();
+    _notificate();
+  }
+
+  void _notificate() async {
+    notificationService.initNotifications();
+    notificationService.cancelNotifications();
+    notificationService.scheduleNotification();
   }
 
   Future<void> _authenticate() async {
@@ -72,17 +83,21 @@ class _MeroAppState extends State<MeroApp> {
           elevation: 1,
         ),
         listTileTheme: ListTileThemeData(
-          iconColor: Colors.pink.shade900,
-          selectedColor: Colors.pink.shade700,
-          textColor: Colors.pink.shade900,
-          titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'IndieFlower')
-        ),
-        dividerTheme: DividerThemeData(
-          color: Colors.pink.shade200
-        ),
-        dialogTheme: DialogTheme(
-          titleTextStyle: TextStyle(fontFamily: 'IndieFlower', color: Colors.pink.shade900, fontSize: 24),
-          contentTextStyle: TextStyle(fontFamily: 'IndieFlower', color: Colors.pink, fontSize: 24),
+            iconColor: Colors.pink.shade900,
+            selectedColor: Colors.pink.shade700,
+            textColor: Colors.pink.shade900,
+            titleTextStyle: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'IndieFlower')),
+        dividerTheme: DividerThemeData(color: Colors.pink.shade200),
+        dialogTheme: DialogThemeData(
+          titleTextStyle: TextStyle(
+              fontFamily: 'IndieFlower',
+              color: Colors.pink.shade900,
+              fontSize: 24),
+          contentTextStyle: TextStyle(
+              fontFamily: 'IndieFlower', color: Colors.pink, fontSize: 24),
         ),
         appBarTheme: AppBarTheme(
             elevation: 1,
@@ -92,10 +107,11 @@ class _MeroAppState extends State<MeroApp> {
             ),
             titleSpacing: 0,
             titleTextStyle: TextStyle(
-                fontFamily: 'IndieFlower',
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.pink.shade900,)),
+              fontFamily: 'IndieFlower',
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.pink.shade900,
+            )),
         useMaterial3: true,
       ),
       home: _authorized == 'Authorized'

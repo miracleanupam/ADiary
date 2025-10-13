@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
+import 'package:adiary/screens/styled_text.dart';
+import 'package:adiary/services/images.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AddEntry extends StatefulWidget {
   final Function fn;
@@ -15,8 +19,25 @@ class AddEntry extends StatefulWidget {
 class _AddEntryState extends State<AddEntry> {
   int? _entryId;
   DateTime? _selectedDate = DateTime.now();
+  List<String> _pickedImages = [];
+  String? _directory;
+
   final TextEditingController _journalController = TextEditingController();
   final EntryProvider entryProvider = EntryProvider();
+  final ImageService imageService = ImageService();
+
+  @override
+  void initState() {
+    super.initState();
+    _getImageDirectory();
+  }
+
+  void _getImageDirectory() async {
+    Directory imageDirectory = await getApplicationDocumentsDirectory();
+    setState(() {
+      _directory = imageDirectory.path;
+    });
+  }
 
   Future<void> _pickDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
@@ -32,11 +53,34 @@ class _AddEntryState extends State<AddEntry> {
     }
   }
 
+  Future<void> _handleImagesSelection() async {
+    List<String> pickedImages = await imageService.pickImages();
+
+    setState(() {
+      _pickedImages = [..._pickedImages, ...pickedImages];
+    });
+  }
+
+  void _removePickedImage(index) async {
+    String imageName = _pickedImages[index];
+    String imagePath = "$_directory/$imageName";
+
+    File imageFile = File(imagePath);
+    if (await imageFile.exists()) {
+      await imageFile.delete();
+    }
+    setState(() {
+      _pickedImages.removeAt(index);
+    });
+  }
+
   void _saveEntry() async {
     if (_selectedDate != null && _journalController.text.isNotEmpty) {
       Entry newEntry = Entry(
-          content: _journalController.text,
-          date: DateFormat.yMMMd().format(_selectedDate!));
+        content: _journalController.text,
+        date: DateFormat.yMMMd().format(_selectedDate!),
+        images: _pickedImages,
+      );
       if (_entryId != null) {
         newEntry.id = _entryId;
       }
@@ -58,6 +102,35 @@ class _AddEntryState extends State<AddEntry> {
         SnackBar(content: Text("Please select a date and write an entry.")),
       );
     }
+  }
+
+  Widget _removableImage(index) {
+    return Stack(children: [
+      ClipRRect(
+          borderRadius: BorderRadiusGeometry.circular(6),
+          child: Image.file(
+            File("$_directory/${_pickedImages[index]}"),
+            height: 100,
+          )),
+      Positioned(
+          top: 2,
+          right: 2,
+          child: GestureDetector(
+            onTap: () => _removePickedImage(index),
+            child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Icon(
+                    Icons.close,
+                    size: 16,
+                  ),
+                )),
+          )),
+    ]);
   }
 
   @override
@@ -121,11 +194,50 @@ class _AddEntryState extends State<AddEntry> {
                 expands: true,
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8.0, 8, 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  StyledText(value: "Images"),
+                  GestureDetector(
+                    onTap: _handleImagesSelection,
+                    child: Icon(
+                      Icons.add_a_photo_outlined,
+                      color: Colors.pink.shade900,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            if (_pickedImages.isNotEmpty)
+              Stack(
+                children: [
+                  // Scrollable horizontal list
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children:
+                          List.generate(_pickedImages.length * 2 - 1, (index) {
+                        if (index.isEven) {
+                          final itemIndex = index ~/ 2;
+                          return _removableImage(itemIndex);
+                        } else {
+                          return const SizedBox(width: 12); // separator
+                        }
+                      }),
+                    ),
+                  ),
+                ],
+              ),
             SizedBox(height: 16),
             AlevatedButton(
                 onPressed: _saveEntry,
                 icon: Icons.favorite_border,
-                text: 'Save Memory')
+                text: 'Save Memory'),
+            SizedBox(
+              height: 16,
+            )
           ],
         ),
       ),

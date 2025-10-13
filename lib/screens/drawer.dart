@@ -50,6 +50,20 @@ class _ADrawerState extends State<ADrawer> {
             Navigator.pop(context);
           },
         ),
+        ListTile(
+          leading: Icon(Icons.notification_important),
+          title: Text(
+            'Notification',
+          ),
+          selected: currentSelection == 'notification',
+          onTap: () {
+            setState(() {
+              currentSelection = 'notification';
+            });
+            widget.onTapCallback('notification');
+            Navigator.pop(context);
+          },
+        ),
         Divider(),
         ListTile(
           leading: Icon(Icons.download),

@@ -6,6 +6,6 @@ class About extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const StyledText(value: 'For Prinsu.');
+    return const StyledText(value: 'For Prinsu. With Love');
   }
 }
