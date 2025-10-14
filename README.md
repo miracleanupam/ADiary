@@ -2,6 +2,15 @@
 Record your best memories and relive them when you're down. Cause we tend to forgot the good times and get stuck on the bad ones.
 
 ## Release Notes
+### Version 2.0.0
+
+## Features Added
+- Ability to add Images to record visuals
+- Daily notifications reminder
+
+## Other changes
+- UI/UX enhancements
+
 ### Version 1.0.0
 
 ## Features
@@ -9,8 +18,6 @@ Record your best memories and relive them when you're down. Cause we tend to for
 - Export/Import your data
 - Encrypted data
 - Authentication with biometrics
-- Ability to add Images to record visuals
-- Daily notifications reminder
 
 ## Features coming soon:
 * Rating for memories
