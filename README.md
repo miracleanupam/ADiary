@@ -9,9 +9,10 @@ Record your best memories and relive them when you're down. Cause we tend to for
 - Export/Import your data
 - Encrypted data
 - Authentication with biometrics
+- Ability to add Images to record visuals
+- Daily notifications reminder
 
 ## Features coming soon:
-* Ability to add Images to record visuals
 * Rating for memories
 * And so much more
 
