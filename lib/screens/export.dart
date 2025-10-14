@@ -63,11 +63,11 @@ class _ExportDataState extends State<ExportData> {
                           children: [
                             StyledText(
                                 value:
-                                    'This will export your data to a sqlite database. It will be encrypted with the password you set on the application.'),
+                                    'This will export your data to a .zip file. The zip file will contain the images and the database file. The database file will be encrypted with the password you set on the application.'),
                             StyledText(
                                 value:
                                     'If you do not remember the password, you can change it from the drawer.'),
-                            StyledText(value: 'Begin export when ready.'),                 
+                            StyledText(value: 'Begin export when ready...'),
                           ],
                         ),
                       ),
@@ -85,6 +85,9 @@ class _ExportDataState extends State<ExportData> {
                           onPressed: _export,
                           icon: Icons.download,
                           text: 'Export'),
+                      SizedBox(
+                        height: 16,
+                      )
                     ],
                   ),
                 )

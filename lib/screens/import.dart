@@ -67,20 +67,21 @@ class _ImportDataState extends State<ImportData> {
                           children: [
                             StyledText(
                                 value:
-                                    'This will import your data from existing sqlite db.'),
+                                    'This will import your data from existing .zip file.'),
+                            StyledText(
+                                value: 'Choose the .zip file you exported.'),
                             StyledText(
                                 value:
-                                    'Choose the .db file you exported. If you do not see your exported .db file in the file picker, you can open the side drawer on it and choose file manager to select the .db file.'),
+                                    'If the password set on the app when the the .zip was exported does not match with the current password set on this app, it will not show anything.'),
                             StyledText(
                                 value:
-                                    'If the password set on the exported .db file does not match with the password set on the app, it will not show anything.'),
+                                    'You can change the password in the app to match the password on exported file.'),
                             StyledText(
-                                value:
-                                    'You can change the password in the app to match the password on exported .db file.'),
-                            StyledText(
+                                fontSize: 36,
+                                color: Colors.pink.shade300,
                                 value:
                                     'Careful: Importing will override the existing data.'),
-                            StyledText(value: 'Begin import when ready.'),           
+                            StyledText(value: 'Begin import when ready...'),
                           ],
                         ),
                       ),
@@ -98,6 +99,9 @@ class _ImportDataState extends State<ImportData> {
                           onPressed: _import,
                           icon: Icons.upload,
                           text: 'Import'),
+                      SizedBox(
+                        height: 16,
+                      )
                     ],
                   ),
                 ),

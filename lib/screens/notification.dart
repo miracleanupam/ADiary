@@ -115,7 +115,7 @@ class _NotificationManagerState extends State<NotificationManager> {
             ],
           ),
           SizedBox(
-            height: 20,
+            height: 16,
           )
         ],
       ),

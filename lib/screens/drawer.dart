@@ -25,13 +25,21 @@ class _ADrawerState extends State<ADrawer> {
         child: ListView(
       children: [
         DrawerHeader(
-          decoration: BoxDecoration(color: Colors.pink.shade200),
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                  opacity: 0.8,
+                  fit: BoxFit.cover,
+                  colorFilter:
+                      ColorFilter.mode(Colors.pink.shade200, BlendMode.color),
+                  image:
+                      AssetImage('assets/images/drawer_header_background.png')),
+              color: Colors.pink.shade200),
           child: Container(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.bottomLeft,
               child: Text(
-                'What\'s up Gorlie?... xoxo',
+                'xoxo',
                 style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.pink.shade900),
               )),

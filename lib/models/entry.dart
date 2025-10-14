@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -156,37 +159,114 @@ class EntryProvider {
     }
   }
 
-  Future<String> export() async {
-    String dbPath = await getDatabasesPath();
-    String path = join(dbPath, 'happy_journal.db');
-    String exportDirectoryPath = '/storage/emulated/0/Download/ADiary';
-    Directory exportDirectory = Directory(exportDirectoryPath);
-    if (!await exportDirectory.exists()) {
-      await exportDirectory.create(recursive: true);
+  Future<bool> requestStoragePermission() async {
+    var status = await Permission.manageExternalStorage.status;
+    if (!await Permission.manageExternalStorage.isGranted) {
+      status = await Permission.manageExternalStorage.request();
     }
-    String filename = 'ADiary_${DateTime.now().millisecondsSinceEpoch}.db';
-    String exportPath = join(exportDirectoryPath, filename);
+    return status.isGranted;
+  }
 
-    File sourceFile = File(path);
-    await sourceFile.copy(exportPath);
-    return 'Download/ADiary/$filename';
+  Future<String> export() async {
+    if (Platform.isAndroid) {
+      if (!await requestStoragePermission()) {
+        throw Exception("No permission granted");
+      }
+    }
+
+    final archive = Archive();
+
+    final Directory imagesDirectory = await getApplicationDocumentsDirectory();
+    final String imagesDirectoryPath = imagesDirectory.path;
+
+    final String dbPath = await getDatabasesPath();
+    final Directory dbDirectory = Directory(dbPath);
+
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+    if (selectedDirectory == null) {
+      throw Exception('No directory selected');
+    }
+
+    Future<void> addFiles(
+        Archive archive, Directory dir, String basePath) async {
+      for (var entity in dir.listSync(recursive: true)) {
+        if (entity is Directory) {
+          continue;
+        }
+
+        if (entity is File) {
+          if (!entity.path.endsWith('.jpg') && !entity.path.endsWith('.db')) {
+            continue;
+          }
+          final relativePath = entity.path.replaceFirst('$basePath/', '');
+          final bytes = await entity.readAsBytes();
+
+          // Add to archive
+          final archiveFile = ArchiveFile(
+            relativePath,
+            bytes.length,
+            bytes,
+          );
+          archive.addFile(archiveFile);
+        }
+      }
+    }
+
+    await addFiles(archive, imagesDirectory, imagesDirectoryPath);
+
+    await addFiles(archive, dbDirectory, dbPath);
+
+    final zipEncoder = ZipEncoder();
+    final zipData = zipEncoder.encode(archive);
+
+    final zipPath = join(selectedDirectory,
+        'ADiary_${DateTime.now().millisecondsSinceEpoch}.zip');
+    final zipFile = File(zipPath);
+    await zipFile.writeAsBytes(zipData);
+
+    return zipPath;
   }
 
   Future<void> import() async {
+    if (Platform.isAndroid) {
+      if (!await requestStoragePermission()) {
+        throw Exception("No permission granted");
+      }
+    }
+
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result == null) {
       throw Exception('No Files Selected');
     }
-    if (result.files.single.extension != 'db') {
-      throw Exception('Can only import .db files');
+    if (result.files.single.extension != 'zip') {
+      throw Exception('Can only import .zip files');
     }
+    final bytes = await File(result.files.single.path!).readAsBytes();
+    final archive = ZipDecoder().decodeBytes(bytes);
 
-    File selectedFile = File(result.files.single.path!);
+    // Get directories
+    final documentsDirectory = await getApplicationDocumentsDirectory();
+    final dbPath = await getDatabasesPath();
 
-    String dbPath = await getDatabasesPath();
-    String currentPath = join(dbPath, 'happy_journal.db');
+    // Extract files
+    for (final file in archive) {
+      final filename = file.name;
 
-    await selectedFile.copy(currentPath);
+      if (file.isFile) {
+        final data = file.content as List<int>;
+
+        if (filename.endsWith('.db')) {
+          final dbFile = File('$dbPath/$filename');
+          await dbFile.create();
+          await dbFile.writeAsBytes(data);
+        } else {
+          final imageFile = File('${documentsDirectory.path}/$filename');
+          await imageFile.create();
+          await imageFile.writeAsBytes(data);
+        }
+      }
+    }
   }
 }
