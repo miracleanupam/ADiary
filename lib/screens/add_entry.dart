@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:adiary/compnents/audio_player.dart';
 import 'package:adiary/compnents/add_entry_title.dart';
+import 'package:adiary/compnents/date_picker.dart';
 import 'package:adiary/compnents/removable_image.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
@@ -211,20 +212,7 @@ class _AddEntryState extends State<AddEntry> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton.icon(
-                    onPressed: () => _pickDate(context),
-                    icon: const Icon(Icons.calendar_month),
-                    style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        textStyle: TextStyle(
-                            fontSize: 24,
-                            fontFamily: 'IndieFlower',
-                            fontWeight: FontWeight.bold)),
-                    label: Text(
-                      _selectedDate == null
-                          ? "Pick a Date"
-                          : DateFormat.yMMMd().format(_selectedDate!),
-                    )),
+                DatePicker(fn: () => _pickDate(context), selectedDate: _selectedDate),
                 FilledButton.icon(
                     onPressed: () => _pickMood(context),
                     icon: _selectedMood?['icon'] ??
