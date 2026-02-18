@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:adiary/compnents/audio_button.dart';
 import 'package:adiary/compnents/audio_input.dart';
 import 'package:adiary/compnents/add_entry_title.dart';
 import 'package:adiary/compnents/date_picker.dart';
@@ -237,35 +238,11 @@ class _AddEntryState extends State<AddEntry> {
             SizedBox(
               height: 5,
             ),
-            ElevatedButton(
-                onPressed: () async {
+            AudioButton(showRecorder: _showRecorder, fn: () async {
                   setState(() {
                     _showRecorder = !_showRecorder;
                   });
-                },
-                style: ElevatedButton.styleFrom(
-                    side: BorderSide(color: Colors.pink.shade200, width: 1),
-                    backgroundColor: Colors.pink.shade100,
-                    foregroundColor: Colors.pink.shade900,
-                    iconColor: Colors.pink.shade900,
-                    iconSize: 24,
-                    textStyle: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'IndieFlower')),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(_showRecorder ? Icons.edit : Icons.mic),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Text(_showRecorder
-                        ? 'Edit journal'
-                        : 'Record an andio too????!!'),
-                  ],
-                )),
+                }),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8.0, 8, 8.0),
               child: Row(
