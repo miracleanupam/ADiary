@@ -10,18 +10,21 @@ class JournalInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    OutlineInputBorder borderStyle = OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.pink.shade900, width: 1));
     return TextField(
-        controller: journalController,
-        textAlignVertical: TextAlignVertical.top,
-        decoration: InputDecoration(
+      controller: journalController,
+      textAlignVertical: TextAlignVertical.top,
+      decoration: InputDecoration(
           labelText: "What made you happy?",
-          border: OutlineInputBorder(),
-        ),
-        style: TextStyle(
-          fontSize: 24,
-        ),
-        maxLines: null,
-        expands: true,
-      );
+          enabledBorder: borderStyle,
+          focusedBorder: borderStyle,
+          labelStyle: TextStyle(color: Colors.pink.shade900)),
+      style: TextStyle(
+        fontSize: 24,
+      ),
+      maxLines: null,
+      expands: true,
+    );
   }
 }
