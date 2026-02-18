@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:adiary/compnents/audio_player.dart';
+import 'package:adiary/compnents/removable_image.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
 import 'package:adiary/screens/styled_text.dart';
@@ -194,35 +195,6 @@ class _AddEntryState extends State<AddEntry> {
     }
   }
 
-  Widget _removableImage(index) {
-    return Stack(children: [
-      ClipRRect(
-          borderRadius: BorderRadiusGeometry.circular(6),
-          child: Image.file(
-            File("$_directory/${_pickedImages[index]}"),
-            height: 100,
-          )),
-      Positioned(
-          top: 2,
-          right: 2,
-          child: GestureDetector(
-            onTap: () => _removePickedImage(index),
-            child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Icon(
-                    Icons.close,
-                    size: 16,
-                  ),
-                )),
-          )),
-    ]);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -301,14 +273,14 @@ class _AddEntryState extends State<AddEntry> {
                           onPressed: _toggleRecordingState,
                         ),
                         if (_recordingPath != '')
-                        IconButton(
-                            onPressed: () async {
-                              await recorderService.deleteFile();
-                              setState(() {
-                                _recordingPath = '';
-                              });
-                            },
-                            icon: Icon(Icons.cut)),
+                          IconButton(
+                              onPressed: () async {
+                                await recorderService.deleteFile();
+                                setState(() {
+                                  _recordingPath = '';
+                                });
+                              },
+                              icon: Icon(Icons.cut)),
                         if (_recordingPath != '')
                           AudioPlayerWidget(filePath: _recordingPath),
                       ],
@@ -386,7 +358,11 @@ class _AddEntryState extends State<AddEntry> {
                           List.generate(_pickedImages.length * 2 - 1, (index) {
                         if (index.isEven) {
                           final itemIndex = index ~/ 2;
-                          return _removableImage(itemIndex);
+                          return RemovableImage(
+                              imagePath:
+                                  "$_directory/${_pickedImages[itemIndex]}",
+                              removeImageFn: () =>
+                                  _removePickedImage(itemIndex));
                         } else {
                           return const SizedBox(width: 12); // separator
                         }
