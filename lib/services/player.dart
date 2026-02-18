@@ -11,6 +11,10 @@ class AudioPlayerService {
     await _player.pause();
   }
 
+  Future<void> seek(int ms) async {
+    await _player.seek(Duration(milliseconds: ms));
+  }
+
   Future<void> resume() async {
     await _player.resume();
   }

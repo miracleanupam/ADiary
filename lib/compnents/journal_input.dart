@@ -12,6 +12,7 @@ class JournalInput extends StatelessWidget {
   Widget build(BuildContext context) {
     OutlineInputBorder borderStyle = OutlineInputBorder(
         borderSide: BorderSide(color: Colors.pink.shade900, width: 1));
+
     return TextField(
       controller: journalController,
       textAlignVertical: TextAlignVertical.top,
