@@ -1,7 +1,8 @@
 import 'dart:io';
-import 'package:adiary/compnents/audio_player.dart';
+import 'package:adiary/compnents/audio_input.dart';
 import 'package:adiary/compnents/add_entry_title.dart';
 import 'package:adiary/compnents/date_picker.dart';
+import 'package:adiary/compnents/journal_input.dart';
 import 'package:adiary/compnents/mood_picker.dart';
 import 'package:adiary/compnents/removable_image.dart';
 import 'package:adiary/models/entry.dart';
@@ -213,49 +214,25 @@ class _AddEntryState extends State<AddEntry> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                DatePicker(fn: () => _pickDate(context), selectedDate: _selectedDate),
+                DatePicker(
+                    fn: () => _pickDate(context), selectedDate: _selectedDate),
                 MoodPicker(fn: () => _pickMood(context), mood: _selectedMood),
               ],
             ),
             SizedBox(height: 16),
             Expanded(
               child: _showRecorder
-                  ? Column(
-                      children: [
-                        IconButton(
-                          iconSize: 48,
-                          icon: Icon(
-                            _isRecording ? Icons.stop_circle : Icons.mic,
-                            color: _isRecording ? Colors.red : null,
-                          ),
-                          onPressed: _toggleRecordingState,
-                        ),
-                        if (_recordingPath != '')
-                          IconButton(
-                              onPressed: () async {
-                                await recorderService.deleteFile();
-                                setState(() {
-                                  _recordingPath = '';
-                                });
-                              },
-                              icon: Icon(Icons.cut)),
-                        if (_recordingPath != '')
-                          AudioPlayerWidget(filePath: _recordingPath),
-                      ],
-                    )
-                  : TextField(
-                      controller: _journalController,
-                      textAlignVertical: TextAlignVertical.top,
-                      decoration: InputDecoration(
-                        labelText: "What made you happy?",
-                        border: OutlineInputBorder(),
-                      ),
-                      style: TextStyle(
-                        fontSize: 24,
-                      ),
-                      maxLines: null,
-                      expands: true,
-                    ),
+                  ? AudioInput(
+                      isRecording: _isRecording,
+                      toggleRecordingState: _toggleRecordingState,
+                      recordingPath: _recordingPath,
+                      removeAudio: () async {
+                        await recorderService.deleteFile();
+                        setState(() {
+                          _recordingPath = '';
+                        });
+                      })
+                  : JournalInput(journalController: _journalController),
             ),
             SizedBox(
               height: 5,
