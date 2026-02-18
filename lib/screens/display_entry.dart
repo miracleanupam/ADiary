@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:adiary/compnents/audio_player.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
 import 'package:adiary/screens/styled_text.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:adiary/constants.dart' as constants;
 
 class DisplayEntry extends StatefulWidget {
   const DisplayEntry({super.key});
@@ -20,6 +22,8 @@ class _DisplayEntryState extends State<DisplayEntry> {
   final EntryProvider entryProvider = EntryProvider();
   final ScrollController scrollController = ScrollController();
   String? _directory;
+  Map<String, dynamic>? _mood;
+  String? _audioPath;
 
   @override
   void initState() {
@@ -30,8 +34,16 @@ class _DisplayEntryState extends State<DisplayEntry> {
 
   void _getRandomEntry() async {
     Entry? randomEntry = await entryProvider.getRandomEntry(_entry?.id);
+    Map<String, dynamic>? entryMood = findMood(randomEntry?.mood);
+    final directory = await getApplicationDocumentsDirectory();
+    final audioPath = '${directory.path}/${randomEntry?.audio}';
+    File audioFile = File(audioPath);
+    bool audioFileExists = await audioFile.exists();
+
     setState(() {
       _entry = randomEntry;
+      _mood = entryMood;
+      _audioPath = audioFileExists ? audioFile.path : null;
     });
   }
 
@@ -40,6 +52,16 @@ class _DisplayEntryState extends State<DisplayEntry> {
     setState(() {
       _directory = imageDirectory.path;
     });
+  }
+
+  Map<String, dynamic>? findMood(String? mood) {
+    if (mood == null) return null;
+
+    try {
+      return constants.MOOD_OPTIONS.firstWhere((item) => item['label'] == mood);
+    } catch (_) {
+      return null;
+    }
   }
 
   Widget getJournalBody() {
@@ -107,6 +129,16 @@ class _DisplayEntryState extends State<DisplayEntry> {
                                 height: 24,
                               ),
                               StyledText(value: "Memory"),
+                              (_mood == null || _mood!.isEmpty)
+                                  ? const SizedBox.shrink()
+                                  : FilledButton.icon(
+                                      onPressed: () {},
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: _mood?['color'],
+                                      ),
+                                      icon: _mood?['icon'],
+                                      label: Text(_mood?['label']),
+                                    ),
                               SizedBox(
                                 height: 16,
                               ),
@@ -161,6 +193,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                               ],
                             ],
                           ))))),
+          if (_audioPath != null) AudioPlayerWidget(filePath: _audioPath!),
           Divider(),
           SizedBox(
             height: 16,

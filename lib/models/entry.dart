@@ -13,20 +13,26 @@ final String columnId = '_id';
 final String columnContent = 'content';
 final String columnDate = 'date';
 final String columnImages = "images";
+final String columnMood = 'mood';
+final String columnAudio = 'audio';
 final String tableEntry = 'entry';
 
 class Entry {
   int? id;
-  String content;
+  String? content;
   String date;
   List<String> images;
+  String? mood;
+  String? audio;
 
   Map<String, Object?> toMap() {
     var jsonImages = jsonEncode(images);
     var map = <String, Object?>{
       columnContent: content,
       columnDate: date,
-      columnImages: jsonImages
+      columnImages: jsonImages,
+      columnMood: mood,
+      columnAudio: audio
     };
 
     if (id != null) {
@@ -38,9 +44,11 @@ class Entry {
 
   Entry(
       {this.id,
-      required this.content,
+      this.content,
       required this.date,
-      this.images = const []});
+      this.images = const [],
+      this.mood,
+      this.audio});
 
   factory Entry.fromMap(Map<String, dynamic> map) {
     String? jsonImages = map[columnImages];
@@ -56,6 +64,8 @@ class Entry {
       content: map[columnContent] as String,
       date: map[columnDate] as String,
       images: images,
+      mood: map[columnMood] as String?,
+      audio: map[columnAudio],
     );
   }
 }
@@ -82,15 +92,29 @@ class EntryProvider {
       await db.execute('''
                 create table $tableEntry (
                   $columnId integer primary key autoincrement,
-                  $columnContent text not null,
+                  $columnContent text,
                   $columnDate text not null,
-                  $columnImages images)
+                  $columnImages images,
+                  $columnMood mood,
+                  $columnAudio audio)
               ''');
     }, onUpgrade: (Database db, int oldVersion, int newVersion) async {
       if (oldVersion < 2) {
         await db.execute('''
             alter table $tableEntry add column $columnImages text
           ''');
+      }
+      if (oldVersion < 3) {
+        await db.execute('''
+          alter table $tableEntry add column $columnMood text
+        ''');
+        await db.execute('''
+          alter table $tableEntry add column $columnAudio text
+        ''');
+        await db.execute('''alter table $tableEntry add column new_text text''');
+        await db.execute('''update $tableEntry set new_text = $columnContent''');
+        await db.execute('''alter table $tableEntry drop column $columnContent''');
+        await db.execute('''alter table $tableEntry rename column new_text to $columnContent''');
       }
     });
   }
@@ -131,20 +155,6 @@ class EntryProvider {
       db.close();
       return null;
     }
-  }
-
-  Future<Entry?> getEntry(int id) async {
-    List<Map> maps = await db.query(tableEntry,
-        columns: [columnId, columnContent, columnDate],
-        where: '$columnId = ?',
-        whereArgs: [id]);
-
-    if (maps.isNotEmpty) {
-      db.close();
-      return Entry.fromMap(maps.first as Map<String, dynamic>);
-    }
-    db.close();
-    return null;
   }
 
   Future<int> getCount() async {

@@ -1,11 +1,14 @@
 import 'dart:io';
+import 'package:adiary/compnents/audio_player.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
 import 'package:adiary/screens/styled_text.dart';
 import 'package:adiary/services/images.dart';
+import 'package:adiary/services/recording.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:adiary/constants.dart' as constants;
 
 class AddEntry extends StatefulWidget {
   final Function fn;
@@ -19,12 +22,17 @@ class AddEntry extends StatefulWidget {
 class _AddEntryState extends State<AddEntry> {
   int? _entryId;
   DateTime? _selectedDate = DateTime.now();
+  Map<String, dynamic>? _selectedMood;
   List<String> _pickedImages = [];
   String? _directory;
 
   final TextEditingController _journalController = TextEditingController();
   final EntryProvider entryProvider = EntryProvider();
   final ImageService imageService = ImageService();
+  final RecorderService recorderService = RecorderService();
+  bool _showRecorder = false;
+  bool _isRecording = false;
+  String _recordingPath = '';
 
   @override
   void initState() {
@@ -39,6 +47,57 @@ class _AddEntryState extends State<AddEntry> {
     });
   }
 
+  Future<Map<String, dynamic>?> showStringPicker(BuildContext context) {
+    return showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Vibe it! Pretty Lady!'),
+        content: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: constants.MOOD_OPTIONS
+              .map((opt) => ChoiceChip(
+                    avatar: opt['icon'],
+                    label: Text(opt['label']),
+                    backgroundColor: opt['color'],
+                    selected: false,
+                    onSelected: (_) => Navigator.pop(context, opt),
+                  ))
+              .toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _toggleRecordingState() async {
+    if (_isRecording) {
+      final path = await recorderService.stopRecording();
+      if (path != null) {
+        print("Recording saed to $path");
+        setState(() {
+          _recordingPath = path;
+        });
+      }
+    } else {
+      await recorderService.startRecording();
+    }
+    setState(() {
+      _isRecording = !_isRecording;
+    });
+  }
+
+  @override
+  void dispose() {
+    recorderService.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
         context: context,
@@ -50,6 +109,13 @@ class _AddEntryState extends State<AddEntry> {
       setState(() {
         _selectedDate = pickedDate;
       });
+    }
+  }
+
+  Future<void> _pickMood(BuildContext context) async {
+    Map<String, dynamic>? result = await showStringPicker(context);
+    if (result != null) {
+      setState(() => _selectedMood = result);
     }
   }
 
@@ -75,31 +141,55 @@ class _AddEntryState extends State<AddEntry> {
   }
 
   void _saveEntry() async {
-    if (_selectedDate != null && _journalController.text.isNotEmpty) {
-      Entry newEntry = Entry(
+    if (_selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("When did this happen? Enter a date, pls...")),
+      );
+      return;
+    }
+    if (_recordingPath == '' && _journalController.text.isEmpty) {
+      print(_journalController.text);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text("Girlll, what do I save? There's not text or audio...")),
+      );
+      return;
+    }
+
+    String? audioName;
+    if (_recordingPath != '') {
+      audioName = await recorderService.saveFile();
+
+      if (audioName == null || audioName == '') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Could not save audio...")),
+        );
+        return;
+      }
+    }
+    print('----------saved r4om function ---------- $audioName');
+
+    Entry newEntry = Entry(
         content: _journalController.text,
         date: DateFormat.yMMMd().format(_selectedDate!),
         images: _pickedImages,
-      );
-      if (_entryId != null) {
-        newEntry.id = _entryId;
-      }
+        audio: audioName,
+        mood: _selectedMood?['label']);
+    if (_entryId != null) {
+      newEntry.id = _entryId;
+    }
 
-      Entry updatedEntry = await entryProvider.upsert(newEntry);
+    Entry updatedEntry = await entryProvider.upsert(newEntry);
 
-      setState(() {
-        _entryId = updatedEntry.id;
-      });
-      await widget.fn();
+    setState(() {
+      _entryId = updatedEntry.id;
+    });
+    await widget.fn();
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Memory Preserved!")),
-        );
-      }
-    } else {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please select a date and write an entry.")),
+        SnackBar(content: Text("Memory Preserved!")),
       );
     }
   }
@@ -141,16 +231,16 @@ class _AddEntryState extends State<AddEntry> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text.rich(TextSpan(children: [
           TextSpan(
-              text: '🌸🌸',
+              text: '🌸🌸 ',
               style: TextStyle(shadows: [
                 Shadow(
                     color: Colors.pink.shade900,
                     blurRadius: 10,
                     offset: Offset(0, 0))
               ])),
-          TextSpan(text: ' Recording Happiness... '),
+          TextSpan(text: 'Recording Happiness...'),
           TextSpan(
-              text: '🌸🌸',
+              text: ' 🌸🌸',
               style: TextStyle(shadows: [
                 Shadow(
                     color: Colors.pink.shade900,
@@ -164,36 +254,111 @@ class _AddEntryState extends State<AddEntry> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextButton.icon(
-                onPressed: () => _pickDate(context),
-                icon: const Icon(Icons.calendar_month),
-                style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    textStyle: TextStyle(
-                        fontSize: 24,
-                        fontFamily: 'IndieFlower',
-                        fontWeight: FontWeight.bold)),
-                label: Text(
-                  _selectedDate == null
-                      ? "Pick a Date"
-                      : DateFormat.yMMMd().format(_selectedDate!),
-                )),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton.icon(
+                    onPressed: () => _pickDate(context),
+                    icon: const Icon(Icons.calendar_month),
+                    style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        textStyle: TextStyle(
+                            fontSize: 24,
+                            fontFamily: 'IndieFlower',
+                            fontWeight: FontWeight.bold)),
+                    label: Text(
+                      _selectedDate == null
+                          ? "Pick a Date"
+                          : DateFormat.yMMMd().format(_selectedDate!),
+                    )),
+                FilledButton.icon(
+                    onPressed: () => _pickMood(context),
+                    icon: _selectedMood?['icon'] ??
+                        Icon(Icons.sentiment_satisfied_alt),
+                    label: Text(
+                      _selectedMood?['label'] ?? "Pick Mood",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: "IndieFlower",
+                          fontWeight: FontWeight.bold),
+                    ),
+                    style: FilledButton.styleFrom(
+                        backgroundColor:
+                            _selectedMood?['color'] ?? Colors.teal)),
+              ],
+            ),
             SizedBox(height: 16),
             Expanded(
-              child: TextField(
-                controller: _journalController,
-                textAlignVertical: TextAlignVertical.top,
-                decoration: InputDecoration(
-                  labelText: "What made you happy?",
-                  border: OutlineInputBorder(),
-                ),
-                style: TextStyle(
-                  fontSize: 24,
-                ),
-                maxLines: null,
-                expands: true,
-              ),
+              child: _showRecorder
+                  ? Column(
+                      children: [
+                        IconButton(
+                          iconSize: 48,
+                          icon: Icon(
+                            _isRecording ? Icons.stop_circle : Icons.mic,
+                            color: _isRecording ? Colors.red : null,
+                          ),
+                          onPressed: _toggleRecordingState,
+                        ),
+                        if (_recordingPath != '')
+                        IconButton(
+                            onPressed: () async {
+                              await recorderService.deleteFile();
+                              setState(() {
+                                _recordingPath = '';
+                              });
+                            },
+                            icon: Icon(Icons.cut)),
+                        if (_recordingPath != '')
+                          AudioPlayerWidget(filePath: _recordingPath),
+                      ],
+                    )
+                  : TextField(
+                      controller: _journalController,
+                      textAlignVertical: TextAlignVertical.top,
+                      decoration: InputDecoration(
+                        labelText: "What made you happy?",
+                        border: OutlineInputBorder(),
+                      ),
+                      style: TextStyle(
+                        fontSize: 24,
+                      ),
+                      maxLines: null,
+                      expands: true,
+                    ),
             ),
+            SizedBox(
+              height: 5,
+            ),
+            ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    _showRecorder = !_showRecorder;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                    side: BorderSide(color: Colors.pink.shade200, width: 1),
+                    backgroundColor: Colors.pink.shade100,
+                    foregroundColor: Colors.pink.shade900,
+                    iconColor: Colors.pink.shade900,
+                    iconSize: 24,
+                    textStyle: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'IndieFlower')),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(_showRecorder ? Icons.edit : Icons.mic),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text(_showRecorder
+                        ? 'Edit journal'
+                        : 'Record an andio too????!!'),
+                  ],
+                )),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8.0, 8, 8.0),
               child: Row(
