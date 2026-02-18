@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:adiary/compnents/audio_player.dart';
+import 'package:adiary/compnents/add_entry_title.dart';
 import 'package:adiary/compnents/removable_image.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
@@ -149,7 +150,6 @@ class _AddEntryState extends State<AddEntry> {
       return;
     }
     if (_recordingPath == '' && _journalController.text.isEmpty) {
-      print(_journalController.text);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content:
@@ -169,7 +169,6 @@ class _AddEntryState extends State<AddEntry> {
         return;
       }
     }
-    print('----------saved r4om function ---------- $audioName');
 
     Entry newEntry = Entry(
         content: _journalController.text,
@@ -177,6 +176,7 @@ class _AddEntryState extends State<AddEntry> {
         images: _pickedImages,
         audio: audioName,
         mood: _selectedMood?['label']);
+
     if (_entryId != null) {
       newEntry.id = _entryId;
     }
@@ -201,25 +201,7 @@ class _AddEntryState extends State<AddEntry> {
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text.rich(TextSpan(children: [
-          TextSpan(
-              text: '🌸🌸 ',
-              style: TextStyle(shadows: [
-                Shadow(
-                    color: Colors.pink.shade900,
-                    blurRadius: 10,
-                    offset: Offset(0, 0))
-              ])),
-          TextSpan(text: 'Recording Happiness...'),
-          TextSpan(
-              text: ' 🌸🌸',
-              style: TextStyle(shadows: [
-                Shadow(
-                    color: Colors.pink.shade900,
-                    blurRadius: 10,
-                    offset: Offset(0, 0))
-              ]))
-        ])),
+        title: AddEntryTitle(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
