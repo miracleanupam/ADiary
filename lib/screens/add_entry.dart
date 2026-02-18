@@ -3,12 +3,11 @@ import 'package:adiary/compnents/audio_button.dart';
 import 'package:adiary/compnents/audio_input.dart';
 import 'package:adiary/compnents/add_entry_title.dart';
 import 'package:adiary/compnents/date_picker.dart';
+import 'package:adiary/compnents/images_input.dart';
 import 'package:adiary/compnents/journal_input.dart';
 import 'package:adiary/compnents/mood_picker.dart';
-import 'package:adiary/compnents/removable_image.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
-import 'package:adiary/screens/styled_text.dart';
 import 'package:adiary/services/images.dart';
 import 'package:adiary/services/recording.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +84,6 @@ class _AddEntryState extends State<AddEntry> {
     if (_isRecording) {
       final path = await recorderService.stopRecording();
       if (path != null) {
-        print("Recording saed to $path");
         setState(() {
           _recordingPath = path;
         });
@@ -238,51 +236,18 @@ class _AddEntryState extends State<AddEntry> {
             SizedBox(
               height: 5,
             ),
-            AudioButton(showRecorder: _showRecorder, fn: () async {
+            AudioButton(
+                showRecorder: _showRecorder,
+                fn: () async {
                   setState(() {
                     _showRecorder = !_showRecorder;
                   });
                 }),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8.0, 8, 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  StyledText(value: "Images"),
-                  GestureDetector(
-                    onTap: _handleImagesSelection,
-                    child: Icon(
-                      Icons.add_a_photo_outlined,
-                      color: Colors.pink.shade900,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            if (_pickedImages.isNotEmpty)
-              Stack(
-                children: [
-                  // Scrollable horizontal list
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children:
-                          List.generate(_pickedImages.length * 2 - 1, (index) {
-                        if (index.isEven) {
-                          final itemIndex = index ~/ 2;
-                          return RemovableImage(
-                              imagePath:
-                                  "$_directory/${_pickedImages[itemIndex]}",
-                              removeImageFn: () =>
-                                  _removePickedImage(itemIndex));
-                        } else {
-                          return const SizedBox(width: 12); // separator
-                        }
-                      }),
-                    ),
-                  ),
-                ],
-              ),
+            ImagesInput(
+                handleImagesSelection: _handleImagesSelection,
+                pickedImages: _pickedImages,
+                directory: _directory,
+                removePickedImage: _removePickedImage),
             SizedBox(height: 16),
             AlevatedButton(
                 onPressed: _saveEntry,
