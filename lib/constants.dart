@@ -24,40 +24,104 @@ const homePageWidgetTitleListsForAppBar = <String, String>{
   'notification': "I know you forget..."
 };
 
-const List<Map<String, dynamic>> MOOD_OPTIONS = [
-  {'label': "Delighted", 'icon': Icon(Icons.ac_unit), 'color': Colors.red},
+final List<Map<String, dynamic>> MOOD_OPTIONS = [
+  {
+    'label': "Delighted",
+    'icon': const Icon(Icons.ac_unit),
+    'bgColor': Colors.red.shade100,
+    'borderColor': Colors.red.shade300,
+    'textColor': Colors.red.shade800,
+  },
   {
     'label': "Cheerful",
-    'icon': Icon(Icons.abc_outlined),
-    'color': Colors.orange
+    'icon': const Icon(Icons.abc_outlined),
+    'bgColor': Colors.orange.shade100,
+    'borderColor': Colors.orange.shade300,
+    'textColor': Colors.orange.shade800,
   },
   {
     'label': "Excited",
-    'icon': Icon(Icons.access_alarm_sharp),
-    'color': Colors.amber
+    'icon': const Icon(Icons.access_alarm_sharp),
+    'bgColor': Colors.amber.shade100,
+    'borderColor': Colors.amber.shade300,
+    'textColor': Colors.amber.shade800,
   },
-  {'label': "Proud", 'icon': Icon(Icons.safety_check), 'color': Colors.green},
+  {
+    'label': "Proud",
+    'icon': const Icon(Icons.safety_check),
+    'bgColor': Colors.green.shade100,
+    'borderColor': Colors.green.shade300,
+    'textColor': Colors.green.shade800,
+  },
   {
     'label': "Grateful",
-    'icon': Icon(Icons.baby_changing_station),
-    'color': Colors.teal
+    'icon': const Icon(Icons.baby_changing_station),
+    'bgColor': Colors.teal.shade100,
+    'borderColor': Colors.teal.shade300,
+    'textColor': Colors.teal.shade800,
   },
-  {'label': "Hopeful", 'icon': Icon(Icons.cabin), 'color': Colors.cyan},
-  {'label': "Inspired", 'icon': Icon(Icons.dangerous), 'color': Colors.blue},
-  {'label': "Amused", 'icon': Icon(Icons.e_mobiledata), 'color': Colors.indigo},
-  {'label': "Content", 'icon': Icon(Icons.face), 'color': Colors.purple},
-  {'label': "Glad", 'icon': Icon(Icons.g_mobiledata), 'color': Colors.pink},
-  {'label': "Relieved", 'icon': Icon(Icons.h_mobiledata), 'color': Colors.lime},
-  {'label': "Loved", 'icon': Icon(Icons.ice_skating), 'color': Colors.brown},
+  {
+    'label': "Hopeful",
+    'icon': const Icon(Icons.cabin),
+    'bgColor': Colors.cyan.shade100,
+    'borderColor': Colors.cyan.shade300,
+    'textColor': Colors.cyan.shade800,
+  },
+  {
+    'label': "Inspired",
+    'icon': const Icon(Icons.dangerous),
+    'bgColor': Colors.blue.shade100,
+    'borderColor': Colors.blue.shade300,
+    'textColor': Colors.blue.shade800,
+  },
+  {
+    'label': "Amused",
+    'icon': const Icon(Icons.e_mobiledata),
+    'bgColor': Colors.indigo.shade100,
+    'borderColor': Colors.indigo.shade300,
+    'textColor': Colors.indigo.shade800,
+  },
+  {
+    'label': "Content",
+    'icon': const Icon(Icons.face),
+    'bgColor': Colors.purple.shade100,
+    'borderColor': Colors.purple.shade300,
+    'textColor': Colors.purple.shade800,
+  },
+  {
+    'label': "Glad",
+    'icon': const Icon(Icons.g_mobiledata),
+    'bgColor': Colors.pink.shade100,
+    'borderColor': Colors.pink.shade300,
+    'textColor': Colors.pink.shade800,
+  },
+  {
+    'label': "Relieved",
+    'icon': const Icon(Icons.h_mobiledata),
+    'bgColor': Colors.lime.shade100,
+    'borderColor': Colors.lime.shade300,
+    'textColor': Colors.lime.shade800,
+  },
+  {
+    'label': "Loved",
+    'icon': const Icon(Icons.ice_skating),
+    'bgColor': Colors.brown.shade100,
+    'borderColor': Colors.brown.shade300,
+    'textColor': Colors.brown.shade800,
+  },
   {
     'label': "Appreciated",
-    'icon': Icon(Icons.javascript),
-    'color': Colors.grey
+    'icon': const Icon(Icons.javascript),
+    'bgColor': Colors.grey.shade200,
+    'borderColor': Colors.grey.shade400,
+    'textColor': Colors.grey.shade900,
   },
   {
     'label': "Empowered",
-    'icon': Icon(Icons.kayaking),
-    'color': Colors.deepOrange
+    'icon': const Icon(Icons.kayaking),
+    'bgColor': Colors.deepOrange.shade100,
+    'borderColor': Colors.deepOrange.shade300,
+    'textColor': Colors.deepOrange.shade800,
   },
 ];
 

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:adiary/compnents/audio_player.dart';
+import 'package:adiary/compnents/mood_picker.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
 import 'package:adiary/screens/styled_text.dart';
@@ -131,14 +132,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                               StyledText(value: "Memory"),
                               (_mood == null || _mood!.isEmpty)
                                   ? const SizedBox.shrink()
-                                  : FilledButton.icon(
-                                      onPressed: () {},
-                                      style: FilledButton.styleFrom(
-                                        backgroundColor: _mood?['color'],
-                                      ),
-                                      icon: _mood?['icon'],
-                                      label: Text(_mood?['label']),
-                                    ),
+                                  : MoodPill(fn: () {}, mood: _mood),
                               SizedBox(
                                 height: 16,
                               ),

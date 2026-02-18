@@ -64,7 +64,11 @@ class _AddEntryState extends State<AddEntry> {
               .map((opt) => ChoiceChip(
                     avatar: opt['icon'],
                     label: Text(opt['label']),
-                    backgroundColor: opt['color'],
+                    backgroundColor: opt['bgColor'],
+                    side: BorderSide(color: opt['borderColor'], width: 1),
+                    labelStyle: TextStyle(
+                      color: opt['textColor']
+                    ),
                     selected: false,
                     onSelected: (_) => Navigator.pop(context, opt),
                   ))
@@ -121,6 +125,12 @@ class _AddEntryState extends State<AddEntry> {
     if (result != null) {
       setState(() => _selectedMood = result);
     }
+  }
+
+  void _clearMood() {
+    setState(() {
+      _selectedMood = null;
+    });
   }
 
   Future<void> _handleImagesSelection() async {
@@ -215,7 +225,7 @@ class _AddEntryState extends State<AddEntry> {
               children: [
                 DatePicker(
                     fn: () => _pickDate(context), selectedDate: _selectedDate),
-                MoodPicker(fn: () => _pickMood(context), mood: _selectedMood),
+                MoodPicker(fn: () => _pickMood(context), mood: _selectedMood, clearMood: _clearMood),
               ],
             ),
             SizedBox(height: 16),
