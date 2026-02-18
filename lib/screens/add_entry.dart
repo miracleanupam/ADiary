@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:adiary/compnents/audio_player.dart';
 import 'package:adiary/compnents/add_entry_title.dart';
 import 'package:adiary/compnents/date_picker.dart';
+import 'package:adiary/compnents/mood_picker.dart';
 import 'package:adiary/compnents/removable_image.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
@@ -213,20 +214,7 @@ class _AddEntryState extends State<AddEntry> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 DatePicker(fn: () => _pickDate(context), selectedDate: _selectedDate),
-                FilledButton.icon(
-                    onPressed: () => _pickMood(context),
-                    icon: _selectedMood?['icon'] ??
-                        Icon(Icons.sentiment_satisfied_alt),
-                    label: Text(
-                      _selectedMood?['label'] ?? "Pick Mood",
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontFamily: "IndieFlower",
-                          fontWeight: FontWeight.bold),
-                    ),
-                    style: FilledButton.styleFrom(
-                        backgroundColor:
-                            _selectedMood?['color'] ?? Colors.teal)),
+                MoodPicker(fn: () => _pickMood(context), mood: _selectedMood),
               ],
             ),
             SizedBox(height: 16),
