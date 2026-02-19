@@ -24,7 +24,7 @@ class ImagesInput extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              StyledText(value: "Images"),
+              StyledText(value: pickedImages.isEmpty ? "Add Images" : "Images"),
               GestureDetector(
                 onTap: () => handleImagesSelection(),
                 child: Icon(

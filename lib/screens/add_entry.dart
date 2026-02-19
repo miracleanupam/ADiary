@@ -253,6 +253,7 @@ class _AddEntryState extends State<AddEntry> {
                     _showRecorder = !_showRecorder;
                   });
                 }),
+            SizedBox(height: 16,),
             ImagesInput(
                 handleImagesSelection: _handleImagesSelection,
                 pickedImages: _pickedImages,

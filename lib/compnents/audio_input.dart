@@ -103,18 +103,29 @@ class _AudioInputState extends State<AudioInput>
           Expanded(
             child: Container(
               alignment: Alignment.bottomCenter,
-              child: ScaleTransition(
-                scale: widget.isRecording
-                    ? _pulseAnimation
-                    : const AlwaysStoppedAnimation(1.0),
-                child: IconButton.filled(
-                  iconSize: 48,
-                  icon: Icon(
-                    widget.isRecording ? Icons.stop_circle : Icons.mic,
-                    color: widget.isRecording ? Colors.red : null,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text("Use the button below to start/stop or redo the recording.",
+                    style: TextStyle(
+                      color: Colors.pink.shade900,
+                    ),
                   ),
-                  onPressed: () => widget.toggleRecordingState(),
-                ),
+                  SizedBox(height: 48,),
+                  ScaleTransition(
+                    scale: widget.isRecording
+                        ? _pulseAnimation
+                        : const AlwaysStoppedAnimation(1.0),
+                    child: IconButton.filled(
+                      iconSize: 48,
+                      icon: Icon(
+                        widget.isRecording ? Icons.stop_circle : Icons.mic,
+                        color: widget.isRecording ? Colors.red : null,
+                      ),
+                      onPressed: () => widget.toggleRecordingState(),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -157,11 +168,17 @@ class _AudioInputState extends State<AudioInput>
                     ],
                   ),
                 Spacer(),
-                if (widget.recordingPath != '' && !widget.isRecording)
+                if (!widget.isRecording)
+                  Text(widget.recordingPath == '' ? "You can preview the audio here after you record something." : "Preview:",
+                      style: TextStyle(
+                        color: Colors.pink.shade900,
+                      ),
+                  ),
+                if (!widget.isRecording)
                   Stack(
                     children: [
                       AudioPlayerWidget(filePath: widget.recordingPath),
-                      Positioned(
+                      if (widget.recordingPath != '') Positioned(
                           top: 0,
                           right: 5,
                           child: GestureDetector(

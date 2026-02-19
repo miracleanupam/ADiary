@@ -10,7 +10,7 @@ class AudioButton extends StatelessWidget {
     return ElevatedButton(
         onPressed: () => fn(),
         style: ElevatedButton.styleFrom(
-            side: BorderSide(color: Colors.pink.shade200, width: 1),
+            side: BorderSide(color: Colors.pink.shade900, width: 1),
             backgroundColor: Colors.pink.shade100,
             foregroundColor: Colors.pink.shade900,
             iconColor: Colors.pink.shade900,
@@ -27,7 +27,7 @@ class AudioButton extends StatelessWidget {
             SizedBox(
               width: 5,
             ),
-            Text(showRecorder ? 'Edit journal' : 'Record an andio too????!!'),
+            Text(showRecorder ? 'Edit journal' : 'Take Me to Audio'),
           ],
         ));
   }

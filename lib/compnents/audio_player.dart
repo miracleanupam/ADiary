@@ -79,6 +79,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
   }
 
   void _togglePlay() {
+    if (widget.filePath == '') {
+      return;
+    }
     if (_isPlaying) {
       _player.pause();
     } else {
@@ -154,7 +157,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
                       final barW =
                           ((constraints.maxWidth - (count - 1) * 2) / count)
                               .clamp(2.0, 8.0);
-                      return Row(
+                      return widget.filePath == '' ? Placeholder() : Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: List.generate(count, (i) {
                           final filled = i / count < _progress;
@@ -211,7 +214,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _format(_position),
+                        widget.filePath == '' ? "--" : _format(_position),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -220,7 +223,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
                         ),
                       ),
                       Text(
-                        _format(_duration),
+                        widget.filePath == '' ? "--" : _format(_duration),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
