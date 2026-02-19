@@ -46,7 +46,7 @@ class _AddEntryState extends State<AddEntry> {
   }
 
   void _getImageDirectory() async {
-    Directory imageDirectory = await getApplicationDocumentsDirectory();
+    Directory imageDirectory = await getTemporaryDirectory();
     setState(() {
       _directory = imageDirectory.path;
     });
@@ -66,9 +66,7 @@ class _AddEntryState extends State<AddEntry> {
                     label: Text(opt['label']),
                     backgroundColor: opt['bgColor'],
                     side: BorderSide(color: opt['borderColor'], width: 1),
-                    labelStyle: TextStyle(
-                      color: opt['textColor']
-                    ),
+                    labelStyle: TextStyle(color: opt['textColor']),
                     selected: false,
                     onSelected: (_) => Navigator.pop(context, opt),
                   ))
@@ -143,12 +141,8 @@ class _AddEntryState extends State<AddEntry> {
 
   void _removePickedImage(index) async {
     String imageName = _pickedImages[index];
-    String imagePath = "$_directory/$imageName";
+    await imageService.removeImage(imageName);
 
-    File imageFile = File(imagePath);
-    if (await imageFile.exists()) {
-      await imageFile.delete();
-    }
     setState(() {
       _pickedImages.removeAt(index);
     });
@@ -161,6 +155,7 @@ class _AddEntryState extends State<AddEntry> {
       );
       return;
     }
+
     if (_recordingPath == '' && _journalController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -170,17 +165,8 @@ class _AddEntryState extends State<AddEntry> {
       return;
     }
 
-    String? audioName;
-    if (_recordingPath != '') {
-      audioName = await recorderService.saveFile();
-
-      if (audioName == null || audioName == '') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Could not save audio...")),
-        );
-        return;
-      }
-    }
+    String? audioName = await recorderService.saveFile();
+    await imageService.saveFiles();
 
     Entry newEntry = Entry(
         content: _journalController.text,
@@ -225,7 +211,10 @@ class _AddEntryState extends State<AddEntry> {
               children: [
                 DatePicker(
                     fn: () => _pickDate(context), selectedDate: _selectedDate),
-                MoodPicker(fn: () => _pickMood(context), mood: _selectedMood, clearMood: _clearMood),
+                MoodPicker(
+                    fn: () => _pickMood(context),
+                    mood: _selectedMood,
+                    clearMood: _clearMood),
               ],
             ),
             SizedBox(height: 16),
@@ -253,7 +242,9 @@ class _AddEntryState extends State<AddEntry> {
                     _showRecorder = !_showRecorder;
                   });
                 }),
-            SizedBox(height: 16,),
+            SizedBox(
+              height: 16,
+            ),
             ImagesInput(
                 handleImagesSelection: _handleImagesSelection,
                 pickedImages: _pickedImages,
