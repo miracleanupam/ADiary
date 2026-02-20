@@ -56,19 +56,18 @@ class _AddEntryState extends State<AddEntry> {
     return showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.pink.shade100,
         title: Text('Vibe it! Pretty Lady!'),
         content: Wrap(
           spacing: 8,
           runSpacing: 8,
           children: constants.MOOD_OPTIONS
-              .map((opt) => ChoiceChip(
-                    avatar: opt['icon'],
-                    label: Text(opt['label']),
-                    backgroundColor: opt['bgColor'],
-                    side: BorderSide(color: opt['borderColor'], width: 1),
-                    labelStyle: TextStyle(color: opt['textColor']),
-                    selected: false,
-                    onSelected: (_) => Navigator.pop(context, opt),
+              .map((opt) => GestureDetector(
+                    child: MoodPill(
+                        fn: () {
+                          Navigator.pop(context, opt);
+                        },
+                        mood: opt),
                   ))
               .toList(),
         ),
@@ -251,6 +250,7 @@ class _AddEntryState extends State<AddEntry> {
                 directory: _directory,
                 removePickedImage: _removePickedImage),
             SizedBox(height: 16),
+            Divider(),
             AlevatedButton(
                 onPressed: _saveEntry,
                 icon: Icons.favorite_border,

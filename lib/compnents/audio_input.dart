@@ -1,3 +1,4 @@
+import 'package:adiary/compnents/animated_close_button.dart';
 import 'package:adiary/compnents/audio_player.dart';
 import 'package:flutter/material.dart';
 
@@ -36,12 +37,14 @@ class _AudioInputState extends State<AudioInput>
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
-    )..repeat(reverse: true)..addListener(() => setState(() {}));
+    )
+      ..repeat(reverse: true)
+      ..addListener(() => setState(() {}));
 
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-        _micAnimation = Tween<double>(begin: 1.0, end: 1.03).animate(
+    _micAnimation = Tween<double>(begin: 1.0, end: 1.03).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
@@ -120,9 +123,7 @@ class _AudioInputState extends State<AudioInput>
                     height: 48,
                   ),
                   ScaleTransition(
-                    scale: widget.isRecording
-                        ? _pulseAnimation
-                        : _micAnimation,
+                    scale: widget.isRecording ? _pulseAnimation : _micAnimation,
                     child: IconButton.filled(
                       iconSize: 48,
                       icon: Icon(
@@ -189,7 +190,11 @@ class _AudioInputState extends State<AudioInput>
                     children: [
                       AudioPlayerWidget(filePath: widget.recordingPath),
                       if (widget.recordingPath != '')
-                        RemoveAudioButton(widget: widget)
+                        AnimatedCloseButton(
+                          top: 0,
+                          right: 5,
+                          fn: widget.removeAudio,
+                        )
                     ],
                   ),
                 SizedBox(
@@ -202,70 +207,5 @@ class _AudioInputState extends State<AudioInput>
         ],
       ),
     );
-  }
-}
-
-class RemoveAudioButton extends StatefulWidget {
-  const RemoveAudioButton({
-    super.key,
-    required this.widget,
-  });
-
-  final AudioInput widget;
-
-  @override
-  State<RemoveAudioButton> createState() => _RemoveAudioButtonState();
-}
-
-class _RemoveAudioButtonState extends State<RemoveAudioButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _pulseAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: Duration(milliseconds: 1000),
-      vsync: this,
-    )
-      ..repeat(reverse: true)
-      ..addListener(() {});
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-        top: 0,
-        right: 5,
-        child: GestureDetector(
-          onTap: () => widget.widget.removeAudio(),
-          child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.pink.shade600),
-                color: Colors.pink.shade200,
-                shape: BoxShape.circle,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: ScaleTransition(
-                  scale: _pulseAnimation,
-                  child: Icon(
-                    Icons.close,
-                    size: 12,
-                    color: Colors.pink.shade600,
-                  ),
-                ),
-              )),
-        ));
   }
 }

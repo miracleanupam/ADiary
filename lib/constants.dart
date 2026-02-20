@@ -33,11 +33,18 @@ final List<Map<String, dynamic>> MOOD_OPTIONS = [
     'textColor': Colors.indigo.shade800,
   },
   {
+    'label': "Beautiful",
+    'icon': const Icon(Icons.photo_camera_outlined),
+    'bgColor': Colors.pinkAccent.shade100,
+    'borderColor': Colors.pink.shade600,
+    'textColor': Colors.pink.shade900,
+  },
+  {
     'label': "Cheerful",
     'icon': const Icon(Icons.mood),
     'bgColor': Colors.orange.shade100,
     'borderColor': Colors.orange.shade300,
-    'textColor': Colors.orange.shade800,
+    'textColor': Colors.pink.shade800,
   },
   {
     'label': "Content",
@@ -45,6 +52,20 @@ final List<Map<String, dynamic>> MOOD_OPTIONS = [
     'bgColor': Colors.purple.shade100,
     'borderColor': Colors.purple.shade300,
     'textColor': Colors.purple.shade800,
+  },
+  {
+    'label': "Cozy",
+    'icon': const Icon(Icons.fireplace_outlined),
+    'bgColor': Colors.orangeAccent.shade100,
+    'borderColor': Colors.red.shade600,
+    'textColor': Colors.red.shade600,
+  },
+  {
+    'label': "Creative",
+    'icon': const Icon(Icons.brush_outlined),
+    'bgColor': Colors.brown.shade200,
+    'borderColor': Colors.brown.shade600,
+    'textColor': Colors.brown.shade900,
   },
   {
     'label': "Delighted",
@@ -64,15 +85,22 @@ final List<Map<String, dynamic>> MOOD_OPTIONS = [
     'label': "Excited",
     'icon': const Icon(Icons.sentiment_satisfied),
     'bgColor': Colors.amber.shade100,
-    'borderColor': Colors.amber.shade300,
-    'textColor': Colors.amber.shade800,
+    'borderColor': Colors.amber.shade800,
+    'textColor': Colors.pink.shade600,
+  },
+  {
+    'label': "Free",
+    'icon': const Icon(Icons.wind_power_outlined),
+    'bgColor': Colors.grey.shade200,
+    'borderColor': Colors.grey.shade600,
+    'textColor': Colors.grey.shade800,
   },
   {
     'label': "Fulfilled",
     'icon': const Icon(Icons.battery_charging_full_outlined),
-    'bgColor': Colors.red.shade200,
-    'borderColor': Colors.amber.shade300,
-    'textColor': Colors.pink.shade800,
+    'bgColor': Colors.red.shade100,
+    'borderColor': Colors.red.shade600,
+    'textColor': Colors.red.shade900,
   },
   {
     'label': "Glad",
@@ -117,25 +145,39 @@ final List<Map<String, dynamic>> MOOD_OPTIONS = [
     'textColor': Colors.green.shade800,
   },
   {
+    'label': "Purposeful",
+    'icon': const Icon(Icons.bolt_outlined),
+    'bgColor': Colors.deepPurple.shade100,
+    'borderColor': Colors.deepPurple.shade600,
+    'textColor': Colors.deepPurple.shade800,
+  },
+  {
     'label': "Relieved",
     'icon': const Icon(Icons.thumb_up_alt_outlined),
     'bgColor': Colors.lime.shade100,
     'borderColor': Colors.lime.shade300,
-    'textColor': Colors.lime.shade800,
+    'textColor': Colors.lime.shade900,
   },
-    {
+  {
     'label': "Rich",
     'icon': const Icon(Icons.euro_outlined),
-    'bgColor': Colors.deepOrange.shade200,
-    'borderColor': Colors.lime.shade300,
+    'bgColor': Colors.deepOrange.shade100,
+    'borderColor': Colors.deepOrange.shade600,
     'textColor': Colors.pink.shade800,
   },
-    {
+  {
     'label': "Seen",
     'icon': const Icon(Icons.visibility_outlined),
     'bgColor': Colors.grey.shade200,
     'borderColor': Colors.grey.shade400,
     'textColor': Colors.grey.shade900,
+  },
+  {
+    'label': "Tingly",
+    'icon': const Icon(Icons.vibration_outlined),
+    'bgColor': Colors.indigoAccent.shade100,
+    'borderColor': Colors.indigo.shade600,
+    'textColor': Colors.indigo.shade600,
   },
 ];
 
