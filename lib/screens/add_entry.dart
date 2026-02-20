@@ -197,6 +197,7 @@ class _AddEntryState extends State<AddEntry> {
     return Scaffold(
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
+        flexibleSpace: constants.appBarBg,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: AddEntryTitle(),
       ),

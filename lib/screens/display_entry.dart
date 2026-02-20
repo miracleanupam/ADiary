@@ -69,6 +69,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
     return Scaffold(
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
+        flexibleSpace: constants.appBarBg,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text.rich(TextSpan(children: [
           TextSpan(

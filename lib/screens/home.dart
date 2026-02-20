@@ -42,6 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       backgroundColor: Colors.pink.shade100,
       appBar: AppBar(
+        flexibleSpace: constants.appBarBg,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(
             "${constants.homePageWidgetTitleListsForAppBar[_drawerScreen]}"),

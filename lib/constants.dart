@@ -31,6 +31,15 @@ final BoxDecoration bgDecoration = BoxDecoration(
         colorFilter: ColorFilter.mode(
             Colors.black.withValues(alpha: 0.25), BlendMode.dstATop)));
 
+final Widget appBarBg = Container(
+  decoration: BoxDecoration(
+      image: DecorationImage(
+          image: AssetImage('assets/images/stars.jpeg'),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+              Colors.black.withValues(alpha: 0.6), BlendMode.dstATop))),
+);
+
 final List<Map<String, dynamic>> MOOD_OPTIONS = [
   {
     'label': "Amused",
