@@ -87,7 +87,7 @@ class EntryProvider {
     String dbPath = await getDatabasesPath();
     String path = join(dbPath, 'happy_journal.db');
 
-    db = await openDatabase(path, version: 2, password: securePassword,
+    db = await openDatabase(path, version: 3, password: securePassword,
         onCreate: (Database db, int version) async {
       await db.execute('''
                 create table $tableEntry (
@@ -206,7 +206,7 @@ class EntryProvider {
         }
 
         if (entity is File) {
-          if (!entity.path.endsWith('.jpg') && !entity.path.endsWith('.db')) {
+          if (!entity.path.endsWith('.jpg') && !entity.path.endsWith('.db') && !entity.path.endsWith('.m4a')) {
             continue;
           }
           final relativePath = entity.path.replaceFirst('$basePath/', '');

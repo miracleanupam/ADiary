@@ -63,7 +63,7 @@ class _ExportDataState extends State<ExportData> {
                           children: [
                             StyledText(
                                 value:
-                                    'This will export your data to a .zip file. The zip file will contain the images and the database file. The database file will be encrypted with the password you set on the application.'),
+                                    'This will export your data to a .zip file. The zip file will contain the images, audios and the database file. The database file will be encrypted with the password you set on the application.'),
                             StyledText(
                                 value:
                                     'If you do not remember the password, you can change it from the drawer.'),
