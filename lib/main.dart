@@ -66,15 +66,10 @@ class _MeroAppState extends State<MeroApp> {
         () => _authorized = authenticated ? 'Authorized' : 'Not Authorized');
   }
 
-  // Future<void> _cancelAuthentication() async {
-  //   await auth.stopAuthentication();
-  //   setState(() => _isAuthenticating = false);
-  // }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ADiary',
       theme: ThemeData(
         fontFamily: 'IndieFlower',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),

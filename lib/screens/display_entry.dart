@@ -90,116 +90,124 @@ class _DisplayEntryState extends State<DisplayEntry> {
               ]))
         ])),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          TextButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.calendar_month),
-              style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  textStyle: TextStyle(
-                      fontSize: 24,
-                      fontFamily: 'IndieFlower',
-                      fontWeight: FontWeight.bold)),
-              label: Text.rich(TextSpan(children: [
-                TextSpan(text: '${_entry?.date} '),
-                TextSpan(
-                    text: '🪷🪷',
-                    style: TextStyle(shadows: [
-                      Shadow(
-                          color: Colors.pink.shade900,
-                          blurRadius: 10,
-                          offset: Offset(0, 0))
-                    ]))
-              ]))),
-          Divider(),
-          Expanded(
-              child: RawScrollbar(
-                  controller: scrollController,
-                  thumbVisibility: true,
-                  thickness: 1,
-                  thumbColor: Theme.of(context).colorScheme.primary,
-                  child: SingleChildScrollView(
-                      controller: scrollController,
-                      child: SizedBox(
-                          width: double.infinity,
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: 24,
-                              ),
-                              StyledText(value: "Memory"),
-                              (_mood == null || _mood!.isEmpty)
-                                  ? const SizedBox.shrink()
-                                  : MoodPill(fn: () {}, mood: _mood),
-                              SizedBox(
-                                height: 16,
-                              ),
-                              Text(
-                                '${_entry?.content}',
-                                style: TextStyle(fontSize: 24),
-                              ),
-                              SizedBox(
-                                height: 24,
-                              ),
-                              if (_entry?.images != null &&
-                                  _entry!.images.isNotEmpty) ...[
-                                Divider(),
-                                SizedBox(
-                                  height: 24,
-                                ),
-                                StyledText(value: "Images"),
-                                SizedBox(
-                                  height: 16,
-                                ),
-                                ListView.separated(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: _entry!.images.length,
-                                  itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => FullScreenGallery(
-                                                imagePaths: _entry!.images,
-                                                initialIndex:
-                                                    index, // start from tapped image
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadiusGeometry.circular(
-                                                    6),
-                                            child: Image.file(File(
-                                                "$_directory/${_entry!.images[index]}"))));
-                                  },
-                                  separatorBuilder: (context, index) {
-                                    return SizedBox(
-                                      height: 20,
-                                    );
-                                  },
-                                )
-                              ],
-                            ],
-                          ))))),
-          if (_audioPath != null) AudioPlayerWidget(filePath: _audioPath!),
-          Divider(),
-          SizedBox(
-            height: 16,
-          ),
-          AlevatedButton(
-              onPressed: _getRandomEntry,
-              icon: Icons.cached,
-              text: 'See Another'),
-          SizedBox(
-            height: 16,
-          )
-        ]),
+      body: Container(
+        decoration: constants.bgDecoration,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            TextButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.calendar_month),
+                style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    textStyle: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'IndieFlower',
+                        fontWeight: FontWeight.bold)),
+                label: Text.rich(TextSpan(children: [
+                  TextSpan(text: '${_entry?.date} '),
+                  TextSpan(
+                      text: '🪷🪷',
+                      style: TextStyle(shadows: [
+                        Shadow(
+                            color: Colors.pink.shade900,
+                            blurRadius: 10,
+                            offset: Offset(0, 0))
+                      ]))
+                ]))),
+            Divider(),
+            Expanded(
+                child: RawScrollbar(
+                    controller: scrollController,
+                    thumbVisibility: true,
+                    thickness: 1,
+                    thumbColor: Theme.of(context).colorScheme.primary,
+                    child: ClipRRect(
+                      borderRadius: BorderRadiusGeometry.circular(4),
+                      child: SingleChildScrollView(
+                          controller: scrollController,
+                          child: SizedBox(
+                              width: double.infinity,
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 24,
+                                  ),
+                                  StyledText(value: "Memory"),
+                                  (_mood == null || _mood!.isEmpty)
+                                      ? const SizedBox.shrink()
+                                      : MoodPill(fn: () {}, mood: _mood),
+                                  SizedBox(
+                                    height: 16,
+                                  ),
+                                  Text(
+                                    '${_entry?.content}',
+                                    style: TextStyle(fontSize: 24),
+                                  ),
+                                  SizedBox(
+                                    height: 24,
+                                  ),
+                                  if (_entry?.images != null &&
+                                      _entry!.images.isNotEmpty) ...[
+                                    Divider(),
+                                    SizedBox(
+                                      height: 24,
+                                    ),
+                                    StyledText(value: "Images"),
+                                    SizedBox(
+                                      height: 16,
+                                    ),
+                                    ListView.separated(
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: _entry!.images.length,
+                                      itemBuilder: (context, index) {
+                                        return GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      FullScreenGallery(
+                                                    imagePaths: _entry!.images,
+                                                    initialIndex:
+                                                        index, // start from tapped image
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadiusGeometry
+                                                        .circular(6),
+                                                child: Image.file(File(
+                                                    "$_directory/${_entry!.images[index]}"))));
+                                      },
+                                      separatorBuilder: (context, index) {
+                                        return SizedBox(
+                                          height: 20,
+                                        );
+                                      },
+                                    )
+                                  ],
+                                ],
+                              ))),
+                    ))),
+            if (_audioPath != null) AudioPlayerWidget(filePath: _audioPath!),
+            Divider(),
+            SizedBox(
+              height: 16,
+            ),
+            AlevatedButton(
+                onPressed: _getRandomEntry,
+                icon: Icons.cached,
+                text: 'See Another'),
+            SizedBox(
+              height: 16,
+            )
+          ]),
+        ),
       ),
     );
   }

@@ -48,8 +48,11 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       drawer: ADrawer(
           onTapCallback: _drawerItemTapped, selectedItem: _drawerScreen),
-      body: Center(
-        child: constants.homePageWidgetListsForDrawer[_drawerScreen],
+      body: Container(
+        decoration: constants.bgDecoration,
+        child: Center(
+          child: constants.homePageWidgetListsForDrawer[_drawerScreen],
+        ),
       ),
     );
   }

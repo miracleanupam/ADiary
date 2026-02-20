@@ -200,65 +200,69 @@ class _AddEntryState extends State<AddEntry> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: AddEntryTitle(),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                DatePicker(
-                    fn: () => _pickDate(context), selectedDate: _selectedDate),
-                MoodPicker(
-                    fn: () => _pickMood(context),
-                    mood: _selectedMood,
-                    clearMood: _clearMood),
-              ],
-            ),
-            SizedBox(height: 16),
-            Expanded(
-              child: _showRecorder
-                  ? AudioInput(
-                      isRecording: _isRecording,
-                      toggleRecordingState: _toggleRecordingState,
-                      recordingPath: _recordingPath,
-                      removeAudio: () async {
-                        await recorderService.deleteFile();
-                        setState(() {
-                          _recordingPath = '';
-                        });
-                      })
-                  : JournalInput(journalController: _journalController),
-            ),
-            SizedBox(
-              height: 5,
-            ),
-            AudioButton(
-                showRecorder: _showRecorder,
-                fn: () async {
-                  setState(() {
-                    _showRecorder = !_showRecorder;
-                  });
-                }),
-            SizedBox(
-              height: 16,
-            ),
-            ImagesInput(
-                handleImagesSelection: _handleImagesSelection,
-                pickedImages: _pickedImages,
-                directory: _directory,
-                removePickedImage: _removePickedImage),
-            SizedBox(height: 16),
-            Divider(),
-            AlevatedButton(
-                onPressed: _saveEntry,
-                icon: Icons.favorite_border,
-                text: 'Save Memory'),
-            SizedBox(
-              height: 16,
-            )
-          ],
+      body: Container(
+        decoration: constants.bgDecoration,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  DatePicker(
+                      fn: () => _pickDate(context),
+                      selectedDate: _selectedDate),
+                  MoodPicker(
+                      fn: () => _pickMood(context),
+                      mood: _selectedMood,
+                      clearMood: _clearMood),
+                ],
+              ),
+              SizedBox(height: 16),
+              Expanded(
+                child: _showRecorder
+                    ? AudioInput(
+                        isRecording: _isRecording,
+                        toggleRecordingState: _toggleRecordingState,
+                        recordingPath: _recordingPath,
+                        removeAudio: () async {
+                          await recorderService.deleteFile();
+                          setState(() {
+                            _recordingPath = '';
+                          });
+                        })
+                    : JournalInput(journalController: _journalController),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              AudioButton(
+                  showRecorder: _showRecorder,
+                  fn: () async {
+                    setState(() {
+                      _showRecorder = !_showRecorder;
+                    });
+                  }),
+              SizedBox(
+                height: 16,
+              ),
+              ImagesInput(
+                  handleImagesSelection: _handleImagesSelection,
+                  pickedImages: _pickedImages,
+                  directory: _directory,
+                  removePickedImage: _removePickedImage),
+              SizedBox(height: 16),
+              Divider(),
+              AlevatedButton(
+                  onPressed: _saveEntry,
+                  icon: Icons.favorite_border,
+                  text: 'Save Memory'),
+              SizedBox(
+                height: 16,
+              )
+            ],
+          ),
         ),
       ),
     );

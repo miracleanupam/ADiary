@@ -186,16 +186,19 @@ class _AudioInputState extends State<AudioInput>
                     ),
                   ),
                 if (!widget.isRecording)
-                  Stack(
-                    children: [
-                      AudioPlayerWidget(filePath: widget.recordingPath),
-                      if (widget.recordingPath != '')
-                        AnimatedCloseButton(
-                          top: 0,
-                          right: 5,
-                          fn: widget.removeAudio,
-                        )
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                    child: Stack(
+                      children: [
+                        AudioPlayerWidget(filePath: widget.recordingPath),
+                        if (widget.recordingPath != '')
+                          AnimatedCloseButton(
+                            top: 0,
+                            right: 5,
+                            fn: widget.removeAudio,
+                          )
+                      ],
+                    ),
                   ),
                 SizedBox(
                   height: 24,

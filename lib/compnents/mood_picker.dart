@@ -40,7 +40,7 @@ class MoodPill extends StatelessWidget {
         onPressed: () => fn(),
         icon: mood?['icon'] ?? Icon(Icons.sentiment_satisfied_alt),
         label: Text(
-          mood?['label'] ?? "Pick Mood",
+          mood?['label'] ?? "-- --",
           style: TextStyle(
               fontSize: 16,
               fontFamily: "IndieFlower",

@@ -75,7 +75,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
 
   double get _progress {
     if (_duration.inMilliseconds == 0) return 0;
-    return (_position.inMilliseconds / _duration.inMilliseconds).clamp(0.0, 1.0);
+    return (_position.inMilliseconds / _duration.inMilliseconds)
+        .clamp(0.0, 1.0);
   }
 
   void _togglePlay() {
@@ -92,15 +93,15 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.fromLTRB(12, 12, 16, 8),
       decoration: BoxDecoration(
         color: Colors.pink.shade200,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.pink.shade900, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.pink.shade100.withOpacity(0.6),
+            color: Colors.pink.shade100.withValues(alpha: 0.6),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -157,27 +158,29 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
                       final barW =
                           ((constraints.maxWidth - (count - 1) * 2) / count)
                               .clamp(2.0, 8.0);
-                      return widget.filePath == '' ? Placeholder() : Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: List.generate(count, (i) {
-                          final filled = i / count < _progress;
-                          return Padding(
-                            padding:
-                                EdgeInsets.only(right: i < count - 1 ? 2 : 0),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 80),
-                              width: barW,
-                              height: _waveHeights[i],
-                              decoration: BoxDecoration(
-                                color: filled
-                                    ? Colors.pink.shade700
-                                    : Colors.pink.shade50,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                          );
-                        }),
-                      );
+                      return widget.filePath == ''
+                          ? Placeholder()
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: List.generate(count, (i) {
+                                final filled = i / count < _progress;
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                      right: i < count - 1 ? 2 : 0),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 80),
+                                    width: barW,
+                                    height: _waveHeights[i],
+                                    decoration: BoxDecoration(
+                                      color: filled
+                                          ? Colors.pink.shade700
+                                          : Colors.pink.shade50,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                );
+                              }),
+                            );
                     },
                   ),
                 ),

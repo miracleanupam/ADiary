@@ -24,6 +24,13 @@ const homePageWidgetTitleListsForAppBar = <String, String>{
   'notification': "I know you forget..."
 };
 
+final BoxDecoration bgDecoration = BoxDecoration(
+    image: DecorationImage(
+        image: AssetImage('assets/images/nature.jpg'),
+        fit: BoxFit.cover,
+        colorFilter: ColorFilter.mode(
+            Colors.black.withValues(alpha: 0.25), BlendMode.dstATop)));
+
 final List<Map<String, dynamic>> MOOD_OPTIONS = [
   {
     'label': "Amused",
