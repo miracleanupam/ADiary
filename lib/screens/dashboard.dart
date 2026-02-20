@@ -101,7 +101,8 @@ class _DashboardState extends State<Dashboard> {
     return AlevatedButton(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const DisplayEntry()),
+            MaterialPageRoute(
+                builder: (context) => DisplayEntry(fn: _countEntries)),
           );
         },
         icon: Icons.sentiment_very_satisfied,

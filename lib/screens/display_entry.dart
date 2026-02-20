@@ -5,6 +5,7 @@ import 'package:adiary/compnents/mood_picker.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/alevated_button.dart';
 import 'package:adiary/screens/styled_text.dart';
+import 'package:adiary/services/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
@@ -12,7 +13,8 @@ import 'package:photo_view/photo_view_gallery.dart';
 import 'package:adiary/constants.dart' as constants;
 
 class DisplayEntry extends StatefulWidget {
-  const DisplayEntry({super.key});
+  final Function fn;
+  const DisplayEntry({super.key, required this.fn});
 
   @override
   State<DisplayEntry> createState() => _DisplayEntryState();
@@ -65,6 +67,55 @@ class _DisplayEntryState extends State<DisplayEntry> {
     }
   }
 
+  void _promptDelete() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Are you sure? It can not be undone"),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  final ADauthenticationService auth =
+                      ADauthenticationService();
+                  bool authenticated = await auth.authenticate();
+
+                  if (authenticated) {
+                    bool succeeded = await entryProvider.delete(_entry?.id);
+                    if (succeeded) {
+                      await widget.fn();
+                      _getRandomEntry();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text("Could not delete, sorry!!!...")),
+                      );
+                      return;
+                    }
+                    Navigator.pop(context);
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(
+                  "Yes",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "No, I'll keep it!",
+                    style: TextStyle(fontSize: 16),
+                  )),
+            ],
+          );
+        });
+  }
+
   Widget getJournalBody() {
     return Scaffold(
       backgroundColor: Colors.pink.shade100,
@@ -97,26 +148,36 @@ class _DisplayEntryState extends State<DisplayEntry> {
           padding: const EdgeInsets.all(16.0),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            TextButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.calendar_month),
-                style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    textStyle: TextStyle(
-                        fontSize: 24,
-                        fontFamily: 'IndieFlower',
-                        fontWeight: FontWeight.bold)),
-                label: Text.rich(TextSpan(children: [
-                  TextSpan(text: '${_entry?.date} '),
-                  TextSpan(
-                      text: '🪷🪷',
-                      style: TextStyle(shadows: [
-                        Shadow(
-                            color: Colors.pink.shade900,
-                            blurRadius: 10,
-                            offset: Offset(0, 0))
-                      ]))
-                ]))),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.calendar_month),
+                  style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      textStyle: TextStyle(
+                          fontSize: 24,
+                          fontFamily: 'IndieFlower',
+                          fontWeight: FontWeight.bold)),
+                  label: Text.rich(TextSpan(children: [
+                    TextSpan(text: '${_entry?.date} '),
+                    TextSpan(
+                        text: '🪷🪷',
+                        style: TextStyle(shadows: [
+                          Shadow(
+                              color: Colors.pink.shade900,
+                              blurRadius: 10,
+                              offset: Offset(0, 0))
+                        ]))
+                  ]))),
+              IconButton.filled(
+                onPressed: _promptDelete,
+                icon: Icon(Icons.delete_outline_outlined),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.pink.shade100,
+                  foregroundColor: Colors.pink.shade700,
+                ),
+              ),
+            ]),
             Divider(),
             Expanded(
                 child: RawScrollbar(

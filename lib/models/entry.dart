@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -15,6 +16,7 @@ final String columnDate = 'date';
 final String columnImages = "images";
 final String columnMood = 'mood';
 final String columnAudio = 'audio';
+final String columnDiscardedAt = 'discarded_at';
 final String tableEntry = 'entry';
 
 class Entry {
@@ -24,6 +26,7 @@ class Entry {
   List<String> images;
   String? mood;
   String? audio;
+  String? discardedAt;
 
   Map<String, Object?> toMap() {
     var jsonImages = jsonEncode(images);
@@ -32,7 +35,8 @@ class Entry {
       columnDate: date,
       columnImages: jsonImages,
       columnMood: mood,
-      columnAudio: audio
+      columnAudio: audio,
+      columnDiscardedAt: discardedAt
     };
 
     if (id != null) {
@@ -48,7 +52,8 @@ class Entry {
       required this.date,
       this.images = const [],
       this.mood,
-      this.audio});
+      this.audio,
+      this.discardedAt});
 
   factory Entry.fromMap(Map<String, dynamic> map) {
     String? jsonImages = map[columnImages];
@@ -66,6 +71,7 @@ class Entry {
       images: images,
       mood: map[columnMood] as String?,
       audio: map[columnAudio],
+      discardedAt: map[columnDiscardedAt],
     );
   }
 }
@@ -94,9 +100,10 @@ class EntryProvider {
                   $columnId integer primary key autoincrement,
                   $columnContent text,
                   $columnDate text not null,
-                  $columnImages images,
-                  $columnMood mood,
-                  $columnAudio audio)
+                  $columnImages text,
+                  $columnMood text,
+                  $columnAudio text,
+                  $columnDiscardedAt text)
               ''');
     }, onUpgrade: (Database db, int oldVersion, int newVersion) async {
       if (oldVersion < 2) {
@@ -111,10 +118,16 @@ class EntryProvider {
         await db.execute('''
           alter table $tableEntry add column $columnAudio text
         ''');
-        await db.execute('''alter table $tableEntry add column new_text text''');
-        await db.execute('''update $tableEntry set new_text = $columnContent''');
-        await db.execute('''alter table $tableEntry drop column $columnContent''');
-        await db.execute('''alter table $tableEntry rename column new_text to $columnContent''');
+        await db
+            .execute('''alter table $tableEntry add column new_text text''');
+        await db
+            .execute('''update $tableEntry set new_text = $columnContent''');
+        await db
+            .execute('''alter table $tableEntry drop column $columnContent''');
+        await db.execute(
+            '''alter table $tableEntry rename column new_text to $columnContent''');
+        await db.execute(
+            '''alter table $tableEntry add column discarded_at text''');
       }
     });
   }
@@ -138,13 +151,27 @@ class EntryProvider {
     return entry;
   }
 
+  Future<bool> delete(int? id) async {
+    if (id == null) {
+      return true;
+    }
+    try {
+      await _open();
+      await db.execute(
+          '''update $tableEntry set $columnDiscardedAt=${DateFormat('yyyy/MM/dd').format(DateTime.now())} where $columnId = $id''');
+      db.close();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<Entry?> getRandomEntry(int? excludeId) async {
     await _open();
     try {
-      String whereCondition =
-          excludeId == null ? '' : 'where _id != $excludeId';
+      String whereCondition = excludeId == null ? '' : '_id != $excludeId and';
       List<Map> maps = await db.rawQuery(
-          '''select * from $tableEntry $whereCondition order by random() limit 1;''');
+          '''select * from $tableEntry where $whereCondition $columnDiscardedAt is null order by random() limit 1;''');
       if (maps.isNotEmpty) {
         Entry result = Entry.fromMap(maps.first as Map<String, dynamic>);
         return result;
@@ -160,8 +187,8 @@ class EntryProvider {
   Future<int> getCount() async {
     try {
       await _open();
-      int? count = Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM $tableEntry'));
+      int? count = Sqflite.firstIntValue(await db.rawQuery(
+          'SELECT COUNT(*) FROM $tableEntry where $columnDiscardedAt is null'));
       db.close();
       return count ?? 0;
     } catch (_) {
@@ -206,7 +233,9 @@ class EntryProvider {
         }
 
         if (entity is File) {
-          if (!entity.path.endsWith('.jpg') && !entity.path.endsWith('.db') && !entity.path.endsWith('.m4a')) {
+          if (!entity.path.endsWith('.jpg') &&
+              !entity.path.endsWith('.db') &&
+              !entity.path.endsWith('.m4a')) {
             continue;
           }
           final relativePath = entity.path.replaceFirst('$basePath/', '');
