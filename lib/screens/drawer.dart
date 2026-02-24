@@ -59,6 +59,21 @@ class _ADrawerState extends State<ADrawer> {
           },
         ),
         ListTile(
+          leading: Icon(Icons.summarize),
+          title: Text(
+            'Summary',
+          ),
+          selected: currentSelection == 'summary',
+          onTap: () {
+            setState(() {
+              currentSelection = 'summary';
+            });
+            widget.onTapCallback('summary');
+            Navigator.pop(context);
+          },
+        ),
+        Divider(),
+        ListTile(
           leading: Icon(Icons.notification_important),
           title: Text(
             'Notification',
@@ -72,7 +87,6 @@ class _ADrawerState extends State<ADrawer> {
             Navigator.pop(context);
           },
         ),
-        Divider(),
         ListTile(
           leading: Icon(Icons.download),
           title: Text(

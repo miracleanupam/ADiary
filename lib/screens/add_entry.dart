@@ -32,7 +32,6 @@ class _AddEntryState extends State<AddEntry> {
   String? _directory;
 
   final TextEditingController _journalController = TextEditingController();
-  final EntryProvider entryProvider = EntryProvider();
   final ImageService imageService = ImageService();
   final RecorderService recorderService = RecorderService();
   bool _showRecorder = false;
@@ -178,7 +177,7 @@ class _AddEntryState extends State<AddEntry> {
       newEntry.id = _entryId;
     }
 
-    Entry updatedEntry = await entryProvider.upsert(newEntry);
+    Entry updatedEntry = await EntryProvider().upsert(newEntry);
 
     setState(() {
       _entryId = updatedEntry.id;

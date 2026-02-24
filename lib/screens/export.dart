@@ -20,8 +20,7 @@ class _ExportDataState extends State<ExportData> {
     });
 
     try {
-      EntryProvider entryProvider = EntryProvider();
-      String exportedPath = await entryProvider.export();
+      String exportedPath = await EntryProvider().export();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

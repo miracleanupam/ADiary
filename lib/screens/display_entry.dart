@@ -22,7 +22,6 @@ class DisplayEntry extends StatefulWidget {
 
 class _DisplayEntryState extends State<DisplayEntry> {
   Entry? _entry;
-  final EntryProvider entryProvider = EntryProvider();
   final ScrollController scrollController = ScrollController();
   String? _directory;
   Map<String, dynamic>? _mood;
@@ -36,7 +35,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
   }
 
   void _getRandomEntry() async {
-    Entry? randomEntry = await entryProvider.getRandomEntry(_entry?.id);
+    Entry? randomEntry = await EntryProvider().getRandomEntry(_entry?.id);
     Map<String, dynamic>? entryMood = findMood(randomEntry?.mood);
     final directory = await getApplicationDocumentsDirectory();
     final audioPath = '${directory.path}/${randomEntry?.audio}';
@@ -82,7 +81,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                   bool authenticated = await auth.authenticate();
 
                   if (authenticated) {
-                    bool succeeded = await entryProvider.delete(_entry?.id);
+                    bool succeeded = await EntryProvider().delete(_entry?.id);
                     if (succeeded) {
                       await widget.fn();
                       _getRandomEntry();

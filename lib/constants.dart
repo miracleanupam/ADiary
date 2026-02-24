@@ -4,6 +4,7 @@ import 'package:adiary/screens/export.dart';
 import 'package:adiary/screens/import.dart';
 import 'package:adiary/screens/password.dart';
 import 'package:adiary/screens/notification.dart';
+import 'package:adiary/screens/summary.dart';
 import 'package:flutter/material.dart';
 
 const homePageWidgetListsForDrawer = {
@@ -13,6 +14,7 @@ const homePageWidgetListsForDrawer = {
   'about': About(),
   'password': PasswordManager(),
   'notification': NotificationManager(),
+  'summary': Summary(),
 };
 
 const homePageWidgetTitleListsForAppBar = <String, String>{
@@ -21,7 +23,8 @@ const homePageWidgetTitleListsForAppBar = <String, String>{
   'import': 'Gorl, I got your back...',
   'about': 'Why this? You ask?',
   'password': 'Sshh! Keep this a secret!!',
-  'notification': "I know you forget..."
+  'notification': "I know you forget...",
+  'summary': "At a Glance!!"
 };
 
 final BoxDecoration bgDecoration = BoxDecoration(

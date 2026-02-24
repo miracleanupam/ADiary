@@ -139,7 +139,6 @@ class EntryProvider {
   Future<Entry> insert(Entry entry) async {
     await _open();
     entry.id = await db.insert(tableEntry, entry.toMap());
-    db.close();
     return entry;
   }
 
@@ -147,7 +146,6 @@ class EntryProvider {
     await _open();
     await db.update(tableEntry, entry.toMap(),
         where: '$columnId = ?', whereArgs: [entry.id]);
-    db.close();
     return entry;
   }
 
@@ -159,7 +157,6 @@ class EntryProvider {
       await _open();
       await db.execute(
           '''update $tableEntry set $columnDiscardedAt=${DateFormat('yyyy/MM/dd').format(DateTime.now())} where $columnId = $id''');
-      db.close();
       return true;
     } catch (e) {
       return false;
@@ -176,10 +173,8 @@ class EntryProvider {
         Entry result = Entry.fromMap(maps.first as Map<String, dynamic>);
         return result;
       }
-      db.close();
       return null;
     } catch (e) {
-      db.close();
       return null;
     }
   }
@@ -189,10 +184,71 @@ class EntryProvider {
       await _open();
       int? count = Sqflite.firstIntValue(await db.rawQuery(
           'SELECT COUNT(*) FROM $tableEntry where $columnDiscardedAt is null'));
-      db.close();
+      
       return count ?? 0;
     } catch (_) {
       return 0;
+    }
+  }
+Future<int> getDiscardedCount() async {
+    try {
+      await _open();
+      int? count = Sqflite.firstIntValue(await db.rawQuery(
+          'SELECT COUNT(*) FROM $tableEntry where $columnDiscardedAt is not null'));
+      return count ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+  Future<int> getCountWithAudio() async {
+    try {
+      await _open();
+      int? count = Sqflite.firstIntValue(await db.rawQuery(
+          'SELECT COUNT(*) FROM $tableEntry where $columnDiscardedAt is null and $columnAudio is not null'));
+      return count ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+  Future<int> getCountWithImages() async {
+    try {
+      await _open();
+      int? count = Sqflite.firstIntValue(await db.rawQuery(
+          'SELECT COUNT(*) FROM $tableEntry where $columnDiscardedAt is null and $columnImages is not null'));
+      return count ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+    Future<int> getImageCount() async {
+    try {
+      await _open();
+      int? count = Sqflite.firstIntValue(await db.rawQuery(
+          'SELECT COUNT(*) FROM $tableEntry, json_each($tableEntry.$columnImages) where $columnDiscardedAt is null and $columnImages is not null'));
+      return count ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+  Future<String> getFrequentMood() async {
+    try {
+      await _open();
+      final frequentMood = await db.rawQuery(
+        '''
+          SELECT $columnMood, COUNT(*) as total
+          FROM $tableEntry
+          WHERE $columnDiscardedAt IS NULL
+          AND $columnMood IS NOT NULL
+          GROUP BY $columnMood
+          ORDER BY total DESC
+          LIMIT 1
+        '''
+      );
+    if (frequentMood.isEmpty) return '-';
+
+      return '${frequentMood.first[columnMood]} - ${frequentMood.first["total"]}';
+    } catch (_) {
+      return '-';
     }
   }
 

@@ -21,8 +21,7 @@ class _ImportDataState extends State<ImportData> {
 
     bool wasSuccess = false;
     try {
-      EntryProvider entryProvider = EntryProvider();
-      await entryProvider.import();
+      await EntryProvider().import();
       wasSuccess = true;
     } catch (_) {
     } finally {
