@@ -93,12 +93,13 @@ class _StatCardState extends State<StatCard> {
     } 
     setState(() {
       value = '$result';
+      isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return isLoading ? Center(child: CircularProgressIndicator()) : Padding(
       padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
       child: Container(
         decoration: BoxDecoration(
