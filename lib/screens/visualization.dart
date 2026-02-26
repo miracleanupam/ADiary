@@ -1,5 +1,6 @@
 import 'package:adiary/compnents/bar_chart.dart';
 import 'package:adiary/compnents/line_chart.dart';
+import 'package:adiary/compnents/word_cloud.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:flutter/material.dart';
 
@@ -37,6 +38,9 @@ class _VisualizationState extends State<Visualization> {
             Divider(),
             SizedBox(height: 16,),
             LineChart(),
+            Divider(),
+            SizedBox(height: 16,),
+            WordCloud()
           ],
         ),
       ) : Center(

@@ -384,6 +384,21 @@ class EntryProvider {
     return result.first['earliest_year'] as int;
   }
 
+  Future<Map<String, int>> fetchMoodFrequencies() async {
+    await _open();
+    final rows = await db.rawQuery('''
+    SELECT $columnMood, COUNT(*) as count
+    FROM $tableEntry
+    WHERE $columnMood IS NOT NULL AND TRIM($columnMood) != ''
+    GROUP BY $columnMood
+    ORDER BY count DESC
+  ''');
+
+    return {
+      for (final row in rows) row['mood'] as String: row['count'] as int,
+    };
+  }
+
   Future<String> export() async {
     if (Platform.isAndroid) {
       if (!await requestStoragePermission()) {

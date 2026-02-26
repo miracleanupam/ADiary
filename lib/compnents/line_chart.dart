@@ -56,7 +56,6 @@ class _LineChartState extends State<LineChart> {
   }
 
   Future<void> _setup(int? year) async {
-    print('------$year');
     final res =
         await EntryProvider().getYearlyCumulativeCounts(year ?? _selectedYear);
     final convertedData = convertToDailyData(res);
