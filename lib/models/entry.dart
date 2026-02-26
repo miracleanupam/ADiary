@@ -319,17 +319,69 @@ class EntryProvider {
       ORDER BY months.month
     ''', [endMonth]);
 
-    return {
-      for (var row in rows)
-        row['month'] as String: row['total'] as int
-    };
+    return {for (var row in rows) row['month'] as String: row['total'] as int};
   }
+
   Future<bool> requestStoragePermission() async {
     var status = await Permission.manageExternalStorage.status;
     if (!await Permission.manageExternalStorage.isGranted) {
       status = await Permission.manageExternalStorage.request();
     }
     return status.isGranted;
+  }
+
+  Future<Map<String, int>> getYearlyCumulativeCounts(int year) async {
+    await _open();
+    final now = DateTime.now();
+    final isCurrentYear = year == now.year;
+
+    final endDate = isCurrentYear
+        ? now.toIso8601String().substring(0, 10) // YYYY-MM-DD
+        : '$year-12-31';
+    final rows = await db.rawQuery('''
+    WITH RECURSIVE days(day) AS (
+        SELECT date(? || '-01-01')
+        UNION ALL
+        SELECT date(day, '+1 day')
+        FROM days
+        WHERE day < date(?)
+    ),
+    daily_counts AS (
+        SELECT $columnDate AS day, COUNT(*) AS total
+        FROM $tableEntry
+        WHERE substr($columnDate,1,4) = ?
+          AND $columnDiscardedAt IS NULL
+        GROUP BY $columnDate
+    )
+    SELECT
+        days.day,
+        SUM(COALESCE(daily_counts.total,0))
+            OVER (ORDER BY days.day
+                  ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_total
+    FROM days
+    LEFT JOIN daily_counts
+      ON days.day = daily_counts.day
+    ORDER BY days.day;
+  ''', [year.toString(), endDate, year.toString()]);
+
+    return {
+      for (var row in rows) row['day'] as String: row['cumulative_total'] as int
+    };
+  }
+
+  Future<int?> getEarliestYear() async {
+    await _open();
+    final result = await db.rawQuery('''
+    SELECT CAST(strftime('%Y', MIN($columnDate)) AS INTEGER) AS earliest_year
+    FROM $tableEntry
+    WHERE $columnDiscardedAt IS NULL
+  ''');
+
+    if (result.isEmpty || result.first['earliest_year'] == null) {
+      return null;
+    }
+
+    return result.first['earliest_year'] as int;
   }
 
   Future<String> export() async {
