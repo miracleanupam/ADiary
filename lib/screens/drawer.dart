@@ -72,6 +72,20 @@ class _ADrawerState extends State<ADrawer> {
             Navigator.pop(context);
           },
         ),
+        ListTile(
+          leading: Icon(Icons.bar_chart),
+          title: Text(
+            'Visualization',
+          ),
+          selected: currentSelection == 'visualization',
+          onTap: () {
+            setState(() {
+              currentSelection = 'visualization';
+            });
+            widget.onTapCallback('visualization');
+            Navigator.pop(context);
+          },
+        ),
         Divider(),
         ListTile(
           leading: Icon(Icons.notification_important),

@@ -127,7 +127,40 @@ class EntryProvider {
         await db.execute(
             '''alter table $tableEntry rename column new_text to $columnContent''');
         await db.execute(
-            '''alter table $tableEntry add column discarded_at text''');
+            '''alter table $tableEntry add column $columnDiscardedAt text''');
+        await db.execute('''
+              alter table $tableEntry add column date_iso text;
+            ''');
+        await db.execute('''
+              UPDATE entry
+              SET date_iso =
+                substr($columnDate, -4) || '-' ||
+                printf('%02d',
+                  CASE substr($columnDate, 1, 3)
+                    WHEN 'Jan' THEN 1
+                    WHEN 'Feb' THEN 2
+                    WHEN 'Mar' THEN 3
+                    WHEN 'Apr' THEN 4
+                    WHEN 'May' THEN 5
+                    WHEN 'Jun' THEN 6
+                    WHEN 'Jul' THEN 7
+                    WHEN 'Aug' THEN 8
+                    WHEN 'Sep' THEN 9
+                    WHEN 'Oct' THEN 10
+                    WHEN 'Nov' THEN 11
+                    WHEN 'Dec' THEN 12
+                  END
+                ) || '-' ||
+                printf('%02d',
+                  CAST(trim(substr($columnDate, 5, instr($columnDate, ',') - 5)) AS INTEGER)
+                )
+          ''');
+        await db.execute('''update $tableEntry set date = date_iso''');
+        await db.execute('''
+          CREATE INDEX idx_entry_date_iso
+          ON $tableEntry($columnDate)''');
+        await db
+            .execute('''alter table $tableEntry drop column $columnContent''');
       }
     });
   }
@@ -184,13 +217,14 @@ class EntryProvider {
       await _open();
       int? count = Sqflite.firstIntValue(await db.rawQuery(
           'SELECT COUNT(*) FROM $tableEntry where $columnDiscardedAt is null'));
-      
+
       return count ?? 0;
     } catch (_) {
       return 0;
     }
   }
-Future<int> getDiscardedCount() async {
+
+  Future<int> getDiscardedCount() async {
     try {
       await _open();
       int? count = Sqflite.firstIntValue(await db.rawQuery(
@@ -200,6 +234,7 @@ Future<int> getDiscardedCount() async {
       return 0;
     }
   }
+
   Future<int> getCountWithAudio() async {
     try {
       await _open();
@@ -210,6 +245,7 @@ Future<int> getDiscardedCount() async {
       return 0;
     }
   }
+
   Future<int> getCountWithImages() async {
     try {
       await _open();
@@ -220,7 +256,8 @@ Future<int> getDiscardedCount() async {
       return 0;
     }
   }
-    Future<int> getImageCount() async {
+
+  Future<int> getImageCount() async {
     try {
       await _open();
       int? count = Sqflite.firstIntValue(await db.rawQuery(
@@ -230,11 +267,11 @@ Future<int> getDiscardedCount() async {
       return 0;
     }
   }
+
   Future<String> getFrequentMood() async {
     try {
       await _open();
-      final frequentMood = await db.rawQuery(
-        '''
+      final frequentMood = await db.rawQuery('''
           SELECT $columnMood, COUNT(*) as total
           FROM $tableEntry
           WHERE $columnDiscardedAt IS NULL
@@ -242,9 +279,8 @@ Future<int> getDiscardedCount() async {
           GROUP BY $columnMood
           ORDER BY total DESC
           LIMIT 1
-        '''
-      );
-    if (frequentMood.isEmpty) return '-';
+        ''');
+      if (frequentMood.isEmpty) return '-';
 
       return '${frequentMood.first[columnMood]} - ${frequentMood.first["total"]}';
     } catch (_) {
@@ -252,6 +288,42 @@ Future<int> getDiscardedCount() async {
     }
   }
 
+  Future<Map<String, int>> getMonthlyCounts() async {
+    await _open();
+    final now = DateTime.now();
+    final endMonth = '${now.year}-12';
+
+    final rows = await db.rawQuery('''
+      WITH RECURSIVE months(month) AS (
+        -- Start from earliest available month
+        SELECT substr(MIN($columnDate), 1, 7)
+        FROM $tableEntry
+        WHERE $columnDiscardedAt IS NULL
+
+        UNION ALL
+
+        -- Add one month each recursion
+        SELECT strftime('%Y-%m', date(month || '-01', '+1 month'))
+        FROM months
+        WHERE month < ?
+      )
+
+      SELECT
+        months.month,
+        COUNT($tableEntry.$columnDate) as total
+      FROM months
+      LEFT JOIN $tableEntry
+        ON substr($tableEntry.$columnDate, 1, 7) = months.month
+        AND $tableEntry.$columnDiscardedAt IS NULL
+      GROUP BY months.month
+      ORDER BY months.month
+    ''', [endMonth]);
+
+    return {
+      for (var row in rows)
+        row['month'] as String: row['total'] as int
+    };
+  }
   Future<bool> requestStoragePermission() async {
     var status = await Permission.manageExternalStorage.status;
     if (!await Permission.manageExternalStorage.isGranted) {
