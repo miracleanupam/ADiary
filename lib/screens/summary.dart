@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 final List SUMMARY_CARDS = [
   {
     'title': 'Total Entries',
-    'icon': Icons.calculate_outlined,
+    'icon': Icons.numbers,
     'query': 'COUNT',
   },
   {
@@ -23,10 +23,26 @@ final List SUMMARY_CARDS = [
     'query': 'IMAGE_COUNT'
   },
   {
+    'title': 'Current Streak',
+    'icon': Icons.calendar_today,
+    'query': 'CURRENT_STREAK'
+  },
+  {
+    'title': 'Longest Streak',
+    'icon': Icons.calendar_month,
+    'query': 'LONGEST_STREAK'
+  },
+  {
     'title': 'Frequent Mood',
     'icon': Icons.emoji_emotions_outlined,
     'query': 'FREQUENT_MOOD'
   },
+  {
+    'title': '# of Days',
+    'icon': Icons.onetwothree,
+    'query': 'DAYS_WITH_ENTRIES'
+  },
+  
   // {
   //   'title': '',
   //   'icon': ,
@@ -88,6 +104,12 @@ class _StatCardState extends State<StatCard> {
       result = await EntryProvider().getImageCount();
       case 'FREQUENT_MOOD':
       result = await EntryProvider().getFrequentMood();
+      case 'LONGEST_STREAK':
+      result = await EntryProvider().getLongestStreak();
+      case 'CURRENT_STREAK':
+      result = await EntryProvider().getCurrentStreak();
+      case 'DAYS_WITH_ENTRIES':
+      result = await EntryProvider().getDaysWithEntries();
       default:
       break;
     } 
@@ -105,14 +127,15 @@ class _StatCardState extends State<StatCard> {
         decoration: BoxDecoration(
           color: Colors.pink.shade100,
           border: Border.all(
-            color: Colors.pink.shade700
+            color: Colors.pink.shade900
           ),
           borderRadius: BorderRadius.circular(8)
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(cardData!['icon'], size: 60, color: Colors.pink.shade500,),
+            Icon(cardData!['icon'], size: 60, color: Colors.pink.shade900,),
+            VerticalDivider(),
             SizedBox(width: 8,),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +144,8 @@ class _StatCardState extends State<StatCard> {
                   cardData!['title'],
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.pink.shade700
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink.shade900
                   ),
                 ),
                 Text(
