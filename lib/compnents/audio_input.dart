@@ -194,7 +194,7 @@ class _AudioInputState extends State<AudioInput>
                         if (widget.recordingPath != '')
                           AnimatedCloseButton(
                             top: 0,
-                            right: 5,
+                            right: 0,
                             fn: widget.removeAudio,
                           )
                       ],

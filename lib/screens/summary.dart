@@ -38,9 +38,19 @@ final List SUMMARY_CARDS = [
     'query': 'FREQUENT_MOOD'
   },
   {
+    'title': 'Deleted Entries',
+    'icon': Icons.delete_forever,
+    'query': 'DISCARDED_COUNT'
+  },
+  {
     'title': '# of Days',
     'icon': Icons.onetwothree,
     'query': 'DAYS_WITH_ENTRIES'
+  },
+  {
+    'title': 'Day w/ most Entries',
+    'icon': Icons.show_chart,
+    'query': 'DAY_WITH_MOST_ENTRIES'
   },
 
   // {
@@ -110,6 +120,8 @@ class _StatCardState extends State<StatCard> {
         result = await EntryProvider().getCurrentStreak();
       case 'DAYS_WITH_ENTRIES':
         result = await EntryProvider().getDaysWithEntries();
+      case 'DAY_WITH_MOST_ENTRIES':
+        result = await EntryProvider().getDayWithMostEntries();
       default:
         break;
     }
@@ -139,28 +151,36 @@ class _StatCardState extends State<StatCard> {
                     color: Colors.pink.shade900,
                   ),
                   VerticalDivider(),
-                  SizedBox(
-                    width: 8,
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        FittedBox(
+                          // alignment: Alignment.start,
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            cardData!['title'],
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.pink.shade900),
+                          ),
+                        ),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            value,
+                            style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.pink.shade400),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        cardData!['title'],
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.pink.shade900),
-                      ),
-                      Text(
-                        value,
-                        style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.pink.shade400),
-                      )
-                    ],
-                  )
+                  SizedBox(width: 8,)
                 ],
               ),
             ),

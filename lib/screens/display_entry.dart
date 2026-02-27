@@ -210,7 +210,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                                     height: 24,
                                   ),
                                   if (_entry?.images != null &&
-                                      _entry!.images.isNotEmpty) ...[
+                                      _entry!.images!.isNotEmpty) ...[
                                     Divider(),
                                     SizedBox(
                                       height: 24,
@@ -222,7 +222,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                                     ListView.separated(
                                       shrinkWrap: true,
                                       physics: NeverScrollableScrollPhysics(),
-                                      itemCount: _entry!.images.length,
+                                      itemCount: _entry!.images!.length,
                                       itemBuilder: (context, index) {
                                         return GestureDetector(
                                             onTap: () {
@@ -231,7 +231,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                                                 MaterialPageRoute(
                                                   builder: (_) =>
                                                       FullScreenGallery(
-                                                    imagePaths: _entry!.images,
+                                                    imagePaths: _entry!.images!,
                                                     initialIndex:
                                                         index, // start from tapped image
                                                   ),
@@ -243,7 +243,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                                                     BorderRadiusGeometry
                                                         .circular(6),
                                                 child: Image.file(File(
-                                                    "$_directory/${_entry!.images[index]}"))));
+                                                    "$_directory/${_entry!.images![index]}"))));
                                       },
                                       separatorBuilder: (context, index) {
                                         return SizedBox(

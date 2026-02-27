@@ -169,7 +169,7 @@ class _AddEntryState extends State<AddEntry> {
     Entry newEntry = Entry(
         content: _journalController.text,
         date: DateFormat('yyyy-MM-dd').format(_selectedDate!),
-        images: _pickedImages,
+        images: _pickedImages.isEmpty ? null : _pickedImages,
         audio: audioName,
         mood: _selectedMood?['label']);
 

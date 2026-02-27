@@ -23,7 +23,7 @@ class Entry {
   int? id;
   String? content;
   String date;
-  List<String> images;
+  List<String>? images;
   String? mood;
   String? audio;
   String? discardedAt;
@@ -50,7 +50,7 @@ class Entry {
       {this.id,
       this.content,
       required this.date,
-      this.images = const [],
+      this.images,
       this.mood,
       this.audio,
       this.discardedAt});
@@ -189,7 +189,7 @@ class EntryProvider {
     try {
       await _open();
       await db.execute(
-          '''update $tableEntry set $columnDiscardedAt=${DateFormat('yyyy/MM/dd').format(DateTime.now())} where $columnId = $id''');
+          '''update $tableEntry set $columnDiscardedAt=? where $columnId = ?''', [(DateFormat('yyyy/MM/dd').format(DateTime.now())), id]);
       return true;
     } catch (e) {
       return false;
@@ -374,6 +374,31 @@ class EntryProvider {
     }
 
     return result.first['earliest_year'] as int;
+  }
+
+  Future<String?> getDayWithMostEntries() async {
+    await _open();
+    final result = await db.rawQuery('''
+      WITH daily_counts AS (
+          SELECT
+              date($columnDate) AS day,
+              COUNT(*) AS total
+          FROM $tableEntry
+          GROUP BY date($columnDate)
+      )
+
+      SELECT day, total
+      FROM daily_counts
+      WHERE total = (
+          SELECT MAX(total) FROM daily_counts
+      )
+      ORDER BY day;
+    ''');
+
+    if (result.isEmpty) {
+      return null;
+    }
+    return '${result.first['day']} = ${result.first['total']}';
   }
 
   Future<int> getDaysWithEntries() async {
