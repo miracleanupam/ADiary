@@ -51,9 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
           onTapCallback: _drawerItemTapped, selectedItem: _drawerScreen),
       body: Container(
         decoration: constants.bgDecoration,
-        child: Center(
-          child: constants.homePageWidgetListsForDrawer[_drawerScreen],
-        ),
+        height: double.infinity,
+        child: constants.homePageWidgetListsForDrawer[_drawerScreen],
       ),
     );
   }
