@@ -42,7 +42,7 @@ final List SUMMARY_CARDS = [
     'icon': Icons.onetwothree,
     'query': 'DAYS_WITH_ENTRIES'
   },
-  
+
   // {
   //   'title': '',
   //   'icon': ,
@@ -89,30 +89,30 @@ class _StatCardState extends State<StatCard> {
     dynamic result = 0;
     switch (cardData!['query']) {
       case 'COUNT':
-      result = await EntryProvider().getCount();
-      break;
+        result = await EntryProvider().getCount();
+        break;
       case 'COUNT_WITH_AUDIO':
-      result = await EntryProvider().getCountWithAudio();
-      break;
+        result = await EntryProvider().getCountWithAudio();
+        break;
       case 'COUNT_WITH_IMAGES':
-      result = await EntryProvider().getCountWithImages();
-      break;
+        result = await EntryProvider().getCountWithImages();
+        break;
       case 'DISCARDED_COUNT':
-      result = await EntryProvider().getDiscardedCount();
-      break;
+        result = await EntryProvider().getDiscardedCount();
+        break;
       case 'IMAGE_COUNT':
-      result = await EntryProvider().getImageCount();
+        result = await EntryProvider().getImageCount();
       case 'FREQUENT_MOOD':
-      result = await EntryProvider().getFrequentMood();
+        result = await EntryProvider().getFrequentMood();
       case 'LONGEST_STREAK':
-      result = await EntryProvider().getLongestStreak();
+        result = await EntryProvider().getLongestStreak();
       case 'CURRENT_STREAK':
-      result = await EntryProvider().getCurrentStreak();
+        result = await EntryProvider().getCurrentStreak();
       case 'DAYS_WITH_ENTRIES':
-      result = await EntryProvider().getDaysWithEntries();
+        result = await EntryProvider().getDaysWithEntries();
       default:
-      break;
-    } 
+        break;
+    }
     setState(() {
       value = '$result';
       isLoading = false;
@@ -121,46 +121,49 @@ class _StatCardState extends State<StatCard> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading ? Center(child: CircularProgressIndicator()) : Padding(
-      padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.pink.shade100,
-          border: Border.all(
-            color: Colors.pink.shade900
-          ),
-          borderRadius: BorderRadius.circular(8)
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Icon(cardData!['icon'], size: 60, color: Colors.pink.shade900,),
-            VerticalDivider(),
-            SizedBox(width: 8,),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  cardData!['title'],
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade900
+    return isLoading
+        ? Center(child: CircularProgressIndicator())
+        : Padding(
+            padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Colors.pink.shade100,
+                  border: Border.all(color: Colors.pink.shade900),
+                  borderRadius: BorderRadius.circular(8)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    cardData!['icon'],
+                    size: 60,
+                    color: Colors.pink.shade900,
                   ),
-                ),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade400
+                  VerticalDivider(),
+                  SizedBox(
+                    width: 8,
                   ),
-                )
-              ],
-            )
-          ],
-        ),
-      ),
-    );
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        cardData!['title'],
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.pink.shade900),
+                      ),
+                      Text(
+                        value,
+                        style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.pink.shade400),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          );
   }
 }

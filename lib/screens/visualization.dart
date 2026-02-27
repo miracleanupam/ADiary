@@ -26,26 +26,35 @@ class _VisualizationState extends State<Visualization> {
       hasRecords = count > 0 ? true : false;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: hasRecords ? SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 16,),
-            BarChart(),
-            Divider(),
-            SizedBox(height: 16,),
-            LineChart(),
-            Divider(),
-            SizedBox(height: 16,),
-            WordCloud()
-          ],
-        ),
-      ) : Center(
-        child: Text("No data to visualize yet!!! :("),
-      ),
+      child: hasRecords
+          ? SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 16,
+                  ),
+                  BarChart(),
+                  Divider(),
+                  SizedBox(
+                    height: 16,
+                  ),
+                  LineChart(),
+                  Divider(),
+                  SizedBox(
+                    height: 16,
+                  ),
+                  WordCloud()
+                ],
+              ),
+            )
+          : Center(
+              child: Text("No data to visualize yet!!! :("),
+            ),
     );
   }
 }

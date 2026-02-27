@@ -52,11 +52,6 @@ class NotificationService {
         iOS: DarwinNotificationDetails());
   }
 
-  // Future<void> showNotification(
-  //     {int id = 0, String? title = "Hello", String? body = "K chha khabar?"}) async {
-  //   await notificationsPlugin.show(id, title, body, notificationDetails());
-  // }
-
   Future<void> scheduleNotification(
       {String hour = "20", String minute = "30"}) async {
     final now = tz.TZDateTime.now(tz.local);

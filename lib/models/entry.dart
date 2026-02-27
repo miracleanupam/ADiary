@@ -331,30 +331,30 @@ class EntryProvider {
         ? now.toIso8601String().substring(0, 10) // YYYY-MM-DD
         : '$year-12-31';
     final rows = await db.rawQuery('''
-    WITH RECURSIVE days(day) AS (
-        SELECT date(? || '-01-01')
-        UNION ALL
-        SELECT date(day, '+1 day')
-        FROM days
-        WHERE day < date(?)
-    ),
-    daily_counts AS (
-        SELECT $columnDate AS day, COUNT(*) AS total
-        FROM $tableEntry
-        WHERE substr($columnDate,1,4) = ?
-          AND $columnDiscardedAt IS NULL
-        GROUP BY $columnDate
-    )
-    SELECT
-        days.day,
-        SUM(COALESCE(daily_counts.total,0))
-            OVER (ORDER BY days.day
-                  ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_total
-    FROM days
-    LEFT JOIN daily_counts
-      ON days.day = daily_counts.day
-    ORDER BY days.day;
-  ''', [year.toString(), endDate, year.toString()]);
+      WITH RECURSIVE days(day) AS (
+          SELECT date(? || '-01-01')
+          UNION ALL
+          SELECT date(day, '+1 day')
+          FROM days
+          WHERE day < date(?)
+      ),
+      daily_counts AS (
+          SELECT $columnDate AS day, COUNT(*) AS total
+          FROM $tableEntry
+          WHERE substr($columnDate,1,4) = ?
+            AND $columnDiscardedAt IS NULL
+          GROUP BY $columnDate
+      )
+      SELECT
+          days.day,
+          SUM(COALESCE(daily_counts.total,0))
+              OVER (ORDER BY days.day
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_total
+      FROM days
+      LEFT JOIN daily_counts
+        ON days.day = daily_counts.day
+      ORDER BY days.day;
+    ''', [year.toString(), endDate, year.toString()]);
 
     return {
       for (var row in rows) row['day'] as String: row['cumulative_total'] as int
@@ -364,10 +364,10 @@ class EntryProvider {
   Future<int?> getEarliestYear() async {
     await _open();
     final result = await db.rawQuery('''
-    SELECT CAST(strftime('%Y', MIN($columnDate)) AS INTEGER) AS earliest_year
-    FROM $tableEntry
-    WHERE $columnDiscardedAt IS NULL
-  ''');
+      SELECT CAST(strftime('%Y', MIN($columnDate)) AS INTEGER) AS earliest_year
+      FROM $tableEntry
+      WHERE $columnDiscardedAt IS NULL
+    ''');
 
     if (result.isEmpty || result.first['earliest_year'] == null) {
       return null;
@@ -384,17 +384,17 @@ class EntryProvider {
       '''));
 
     return count ?? 0;
-  } 
+  }
 
   Future<Map<String, int>> fetchMoodFrequencies() async {
     await _open();
     final rows = await db.rawQuery('''
-    SELECT $columnMood, COUNT(*) as count
-    FROM $tableEntry
-    WHERE $columnMood IS NOT NULL AND TRIM($columnMood) != ''
-    GROUP BY $columnMood
-    ORDER BY count DESC
-  ''');
+      SELECT $columnMood, COUNT(*) as count
+      FROM $tableEntry
+      WHERE $columnMood IS NOT NULL AND TRIM($columnMood) != ''
+      GROUP BY $columnMood
+      ORDER BY count DESC
+    ''');
 
     return {
       for (final row in rows) row['mood'] as String: row['count'] as int,
@@ -407,51 +407,51 @@ class EntryProvider {
     // It uses a classic SQL technique called "gaps and islands".
 
     final result = await db.rawQuery('''
-    WITH distinct_days AS (
-        -- Step 1:
-        -- Get unique calendar days that have at least one entry.
-        -- We use DISTINCT so multiple entries on the same day
-        -- do not artificially increase the streak length.
-        SELECT DISTINCT date($columnDate) AS day
-        FROM $tableEntry
-    ),
+      WITH distinct_days AS (
+          -- Step 1:
+          -- Get unique calendar days that have at least one entry.
+          -- We use DISTINCT so multiple entries on the same day
+          -- do not artificially increase the streak length.
+          SELECT DISTINCT date($columnDate) AS day
+          FROM $tableEntry
+      ),
 
-    numbered_days AS (
-        -- Step 2:
-        -- Assign a row number to each day in chronological order.
-        -- This creates a sequential index: 1, 2, 3, 4, ...
-        SELECT
-            day,
-            ROW_NUMBER() OVER (ORDER BY day) AS rn
-        FROM distinct_days
-    ),
+      numbered_days AS (
+          -- Step 2:
+          -- Assign a row number to each day in chronological order.
+          -- This creates a sequential index: 1, 2, 3, 4, ...
+          SELECT
+              day,
+              ROW_NUMBER() OVER (ORDER BY day) AS rn
+          FROM distinct_days
+      ),
 
-    grouped_days AS (
-        -- Step 3 (The key trick):
-        -- Subtract the row number (in days) from each date.
-        --
-        -- For consecutive dates:
-        --   day - rn days = constant value
-        --
-        -- That constant value becomes a "group key".
-        -- When there is a gap in dates, the value changes,
-        -- creating a new group.
-        SELECT
-            day,
-            date(day, '-' || rn || ' days') AS grp
-        FROM numbered_days
-    )
+      grouped_days AS (
+          -- Step 3 (The key trick):
+          -- Subtract the row number (in days) from each date.
+          --
+          -- For consecutive dates:
+          --   day - rn days = constant value
+          --
+          -- That constant value becomes a "group key".
+          -- When there is a gap in dates, the value changes,
+          -- creating a new group.
+          SELECT
+              day,
+              date(day, '-' || rn || ' days') AS grp
+          FROM numbered_days
+      )
 
-    -- Step 4:
-    -- Count how many days exist in each group (each streak),
-    -- then take the maximum streak length.
-    SELECT MAX(streak_length) AS longest_streak
-    FROM (
-        SELECT COUNT(*) AS streak_length
-        FROM grouped_days
-        GROUP BY grp
-    );
-  ''');
+      -- Step 4:
+      -- Count how many days exist in each group (each streak),
+      -- then take the maximum streak length.
+      SELECT MAX(streak_length) AS longest_streak
+      FROM (
+          SELECT COUNT(*) AS streak_length
+          FROM grouped_days
+          GROUP BY grp
+      );
+    ''');
 
     // If table is empty, return 0 instead of null.
     return (result.first['longest_streak'] as int?) ?? 0;
@@ -459,8 +459,6 @@ class EntryProvider {
 
   Future<int> getCurrentStreak() async {
     await _open();
-    // This query finds the longest consecutive-day streak of entries.
-    // It uses a classic SQL technique called "gaps and islands".
 
     final result = await db.rawQuery('''
       WITH distinct_days AS (
@@ -512,6 +510,19 @@ class EntryProvider {
 
     // If table is empty, return 0 instead of null.
     return (result.first['current_streak'] as int?) ?? 0;
+  }
+
+  Future<bool> hasEntryToday() async {
+    await _open();
+    final result = await db.rawQuery('''
+      SELECT EXISTS (
+          SELECT 1
+          FROM $tableEntry
+          WHERE date($columnDate) = date('now')
+      ) AS has_entry
+    ''');
+
+    return (result.first['has_entry'] as int) == 1;
   }
 
   Future<bool> requestStoragePermission() async {

@@ -122,12 +122,16 @@ class _BarChartState extends State<BarChart> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Moments per Month", style: TextStyle(
-          color: Colors.pink.shade900,
-          fontSize: 24,
-          fontWeight: FontWeight.bold
-        ),),
-        SizedBox(height: 32,),
+        Text(
+          "Moments per Month",
+          style: TextStyle(
+              color: Colors.pink.shade900,
+              fontSize: 24,
+              fontWeight: FontWeight.bold),
+        ),
+        SizedBox(
+          height: 32,
+        ),
         SizedBox(
             height: chartHeight + BarChart.xAxisHeight,
             child: isLoading
@@ -162,7 +166,7 @@ class _BarChartState extends State<BarChart> {
                           ),
                         ),
                       ),
-            
+
                       // Scrollable bars area
                       Expanded(
                         child: ClipRect(

@@ -15,8 +15,7 @@ class ADiaryPermissions {
 
         if (result.isDenied == true) {
           checkWritePermission();
-        } else {
-        }
+        } else {}
       }
       return true;
     }
