@@ -1,77 +1,84 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_timezone/flutter_timezone.dart';
 
 class NotificationService {
-  final notificationsPlugin = FlutterLocalNotificationsPlugin();
-
+  final _plugin = FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
 
-  Future<void> initNotifications() async {
+  // ─── Init ─────────────────────────────────────────────────────────────────
+
+  Future<void> init() async {
     if (_isInitialized) return;
-    notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
 
-    tz.initializeTimeZones();
-    final TimezoneInfo timezoneInfo = await FlutterTimezone.getLocalTimezone();
-    final String currentTimeZone = timezoneInfo.identifier;
-    tz.setLocalLocation(tz.getLocation(currentTimeZone));
+    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    androidPlugin?.requestNotificationsPermission();
 
-    // Android
-    const initSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/launcher_icon');
+    await _configureTimezone();
+    await _plugin.initialize(_initSettings);
 
-    // Ios
-    const initSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
-
-    const initSettings = InitializationSettings(
-      android: initSettingsAndroid,
-      iOS: initSettingsIOS,
-    );
-
-    await notificationsPlugin.initialize(initSettings);
     _isInitialized = true;
   }
 
-  NotificationDetails notificationDetails() {
-    return const NotificationDetails(
-        android: AndroidNotificationDetails(
-            "daily_channel_id", "Daily Notifications",
-            channelDescription: 'Daily Notification Channel',
-            importance: Importance.max,
-            priority: Priority.high),
-        iOS: DarwinNotificationDetails());
+  Future<void> _configureTimezone() async {
+    tz.initializeTimeZones();
+    final info = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(info.identifier));
   }
 
-  Future<void> scheduleNotification(
-      {String hour = "20", String minute = "30"}) async {
+  static const _initSettings = InitializationSettings(
+    android: AndroidInitializationSettings('@mipmap/launcher_icon'),
+    iOS: DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    ),
+  );
+
+  // ─── Notification details ─────────────────────────────────────────────────
+
+  static const _notificationDetails = NotificationDetails(
+    android: AndroidNotificationDetails(
+      'daily_channel_id',
+      'Daily Notifications',
+      channelDescription: 'Daily Notification Channel',
+      importance: Importance.max,
+      priority: Priority.high,
+    ),
+    iOS: DarwinNotificationDetails(),
+  );
+
+  // ─── Schedule / cancel ────────────────────────────────────────────────────
+
+  Future<void> scheduleNotification({
+    String hour = '20',
+    String minute = '30',
+  }) async {
     final now = tz.TZDateTime.now(tz.local);
+    final scheduled = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      int.parse(hour),
+      int.parse(minute),
+    );
 
-    var scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day,
-        int.parse(hour), int.parse(minute));
-
-    // var scheduledDate = tz.TZDateTime.now(tz.local).add(const Duration(minutes: 2));
     await cancelNotifications();
-    await notificationsPlugin.zonedSchedule(
-        100,
-        "How was your day?",
-        "Add new happy moments or remember some from the past...",
-        scheduledDate,
-        notificationDetails(),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time);
+    await _plugin.zonedSchedule(
+      100,
+      'How was your day?',
+      'Add new happy moments or remember some from the past...',
+      scheduled,
+      _notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
   }
 
-  Future<void> cancelNotifications() async {
-    await notificationsPlugin.cancelAll();
-  }
+  Future<void> cancelNotifications() async => _plugin.cancelAll();
 }

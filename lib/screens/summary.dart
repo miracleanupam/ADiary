@@ -1,3 +1,4 @@
+import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,26 +13,26 @@ const _kSectionGap = 16.0;
 TextStyle _labelStyle(BuildContext context) => TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w700,
-      color: Colors.pink.shade900,
+      color: PinkColors.shade900,
     );
 
 TextStyle _bigNumberStyle(BuildContext context) => TextStyle(
       fontSize: 40,
       fontWeight: FontWeight.w900,
-      color: Colors.pink.shade500,
+      color: PinkColors.shade500,
     );
 
 TextStyle _unitStyle(BuildContext context) => TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w600,
-      color: Colors.pink.shade700,
+      color: PinkColors.shade700,
       fontFamily: 'IndieFlower',
     );
 
 TextStyle _captionStyle(BuildContext context) => TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.bold,
-      color: Colors.pink.shade400,
+      color: PinkColors.shade400,
     );
 
 // ─────────────────────────────────────────────
@@ -96,7 +97,7 @@ class _SummaryState extends State<Summary> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Center(
-        child: CircularProgressIndicator(color: Colors.pink.shade900),
+        child: CircularProgressIndicator(color: PinkColors.shade900),
       );
     }
 
@@ -176,7 +177,7 @@ class _HeaderCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 56,
                   fontWeight: FontWeight.w900,
-                  color: Colors.pink.shade500,
+                  color: PinkColors.shade500,
                 ),
               ),
               TextSpan(
@@ -184,7 +185,7 @@ class _HeaderCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: Colors.pink.shade800,
+                  color: PinkColors.shade800,
                   fontFamily: 'IndieFlower',
                 ),
               ),
@@ -204,12 +205,12 @@ class _HeaderCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.pink.shade400,
+                  color: PinkColors.shade400,
                   fontFamily: 'IndieFlower',
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(CupertinoIcons.sparkles, color: Colors.pink.shade500, size: 16),
+              Icon(CupertinoIcons.sparkles, color: PinkColors.shade500, size: 16),
             ],
           ),
         ],
@@ -235,7 +236,7 @@ class _StreakRow extends StatelessWidget {
         value: currentStreak,
         unit: currentStreak != 1 ? 'days' : 'day',
         captionIcon: Icons.favorite_rounded,
-        captionIconColor: Colors.pink.shade500,
+        captionIconColor: PinkColors.shade500,
         caption: 'Keep going',
         valueMinHeight: 56,
       ),
@@ -246,7 +247,7 @@ class _StreakRow extends StatelessWidget {
         value: longestStreak,
         unit: longestStreak != 1 ? 'days' : 'day',
         captionIcon: Icons.sign_language,
-        captionIconColor: Colors.pink.shade500,
+        captionIconColor: PinkColors.shade500,
         caption: 'Great Job',
         valueMinHeight: 56,
       ),
@@ -378,7 +379,7 @@ class _AffirmationCard extends StatelessWidget {
       tint: const Color(0xFFFFF0F5),
       child: Row(
         children: [
-          Icon(Icons.local_florist_rounded, color: Colors.pink.shade300, size: 32),
+          Icon(Icons.local_florist_rounded, color: PinkColors.shade300, size: 32),
           const SizedBox(width: 16),
           Expanded(
             child: _ScaledRichText(
@@ -389,7 +390,7 @@ class _AffirmationCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.pink.shade700,
+                    color: PinkColors.shade700,
                     height: 1.5,
                   ),
                 ),
@@ -398,7 +399,7 @@ class _AffirmationCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
-                    color: Colors.pink.shade500,
+                    color: PinkColors.shade500,
                   ),
                 ),
                 TextSpan(
@@ -406,7 +407,7 @@ class _AffirmationCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.pink.shade700,
+                    color: PinkColors.shade700,
                     height: 1.5,
                   ),
                 ),
@@ -414,7 +415,7 @@ class _AffirmationCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          Icon(Icons.local_florist_rounded, color: Colors.pink.shade300, size: 32),
+          Icon(Icons.local_florist_rounded, color: PinkColors.shade300, size: 32),
         ],
       ),
     );
@@ -536,7 +537,7 @@ class _StatBlock extends StatelessWidget {
                 Icon(
                   captionIcon,
                   size: 16,
-                  color: captionIconColor ?? Colors.pink.shade400,
+                  color: captionIconColor ?? PinkColors.shade400,
                 ),
               ],
             ],
@@ -563,14 +564,14 @@ class _MediaRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: Colors.pink.shade300, size: 24),
+        Icon(icon, color: PinkColors.shade300, size: 24),
         const SizedBox(width: 8),
         Text(
           '$label: ',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.pink.shade800,
+            color: PinkColors.shade800,
           ),
         ),
         Text(
@@ -578,7 +579,7 @@ class _MediaRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w800,
-            color: Colors.pink.shade500,
+            color: PinkColors.shade500,
           ),
         ),
       ],
@@ -670,15 +671,15 @@ class StatCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: (tint ?? Colors.white).withOpacity(0.45),
+        color: (tint ?? Colors.white).withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(_kCardRadius),
         border: Border.all(
-          color: Colors.pink.shade500.withOpacity(0.6),
+          color: PinkColors.shade500.withValues(alpha: 0.6),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.pink.shade200.withOpacity(0.3),
+            color: PinkColors.shade200.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

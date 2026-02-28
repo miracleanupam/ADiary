@@ -1,6 +1,9 @@
+import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+
+// ─── Data model ───────────────────────────────────────────────────────────────
 
 class BarData {
   final String label;
@@ -9,14 +12,12 @@ class BarData {
   const BarData({required this.label, required this.value});
 }
 
-class BarChart extends StatefulWidget {
-  const BarChart({
-    super.key,
-  });
+// ─── BarChart widget ──────────────────────────────────────────────────────────
 
-  // Fixed left width for y-axis labels
+class BarChart extends StatefulWidget {
+  const BarChart({super.key});
+
   static const double yAxisWidth = 32.0;
-  // Bottom height for x-axis labels
   static const double xAxisHeight = 64.0;
 
   @override
@@ -24,71 +25,28 @@ class BarChart extends StatefulWidget {
 }
 
 class _BarChartState extends State<BarChart> {
-  bool isLoading = true;
-  double maxValue = 0;
-  late List<BarData> monthlyData;
+  bool _isLoading = true;
+  double _maxValue = 0;
+  late List<BarData> _monthlyData;
   late final ScrollController _scrollController;
   int? _selectedIndex;
 
-  static const double barWidth = 10;
-  static const double barSpacing = 19.5;
-  static const int yDivisions = 5;
-  static const double chartHeight = 300;
-  static Color barColor = Colors.pink.shade900;
-  static Color gridLineColor = Colors.pink.shade200;
-  static Color labelColor = Colors.pink.shade800;
-  static double scrollTo = 12 - DateTime.now().month + 1;
+  static const double _barWidth = 10;
+  static const double _barSpacing = 19.5;
+  static const int _yDivisions = 5;
+  static const double _chartHeight = 300;
+  static const double _scrollToMonthsFromEnd = 1;
+
+  static final _barColor = PinkColors.shade900;
+  static final _gridLineColor = PinkColors.shade200;
+  static final _labelColor = PinkColors.shade800;
+
+  // ─── Lifecycle ──────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
     _setup();
-  }
-
-  Future<void> _setup() async {
-    await _fetchData();
-    _scrollController = ScrollController();
-
-    // After the first frame, the scroll view has been laid out and
-    // maxScrollExtent is available — jump straight to the end.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scrollController.hasClients) return;
-
-      final targetIndex = monthlyData.length - scrollTo;
-
-      // Right edge of the target bar in the scroll content's coordinate space
-      final barRightEdge = (targetIndex + 1) * (barWidth + barSpacing);
-
-      // Viewport width (the visible area, excluding the fixed Y-axis)
-      final viewportWidth = _scrollController.position.viewportDimension;
-
-      // Scroll so that bar's right edge sits at the viewport's right edge
-      final scrollToClamped = (barRightEdge - viewportWidth).clamp(
-        0.0,
-        _scrollController.position.maxScrollExtent,
-      );
-      _scrollController.jumpTo(scrollToClamped);
-    });
-  }
-
-  Future<void> _fetchData() async {
-    final data = await EntryProvider().getMonthlyCounts();
-    setState(() {
-      monthlyData = convertToBarData(data);
-      isLoading = false;
-      maxValue = data.values.toList().max.toDouble();
-    });
-  }
-
-  List<BarData> convertToBarData(Map<String, int> data) {
-    final sortedKeys = data.keys.toList()..sort();
-
-    return sortedKeys.map((key) {
-      return BarData(
-        label: key,
-        value: (data[key] ?? 0).toDouble(),
-      );
-    }).toList();
   }
 
   @override
@@ -97,25 +55,60 @@ class _BarChartState extends State<BarChart> {
     super.dispose();
   }
 
-  // Convert a tap's local x (within the visible viewport) to a bar index.
-  // We add the scroll offset to get the position within the full content.
+  // ─── Setup ──────────────────────────────────────────────────────────────────
+
+  Future<void> _setup() async {
+    await _fetchData();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentMonth());
+  }
+
+  Future<void> _fetchData() async {
+    final data = await EntryProvider().getMonthlyCounts();
+    setState(() {
+      _monthlyData = _convertToBarData(data);
+      _maxValue = data.values.toList().max.toDouble();
+      _isLoading = false;
+    });
+  }
+
+  List<BarData> _convertToBarData(Map<String, int> data) {
+    final sortedKeys = data.keys.toList()..sort();
+    return sortedKeys
+        .map((key) => BarData(label: key, value: (data[key] ?? 0).toDouble()))
+        .toList();
+  }
+
+  void _scrollToCurrentMonth() {
+    if (!_scrollController.hasClients) return;
+    final monthsFromEnd = 12 - DateTime.now().month + _scrollToMonthsFromEnd;
+    final targetIndex = _monthlyData.length - monthsFromEnd;
+    final barRightEdge = (targetIndex + 1) * (_barWidth + _barSpacing);
+    final viewportWidth = _scrollController.position.viewportDimension;
+    final offset = (barRightEdge - viewportWidth).clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
+    _scrollController.jumpTo(offset);
+  }
+
+  // ─── Interaction ────────────────────────────────────────────────────────────
+
   int? _indexFromX(double x) {
     final contentX = x + _scrollController.offset;
-    for (int i = 0; i < monthlyData.length; i++) {
-      final barLeft = barSpacing + i * (barWidth + barSpacing);
-      final barRight = barLeft + barWidth;
-      if (contentX >= barLeft && contentX <= barRight) return i;
+    for (int i = 0; i < _monthlyData.length; i++) {
+      final barLeft = _barSpacing + i * (_barWidth + _barSpacing);
+      if (contentX >= barLeft && contentX <= barLeft + _barWidth) return i;
     }
     return null;
   }
 
   void _onTapDown(TapDownDetails details) {
-    final tappedIndex = _indexFromX(details.localPosition.dx);
-    setState(() {
-      // Tapping the same bar again deselects it.
-      _selectedIndex = tappedIndex == _selectedIndex ? null : tappedIndex;
-    });
+    final tapped = _indexFromX(details.localPosition.dx);
+    setState(() => _selectedIndex = tapped == _selectedIndex ? null : tapped);
   }
+
+  // ─── Build ──────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -123,96 +116,104 @@ class _BarChartState extends State<BarChart> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Moments per Month",
+          'Moments per Month',
           style: TextStyle(
-              color: Colors.pink.shade900,
-              fontSize: 24,
-              fontWeight: FontWeight.bold),
+            color: PinkColors.shade900,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        const SizedBox(height: 32),
         SizedBox(
-          height: 32,
+          height: _chartHeight + BarChart.xAxisHeight,
+          child: _isLoading ? const CircularProgressIndicator() : _buildChart(),
         ),
-        SizedBox(
-            height: chartHeight + BarChart.xAxisHeight,
-            child: isLoading
-                ? CircularProgressIndicator()
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 16,
-                        height: chartHeight,
-                        child: Center(
-                          child: RotatedBox(
-                            quarterTurns:
-                                3, // 270deg so text reads bottom-to-top
-                            child: Text(
-                              "# Entries",
-                              style: TextStyle(
-                                  color: barColor, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Fixed Y-axis labels column
-                      SizedBox(
-                        width: BarChart.yAxisWidth,
-                        height: chartHeight,
-                        child: CustomPaint(
-                          painter: YAxisPainter(
-                            maxValue: maxValue,
-                            divisions: yDivisions,
-                            labelColor: labelColor,
-                          ),
-                        ),
-                      ),
-
-                      // Scrollable bars area
-                      Expanded(
-                        child: ClipRect(
-                          child: GestureDetector(
-                            onTapDown: _onTapDown,
-                            behavior: HitTestBehavior.opaque,
-                            child: SingleChildScrollView(
-                              controller: _scrollController,
-                              scrollDirection: Axis.horizontal,
-                              child: SizedBox(
-                                width: monthlyData.length *
-                                        (barWidth + barSpacing) +
-                                    barSpacing,
-                                height: chartHeight + BarChart.xAxisHeight,
-                                child: CustomPaint(
-                                  painter: BarChartPainter(
-                                      data: monthlyData,
-                                      maxValue: maxValue,
-                                      divisions: yDivisions,
-                                      barWidth: barWidth,
-                                      barSpacing: barSpacing,
-                                      chartHeight: chartHeight,
-                                      xAxisHeight: BarChart.xAxisHeight,
-                                      barColor: barColor,
-                                      gridLineColor: gridLineColor,
-                                      labelColor: labelColor,
-                                      selectedIndex: _selectedIndex),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )),
       ],
     );
   }
+
+  Widget _buildChart() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildYAxisLabel(),
+        _buildYAxis(),
+        Expanded(child: _buildScrollableArea()),
+      ],
+    );
+  }
+
+  Widget _buildYAxisLabel() {
+    return SizedBox(
+      width: 16,
+      height: _chartHeight,
+      child: Center(
+        child: RotatedBox(
+          quarterTurns: 3,
+          child: Text(
+            '# Entries',
+            style: TextStyle(color: _barColor, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildYAxis() {
+    return SizedBox(
+      width: BarChart.yAxisWidth,
+      height: _chartHeight,
+      child: CustomPaint(
+        painter: YAxisPainter(
+          maxValue: _maxValue,
+          divisions: _yDivisions,
+          labelColor: _labelColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrollableArea() {
+    return ClipRect(
+      child: GestureDetector(
+        onTapDown: _onTapDown,
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: _monthlyData.length * (_barWidth + _barSpacing) + _barSpacing,
+            height: _chartHeight + BarChart.xAxisHeight,
+            child: CustomPaint(
+              painter: BarChartPainter(
+                data: _monthlyData,
+                maxValue: _maxValue,
+                divisions: _yDivisions,
+                barWidth: _barWidth,
+                barSpacing: _barSpacing,
+                chartHeight: _chartHeight,
+                xAxisHeight: BarChart.xAxisHeight,
+                barColor: _barColor,
+                gridLineColor: _gridLineColor,
+                labelColor: _labelColor,
+                selectedIndex: _selectedIndex,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+// ─── YAxisPainter ─────────────────────────────────────────────────────────────
 
 class YAxisPainter extends CustomPainter {
   final double maxValue;
   final int divisions;
   final Color labelColor;
 
-  YAxisPainter({
+  const YAxisPainter({
     required this.maxValue,
     required this.divisions,
     required this.labelColor,
@@ -229,11 +230,8 @@ class YAxisPainter extends CustomPainter {
     for (int i = 0; i <= divisions; i++) {
       final value = (maxValue / divisions) * i;
       final y = size.height - (size.height * i / divisions);
-
-      final label = _formatValue(value);
-      final textSpan = TextSpan(text: label, style: textStyle);
       final textPainter = TextPainter(
-        text: textSpan,
+        text: TextSpan(text: _formatValue(value), style: textStyle),
         textDirection: TextDirection.ltr,
       )..layout(maxWidth: BarChart.yAxisWidth - 8);
 
@@ -258,6 +256,8 @@ class YAxisPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// ─── BarChartPainter ──────────────────────────────────────────────────────────
+
 class BarChartPainter extends CustomPainter {
   final List<BarData> data;
   final double maxValue;
@@ -271,7 +271,13 @@ class BarChartPainter extends CustomPainter {
   final Color labelColor;
   final int? selectedIndex;
 
-  BarChartPainter({
+  static const double _tooltipPadding = 8.0;
+  static const double _tooltipArrowHeight = 6.0;
+  static const double _tooltipRadius = 6.0;
+  static const double _tooltipGap = 6.0;
+  static const double _rotationAngle = -75 * (3.141592653589793 / 180);
+
+  const BarChartPainter({
     required this.data,
     required this.maxValue,
     required this.divisions,
@@ -288,14 +294,16 @@ class BarChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     _drawGridLines(canvas, size);
-    _drawBars(canvas, size);
-    _drawXLabels(canvas, size);
-    if (selectedIndex != null) _drawTooltip(canvas, size, selectedIndex!);
+    _drawBars(canvas);
+    _drawXLabels(canvas);
+    if (selectedIndex != null) {
+      _drawTooltip(canvas, size, selectedIndex!);
+    }
   }
 
   @override
-  bool shouldRepaint(covariant BarChartPainter oldDelegate) =>
-      oldDelegate.selectedIndex != selectedIndex;
+  bool shouldRepaint(covariant BarChartPainter old) =>
+      old.selectedIndex != selectedIndex;
 
   void _drawGridLines(Canvas canvas, Size size) {
     final paint = Paint()
@@ -309,7 +317,7 @@ class BarChartPainter extends CustomPainter {
     }
   }
 
-  void _drawBars(Canvas canvas, Size size) {
+  void _drawBars(Canvas canvas) {
     final paint = Paint()..style = PaintingStyle.fill;
 
     for (int i = 0; i < data.length; i++) {
@@ -317,77 +325,54 @@ class BarChartPainter extends CustomPainter {
       final barHeight = (item.value / maxValue) * chartHeight;
       final x = barSpacing + i * (barWidth + barSpacing);
       final y = chartHeight - barHeight;
-
       final isSelected = i == selectedIndex;
 
-      // Draw bar with rounded top corners
-      final rrect = RRect.fromRectAndCorners(
-        Rect.fromLTWH(x, y, barWidth, barHeight),
-        topLeft: const Radius.circular(6),
-        topRight: const Radius.circular(6),
+      final topColor = isSelected
+          ? barColor.withValues(alpha: 1)
+          : barColor;
+      final bottomColor = isSelected
+          ? barColor.withValues(alpha: 0.9)
+          : barColor.withValues(alpha: 0.5);
+
+      paint.shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [topColor, bottomColor],
+      ).createShader(Rect.fromLTWH(x, y, barWidth, barHeight));
+
+      canvas.drawRRect(
+        RRect.fromRectAndCorners(
+          Rect.fromLTWH(x, y, barWidth, barHeight),
+          topLeft: const Radius.circular(6),
+          topRight: const Radius.circular(6),
+        ),
+        paint,
       );
-
-      final Color topColor;
-      final Color bottomColor;
-
-      if (isSelected) {
-        topColor = barColor.withValues(alpha: 1);
-        bottomColor = barColor.withValues(alpha: 0.9);
-      } else {
-        topColor = barColor;
-        bottomColor = barColor.withValues(alpha: 0.5);
-      }
-
-      // Gradient for bar
-      final gradient = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [topColor, bottomColor]);
-
-      paint.shader = gradient.createShader(
-        Rect.fromLTWH(x, y, barWidth, barHeight),
-      );
-      canvas.drawRRect(rrect, paint);
     }
   }
 
-  void _drawXLabels(Canvas canvas, Size size) {
+  void _drawXLabels(Canvas canvas) {
     for (int i = 0; i < data.length; i++) {
-      final item = data[i];
       final x = barSpacing + i * (barWidth + barSpacing);
       final centerX = x + barWidth / 2;
-
       final isSelected = i == selectedIndex;
+
       final color = isSelected
           ? barColor.withValues(alpha: 1)
-          : (selectedIndex == null
-              ? labelColor
-              : labelColor.withValues(alpha: 0.6));
-      final textStyle = TextStyle(
-        color: color,
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      );
+          : (selectedIndex == null ? labelColor : labelColor.withValues(alpha: 0.6));
 
-      final textSpan = TextSpan(
-        text: formatLabels(item.label),
-        style: textStyle,
-      );
       final textPainter = TextPainter(
-        text: textSpan,
+        text: TextSpan(
+          text: _formatLabel(data[i].label),
+          style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500),
+        ),
         textDirection: TextDirection.ltr,
       )..layout();
 
-      // Pivot point: horizontally centered under the bar, vertically at label start
-      final pivotX = centerX;
-      final pivotY = chartHeight + 10;
-
       canvas.save();
-      canvas.translate(pivotX, pivotY);
-      canvas.rotate(-75 * (3.141592653589793 / 180)); // -45 degrees
-      // After rotation, offset so text is right-aligned to the pivot
-      textPainter.paint(
-          canvas, Offset(-textPainter.width, -textPainter.height / 2));
+      canvas.translate(centerX, chartHeight + 10);
+      canvas.rotate(_rotationAngle);
+      textPainter.paint(canvas, Offset(-textPainter.width, -textPainter.height / 2));
       canvas.restore();
     }
   }
@@ -403,61 +388,49 @@ class BarChartPainter extends CustomPainter {
         ? '${(item.value / 1000).toStringAsFixed(1)}k'
         : item.value.toInt().toString();
 
-    final textSpan = TextSpan(
-      text: label,
-      style: TextStyle(
-        color: Colors.pink.shade100,
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-      ),
-    );
     final textPainter = TextPainter(
-      text: textSpan,
+      text: TextSpan(
+        text: label,
+        style: TextStyle(
+          color: PinkColors.shade100,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       textDirection: TextDirection.ltr,
     )..layout();
 
-    const padding = 8.0;
-    const arrowHeight = 6.0;
-    final tooltipWidth = textPainter.width + padding * 2;
-    final tooltipHeight = textPainter.height + padding * 2;
-    const tooltipRadius = 6.0;
-    const gap = 6.0;
+    final tooltipWidth = textPainter.width + _tooltipPadding * 2;
+    final tooltipHeight = textPainter.height + _tooltipPadding * 2;
+    final tooltipLeft = (barCenterX - tooltipWidth / 2).clamp(0.0, size.width - tooltipWidth);
+    final tooltipTop = barTopY - tooltipHeight - _tooltipArrowHeight - _tooltipGap;
+    final tooltipRect = Rect.fromLTWH(tooltipLeft, tooltipTop, tooltipWidth, tooltipHeight);
 
-    double tooltipLeft = barCenterX - tooltipWidth / 2;
-    tooltipLeft = tooltipLeft.clamp(0.0, size.width - tooltipWidth);
-    final tooltipTop = barTopY - tooltipHeight - arrowHeight - gap;
+    final bgPaint = Paint()..color = PinkColors.shade900;
 
-    final tooltipRect =
-        Rect.fromLTWH(tooltipLeft, tooltipTop, tooltipWidth, tooltipHeight);
-
-    final bgPaint = Paint()..color = Colors.pink.shade900;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(
-          tooltipRect, const Radius.circular(tooltipRadius)),
+      RRect.fromRectAndRadius(tooltipRect, const Radius.circular(_tooltipRadius)),
       bgPaint,
     );
 
-    final arrowPath = Path()
-      ..moveTo(barCenterX - 6, tooltipTop + tooltipHeight)
-      ..lineTo(barCenterX, tooltipTop + tooltipHeight + arrowHeight)
-      ..lineTo(barCenterX + 6, tooltipTop + tooltipHeight)
-      ..close();
-    canvas.drawPath(arrowPath, bgPaint);
+    canvas.drawPath(
+      Path()
+        ..moveTo(barCenterX - 6, tooltipTop + tooltipHeight)
+        ..lineTo(barCenterX, tooltipTop + tooltipHeight + _tooltipArrowHeight)
+        ..lineTo(barCenterX + 6, tooltipTop + tooltipHeight)
+        ..close(),
+      bgPaint,
+    );
 
     textPainter.paint(
       canvas,
-      Offset(tooltipLeft + padding, tooltipTop + padding),
+      Offset(tooltipLeft + _tooltipPadding, tooltipTop + _tooltipPadding),
     );
   }
 
-  String formatLabels(String rawLabel) {
-    final splits = rawLabel.split('-');
-    final year = splits.first;
-    final month = splits.last;
-    final monthInt = int.parse(month);
-    if (monthInt == 1) {
-      return '$year-1';
-    }
-    return '$monthInt';
+  String _formatLabel(String rawLabel) {
+    final parts = rawLabel.split('-');
+    final monthInt = int.parse(parts.last);
+    return monthInt == 1 ? '${parts.first}-1' : '$monthInt';
   }
 }

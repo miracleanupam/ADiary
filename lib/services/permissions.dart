@@ -3,22 +3,13 @@ import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 
 class ADiaryPermissions {
-  ADiaryPermissions();
-
   Future<bool> checkWritePermission() async {
-    // debugger();
-    if (Platform.isAndroid) {
-      final status = await Permission.storage.status;
+    if (!Platform.isAndroid) return false;
 
-      if (!status.isGranted) {
-        final result = await Permission.storage.request();
+    final status = await Permission.storage.status;
+    if (status.isGranted) return true;
 
-        if (result.isDenied == true) {
-          checkWritePermission();
-        } else {}
-      }
-      return true;
-    }
-    return false;
+    final result = await Permission.storage.request();
+    return result.isGranted;
   }
 }

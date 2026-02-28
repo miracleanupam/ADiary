@@ -1,4 +1,4 @@
-import 'package:adiary/screens/styled_text.dart';
+import 'package:adiary/compnents/styled_text.dart';
 import 'package:flutter/material.dart';
 
 class About extends StatelessWidget {

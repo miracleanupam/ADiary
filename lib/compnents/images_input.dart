@@ -1,5 +1,6 @@
 import 'package:adiary/compnents/removable_image.dart';
-import 'package:adiary/screens/styled_text.dart';
+import 'package:adiary/compnents/styled_text.dart';
+import 'package:adiary/constants.dart';
 import 'package:flutter/material.dart';
 
 class ImagesInput extends StatelessWidget {
@@ -29,7 +30,7 @@ class ImagesInput extends StatelessWidget {
                 onTap: () => handleImagesSelection(),
                 child: Icon(
                   Icons.add_a_photo_outlined,
-                  color: Colors.pink.shade900,
+                  color: PinkColors.shade900,
                 ),
               )
             ],

@@ -1,31 +1,29 @@
+import 'package:adiary/constants.dart';
 import 'package:flutter/material.dart';
 
 class JournalInput extends StatelessWidget {
-  const JournalInput({
-    super.key,
-    required this.journalController,
-  });
-
   final TextEditingController journalController;
+
+  const JournalInput({super.key, required this.journalController});
+
+  static final _borderStyle = OutlineInputBorder(
+    borderSide: BorderSide(color: PinkColors.shade900),
+  );
 
   @override
   Widget build(BuildContext context) {
-    OutlineInputBorder borderStyle = OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.pink.shade900, width: 1));
-
     return TextField(
       controller: journalController,
       textAlignVertical: TextAlignVertical.top,
-      decoration: InputDecoration(
-          labelText: "What made you happy?",
-          enabledBorder: borderStyle,
-          focusedBorder: borderStyle,
-          labelStyle: TextStyle(color: Colors.pink.shade900)),
-      style: TextStyle(
-        fontSize: 24,
-      ),
       maxLines: null,
       expands: true,
+      style: const TextStyle(fontSize: 24),
+      decoration: InputDecoration(
+        labelText: 'What made you happy?',
+        labelStyle: TextStyle(color: PinkColors.shade900),
+        enabledBorder: _borderStyle,
+        focusedBorder: _borderStyle,
+      ),
     );
   }
 }

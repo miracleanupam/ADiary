@@ -6,71 +6,66 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class ImageService {
-  List<String> imageNames = [];
-  List<String> removedNames = [];
+  final _picker = ImagePicker();
+  final _uuid = const Uuid();
+
+  List<String> _imageNames = [];
+  List<String> _removedNames = [];
+
+  // ─── Public API ───────────────────────────────────────────────────────────
 
   Future<List<String>> pickImages() async {
-    ImagePicker imagePicker = ImagePicker();
-    List<XFile> images = await imagePicker.pickMultiImage(
-      requestFullMetadata: true,
-    );
-
-    imageNames =
-        await Future.wait(images.map((image) => saveTemporarily(image)));
-
-    return imageNames;
+    final images = await _picker.pickMultiImage(requestFullMetadata: true);
+    _imageNames = await Future.wait(images.map(_saveTemporarily));
+    return _imageNames;
   }
 
-  Future<String> saveTemporarily(XFile file) async {
-    final directory = await getTemporaryDirectory();
-    var uuid = Uuid();
-    String uuidString = uuid.v7();
-    final imageName = '$uuidString.jpg';
-    final imagePath = '${directory.path}/$imageName';
-    await FlutterImageCompress.compressAndGetFile(file.path, imagePath,
-        quality: 70);
-    return imageName;
-  }
-
-  Future<void> removeImage(imageName) async {
-    final directory = await getTemporaryDirectory();
-    String imagePath = "${directory.path}/$imageName";
-
-    File imageFile = File(imagePath);
-
-    if (await imageFile.exists()) {
-      await imageFile.delete();
-      imageNames.remove(imageName);
-      removedNames.add(imageName);
-    }
+  Future<void> removeImage(String imageName) async {
+    final file = File(await _tempPath(imageName));
+    if (await file.exists()) await file.delete();
+    _imageNames.remove(imageName);
+    _removedNames.add(imageName);
   }
 
   Future<void> saveFiles() async {
-    final directory = await getApplicationDocumentsDirectory();
-    if (removedNames.isNotEmpty) {
-      for (final removedName in removedNames) {
-        String sourcePath = '${directory.path}/$removedName';
-        final sourceFile = File(sourcePath);
+    await _deletePermanent(_removedNames);
+    _removedNames = [];
 
-        if (await sourceFile.exists()) {
-          sourceFile.delete();
-        }
-      }
-      removedNames = [];
-    }
-    if (imageNames.isEmpty) {
-      return;
-    }
+    if (_imageNames.isEmpty) return;
 
-    final tempDirectory = await getTemporaryDirectory();
-    for (final imageName in imageNames) {
-      String sourcePath = '${tempDirectory.path}/$imageName';
-      final sourceFile =
-          File(sourcePath); // imageName is the full path from picker
-      if (await sourceFile.exists()) {
-        final destinationPath = '${directory.path}/$imageName';
-        await sourceFile.copy(destinationPath);
+    final tempDir = await getTemporaryDirectory();
+    final docsDir = await getApplicationDocumentsDirectory();
+
+    for (final name in _imageNames) {
+      final source = File('${tempDir.path}/$name');
+      if (await source.exists()) {
+        await source.copy('${docsDir.path}/$name');
       }
     }
+  }
+
+  // ─── Private helpers ──────────────────────────────────────────────────────
+
+  Future<String> _saveTemporarily(XFile file) async {
+    final name = '${_uuid.v7()}.jpg';
+    await FlutterImageCompress.compressAndGetFile(
+      file.path,
+      await _tempPath(name),
+      quality: 70,
+    );
+    return name;
+  }
+
+  Future<void> _deletePermanent(List<String> names) async {
+    final docsDir = await getApplicationDocumentsDirectory();
+    for (final name in names) {
+      final file = File('${docsDir.path}/$name');
+      if (await file.exists()) await file.delete();
+    }
+  }
+
+  Future<String> _tempPath(String name) async {
+    final dir = await getTemporaryDirectory();
+    return '${dir.path}/$name';
   }
 }

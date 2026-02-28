@@ -1,5 +1,6 @@
 import 'package:adiary/compnents/animated_close_button.dart';
 import 'package:adiary/compnents/audio_player.dart';
+import 'package:adiary/constants.dart';
 import 'package:flutter/material.dart';
 
 class AudioInput extends StatefulWidget {
@@ -22,18 +23,19 @@ class AudioInput extends StatefulWidget {
 
 class _AudioInputState extends State<AudioInput>
     with SingleTickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-  late Animation<double> _micAnimation;
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
+  late final Animation<double> _micAnimation;
+  late final Stopwatch _stopwatch;
 
   int _secondsElapsed = 0;
-  late Stopwatch _stopwatch;
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
     _stopwatch = Stopwatch();
-
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -52,7 +54,6 @@ class _AudioInputState extends State<AudioInput>
   @override
   void didUpdateWidget(AudioInput oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (widget.isRecording && !oldWidget.isRecording) {
       _startRecordingUI();
     } else if (!widget.isRecording && oldWidget.isRecording) {
@@ -60,17 +61,28 @@ class _AudioInputState extends State<AudioInput>
     }
   }
 
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _stopwatch.stop();
+    super.dispose();
+  }
+
+  // ─── Recording UI ─────────────────────────────────────────────────────────
+
   void _startRecordingUI() {
-    _stopwatch.reset();
-    _stopwatch.start();
+    _stopwatch
+      ..reset()
+      ..start();
     _tickTimer();
   }
 
   void _stopRecordingUI() {
     _stopwatch.stop();
-    _pulseController.stop();
-    _pulseController.reset();
-    _pulseController.repeat(reverse: true);
+    _pulseController
+      ..stop()
+      ..reset()
+      ..repeat(reverse: true);
     setState(() => _secondsElapsed = 0);
   }
 
@@ -83,132 +95,115 @@ class _AudioInputState extends State<AudioInput>
   }
 
   String get _formattedTime {
-    final minutes = (_secondsElapsed ~/ 60).toString().padLeft(2, '0');
-    final seconds = (_secondsElapsed % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
+    final m = (_secondsElapsed ~/ 60).toString().padLeft(2, '0');
+    final s = (_secondsElapsed % 60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    _stopwatch.stop();
-    super.dispose();
-  }
+  // ─── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.pink.shade900, width: 1),
+        border: Border.all(color: PinkColors.shade900),
         borderRadius: const BorderRadius.all(Radius.circular(4.0)),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Pulsing mic / stop button
-          Expanded(
-            child: Container(
-              alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "Use the button below to start/stop or redo the recording.",
-                    style: TextStyle(
-                      color: Colors.pink.shade900,
-                    ),
-                  ),
-                  SizedBox(
-                    height: 48,
-                  ),
-                  ScaleTransition(
-                    scale: widget.isRecording ? _pulseAnimation : _micAnimation,
-                    child: IconButton.filled(
-                      iconSize: 48,
-                      icon: Icon(
-                        widget.isRecording ? Icons.stop_circle : Icons.mic,
-                        color: widget.isRecording ? Colors.red : null,
-                      ),
-                      onPressed: () => widget.toggleRecordingState(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          Expanded(
-              child: Container(
-            alignment: Alignment.topCenter,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (widget.isRecording)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 48,
-                      ),
-                      // Blinking red dot
-                      AnimatedOpacity(
-                        opacity: _pulseController.value > 0.5 ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 200),
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formattedTime,
-                        style: TextStyle(
-                          color: Colors.pink.shade900,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                Spacer(),
-                if (!widget.isRecording)
-                  Text(
-                    widget.recordingPath == ''
-                        ? "You can preview the audio here after you record something."
-                        : "Preview:",
-                    style: TextStyle(
-                      color: Colors.pink.shade900,
-                    ),
-                  ),
-                if (!widget.isRecording)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                    child: Stack(
-                      children: [
-                        AudioPlayerWidget(filePath: widget.recordingPath),
-                        if (widget.recordingPath != '')
-                          AnimatedCloseButton(
-                            top: 0,
-                            right: 0,
-                            fn: widget.removeAudio,
-                          )
-                      ],
-                    ),
-                  ),
-                SizedBox(
-                  height: 24,
-                )
-              ],
-            ),
-          )),
-          // Recording indicator row
+          Expanded(child: _buildMicSection()),
+          Expanded(child: _buildPreviewSection()),
         ],
       ),
+    );
+  }
+
+  Widget _buildMicSection() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          'Use the button below to start/stop or redo the recording.',
+          style: TextStyle(color: PinkColors.shade900),
+        ),
+        const SizedBox(height: 48),
+        ScaleTransition(
+          scale: widget.isRecording ? _pulseAnimation : _micAnimation,
+          child: IconButton.filled(
+            iconSize: 48,
+            icon: Icon(
+              widget.isRecording ? Icons.stop_circle : Icons.mic,
+              color: widget.isRecording ? Colors.red : null,
+            ),
+            onPressed: () => widget.toggleRecordingState(),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildPreviewSection() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        if (widget.isRecording) _buildRecordingIndicator(),
+        const Spacer(),
+        if (!widget.isRecording) ...[
+          Text(
+            widget.recordingPath.isEmpty
+                ? 'You can preview the audio here after you record something.'
+                : 'Preview:',
+            style: TextStyle(color: PinkColors.shade900),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Stack(
+              children: [
+                AudioPlayerWidget(filePath: widget.recordingPath),
+                if (widget.recordingPath.isNotEmpty)
+                  AnimatedCloseButton(
+                    top: 0,
+                    right: 0,
+                    fn: widget.removeAudio,
+                  ),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildRecordingIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 48),
+        AnimatedOpacity(
+          opacity: _pulseController.value > 0.5 ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: const BoxDecoration(
+              color: Colors.red,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          _formattedTime,
+          style: TextStyle(
+            color: PinkColors.shade900,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ],
     );
   }
 }

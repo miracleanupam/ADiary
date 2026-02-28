@@ -1,18 +1,19 @@
 import 'package:adiary/constants.dart';
 import 'package:flutter/material.dart';
 
-class AudioButton extends StatelessWidget {
-  final bool showRecorder;
-  final Function fn;
+class AlevatedButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final IconData icon;
+  final String text;
 
-  const AudioButton({
+  const AlevatedButton({
     super.key,
-    required this.showRecorder,
-    required this.fn,
+    required this.onPressed,
+    required this.icon,
+    required this.text,
   });
 
   static final _style = ElevatedButton.styleFrom(
-    side: BorderSide(color: PinkColors.shade900),
     backgroundColor: PinkColors.shade200,
     foregroundColor: PinkColors.shade900,
     iconColor: PinkColors.shade900,
@@ -27,14 +28,14 @@ class AudioButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => fn(),
+      onPressed: onPressed,
       style: _style,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(showRecorder ? Icons.edit : Icons.mic),
+          Icon(icon),
           const SizedBox(width: 5),
-          Text(showRecorder ? 'Edit journal' : 'Take Me to Audio'),
+          Text(text),
         ],
       ),
     );

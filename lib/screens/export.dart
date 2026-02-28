@@ -1,6 +1,6 @@
 import 'package:adiary/models/entry.dart';
-import 'package:adiary/screens/alevated_button.dart';
-import 'package:adiary/screens/styled_text.dart';
+import 'package:adiary/compnents/alevated_button.dart';
+import 'package:adiary/compnents/styled_text.dart';
 import 'package:flutter/material.dart';
 
 class ExportData extends StatefulWidget {

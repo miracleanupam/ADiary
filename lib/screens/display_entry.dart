@@ -2,9 +2,10 @@ import 'dart:io';
 
 import 'package:adiary/compnents/audio_player.dart';
 import 'package:adiary/compnents/mood_picker.dart';
+import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
-import 'package:adiary/screens/alevated_button.dart';
-import 'package:adiary/screens/styled_text.dart';
+import 'package:adiary/compnents/alevated_button.dart';
+import 'package:adiary/compnents/styled_text.dart';
 import 'package:adiary/services/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,8 +13,11 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:adiary/constants.dart' as constants;
 
+// ─── DisplayEntry ─────────────────────────────────────────────────────────────
+
 class DisplayEntry extends StatefulWidget {
   final Function fn;
+
   const DisplayEntry({super.key, required this.fn});
 
   @override
@@ -22,298 +26,301 @@ class DisplayEntry extends StatefulWidget {
 
 class _DisplayEntryState extends State<DisplayEntry> {
   Entry? _entry;
-  final ScrollController scrollController = ScrollController();
-  String? _directory;
   Map<String, dynamic>? _mood;
   String? _audioPath;
+  String? _directory;
+
+  final _scrollController = ScrollController();
+
+  static const _blossomShadow = Shadow(
+    color: Colors.pink,
+    blurRadius: 10,
+    offset: Offset.zero,
+  );
+
+  // ─── Lifecycle ──────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
-    _getRandomEntry();
-    _getImageDirectory();
+    _loadImageDirectory();
+    _loadRandomEntry();
   }
 
-  void _getRandomEntry() async {
-    Entry? randomEntry = await EntryProvider().getRandomEntry(_entry?.id);
-    Map<String, dynamic>? entryMood = findMood(randomEntry?.mood);
-    final directory = await getApplicationDocumentsDirectory();
-    final audioPath = '${directory.path}/${randomEntry?.audio}';
-    File audioFile = File(audioPath);
-    bool audioFileExists = await audioFile.exists();
-
-    setState(() {
-      _entry = randomEntry;
-      _mood = entryMood;
-      _audioPath = audioFileExists ? audioFile.path : null;
-    });
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
-  void _getImageDirectory() async {
-    Directory imageDirectory = await getApplicationDocumentsDirectory();
-    setState(() {
-      _directory = imageDirectory.path;
-    });
+  // ─── Data loading ───────────────────────────────────────────────────────────
+
+  Future<void> _loadImageDirectory() async {
+    final dir = await getApplicationDocumentsDirectory();
+    if (mounted) setState(() => _directory = dir.path);
   }
 
-  Map<String, dynamic>? findMood(String? mood) {
-    if (mood == null) return null;
+  Future<void> _loadRandomEntry() async {
+    final entry = await EntryProvider().getRandomEntry(_entry?.id);
+    final mood = _findMood(entry?.mood);
+    final audioPath = await _resolveAudioPath(entry?.audio);
 
+    if (mounted) {
+      setState(() {
+        _entry = entry;
+        _mood = mood;
+        _audioPath = audioPath;
+      });
+    }
+  }
+
+  Future<String?> _resolveAudioPath(String? audioName) async {
+    if (audioName == null) return null;
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/$audioName');
+    return await file.exists() ? file.path : null;
+  }
+
+  Map<String, dynamic>? _findMood(String? label) {
+    if (label == null) return null;
     try {
-      return constants.MOOD_OPTIONS.firstWhere((item) => item['label'] == mood);
+      return constants.MOOD_OPTIONS.firstWhere((m) => m['label'] == label);
     } catch (_) {
       return null;
     }
   }
 
-  void _promptDelete() async {
+  // ─── Delete ─────────────────────────────────────────────────────────────────
+
+  void _promptDelete() {
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Are you sure? It can not be undone"),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  final ADauthenticationService auth =
-                      ADauthenticationService();
-                  bool authenticated = await auth.authenticate();
-
-                  if (authenticated) {
-                    bool succeeded = await EntryProvider().delete(_entry?.id);
-                    if (succeeded) {
-                      await widget.fn();
-                      _getRandomEntry();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text("Could not delete, sorry!!!...")),
-                      );
-                      return;
-                    }
-                    Navigator.pop(context);
-                  } else {
-                    Navigator.pop(context);
-                  }
-                },
-                child: Text(
-                  "Yes",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    "No, I'll keep it!",
-                    style: TextStyle(fontSize: 16),
-                  )),
-            ],
-          );
-        });
-  }
-
-  Widget getJournalBody() {
-    return Scaffold(
-      backgroundColor: Colors.pink.shade100,
-      appBar: AppBar(
-        flexibleSpace: constants.appBarBg,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text.rich(TextSpan(children: [
-          TextSpan(
-              text: '🌸🌸',
-              style: TextStyle(shadows: [
-                Shadow(
-                    color: Colors.pink.shade900,
-                    blurRadius: 10,
-                    offset: Offset(0, 0))
-              ])),
-          TextSpan(text: ' Remember this? '),
-          TextSpan(
-              text: '🌸🌸',
-              style: TextStyle(shadows: [
-                Shadow(
-                    color: Colors.pink.shade900,
-                    blurRadius: 10,
-                    offset: Offset(0, 0))
-              ]))
-        ])),
-      ),
-      body: Container(
-        decoration: constants.bgDecoration,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.calendar_month),
-                  style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      textStyle: TextStyle(
-                          fontSize: 24,
-                          fontFamily: 'IndieFlower',
-                          fontWeight: FontWeight.bold)),
-                  label: Text.rich(TextSpan(children: [
-                    TextSpan(text: '${_entry?.date} '),
-                    TextSpan(
-                        text: '🪷🪷',
-                        style: TextStyle(shadows: [
-                          Shadow(
-                              color: Colors.pink.shade900,
-                              blurRadius: 10,
-                              offset: Offset(0, 0))
-                        ]))
-                  ]))),
-              IconButton.filled(
-                onPressed: _promptDelete,
-                icon: Icon(Icons.delete_outline_outlined),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.pink.shade100,
-                  foregroundColor: Colors.pink.shade700,
-                ),
-              ),
-            ]),
-            Divider(),
-            Expanded(
-                child: RawScrollbar(
-                    controller: scrollController,
-                    thumbVisibility: true,
-                    thickness: 1,
-                    thumbColor: Theme.of(context).colorScheme.primary,
-                    child: ClipRRect(
-                      borderRadius: BorderRadiusGeometry.circular(4),
-                      child: SingleChildScrollView(
-                          controller: scrollController,
-                          child: SizedBox(
-                              width: double.infinity,
-                              child: Column(
-                                children: [
-                                  SizedBox(
-                                    height: 24,
-                                  ),
-                                  StyledText(value: "Memory"),
-                                  (_mood == null || _mood!.isEmpty)
-                                      ? const SizedBox.shrink()
-                                      : MoodPill(fn: () {}, mood: _mood),
-                                  SizedBox(
-                                    height: 16,
-                                  ),
-                                  Text(
-                                    '${_entry?.content}',
-                                    style: TextStyle(fontSize: 24),
-                                  ),
-                                  SizedBox(
-                                    height: 24,
-                                  ),
-                                  if (_entry?.images != null &&
-                                      _entry!.images!.isNotEmpty) ...[
-                                    Divider(),
-                                    SizedBox(
-                                      height: 24,
-                                    ),
-                                    StyledText(value: "Images"),
-                                    SizedBox(
-                                      height: 16,
-                                    ),
-                                    ListView.separated(
-                                      shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemCount: _entry!.images!.length,
-                                      itemBuilder: (context, index) {
-                                        return GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      FullScreenGallery(
-                                                    imagePaths: _entry!.images!,
-                                                    initialIndex:
-                                                        index, // start from tapped image
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadiusGeometry
-                                                        .circular(6),
-                                                child: Image.file(File(
-                                                    "$_directory/${_entry!.images![index]}"))));
-                                      },
-                                      separatorBuilder: (context, index) {
-                                        return SizedBox(
-                                          height: 20,
-                                        );
-                                      },
-                                    )
-                                  ],
-                                ],
-                              ))),
-                    ))),
-            if (_audioPath != null) AudioPlayerWidget(filePath: _audioPath!),
-            Divider(),
-            SizedBox(
-              height: 16,
-            ),
-            AlevatedButton(
-                onPressed: _getRandomEntry,
-                icon: Icons.cached,
-                text: 'See Another'),
-            SizedBox(
-              height: 16,
-            )
-          ]),
-        ),
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Are you sure? It can not be undone'),
+        actions: [
+          TextButton(
+            onPressed: _confirmDelete,
+            child: const Text('Yes', style: TextStyle(fontSize: 16)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("No, I'll keep it!", style: TextStyle(fontSize: 16)),
+          ),
+        ],
       ),
     );
   }
 
-  Widget getNoJurnalBody() {
+  Future<void> _confirmDelete() async {
+    final auth = ADauthenticationService();
+    final authenticated = await auth.authenticate();
+
+    if (!authenticated) {
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+
+    final succeeded = await EntryProvider().delete(_entry?.id);
+    if (succeeded) {
+      await widget.fn();
+      _loadRandomEntry();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not delete, sorry!...')),
+      );
+    }
+
+    if (mounted) Navigator.pop(context);
+  }
+
+  // ─── Build ──────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    return _entry == null ? _buildEmptyState() : _buildEntryView();
+  }
+
+  Widget _buildEmptyState() {
     return Scaffold(
-      backgroundColor: Colors.pink.shade100,
+      backgroundColor: PinkColors.shade100,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Oops! Didn't find happy memories."),
+        title: const Text("Oops! Didn't find happy memories."),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Center(
                 child: Text(
                   'You will find moments of happiness! It will pass. <3',
                   style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.pink.shade900),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: PinkColors.shade900,
+                  ),
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             AlevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icons.home,
-                text: 'Go Back'),
+              onPressed: () => Navigator.pop(context),
+              icon: Icons.home,
+              text: 'Go Back',
+            ),
           ],
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return _entry == null ? getNoJurnalBody() : getJournalBody();
+  Widget _buildEntryView() {
+    return Scaffold(
+      backgroundColor: PinkColors.shade100,
+      appBar: AppBar(
+        flexibleSpace: constants.appBarBg,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: _buildAppBarTitle(),
+      ),
+      body: Container(
+        decoration: constants.bgDecoration,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildEntryHeader(),
+              const Divider(),
+              Expanded(child: _buildScrollableContent()),
+              if (_audioPath != null) AudioPlayerWidget(filePath: _audioPath!),
+              const Divider(),
+              const SizedBox(height: 16),
+              AlevatedButton(
+                onPressed: _loadRandomEntry,
+                icon: Icons.cached,
+                text: 'See Another',
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppBarTitle() {
+    final blossomStyle = TextStyle(shadows: [_blossomShadow]);
+    return Text.rich(TextSpan(children: [
+      TextSpan(text: '🌸🌸', style: blossomStyle),
+      const TextSpan(text: ' Remember this? '),
+      TextSpan(text: '🌸🌸', style: blossomStyle),
+    ]));
+  }
+
+  Widget _buildEntryHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        TextButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.calendar_month),
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            textStyle: const TextStyle(
+              fontSize: 24,
+              fontFamily: 'IndieFlower',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          label: Text.rich(TextSpan(children: [
+            TextSpan(text: '${_entry?.date} '),
+            TextSpan(
+              text: '🪷🪷',
+              style: TextStyle(shadows: [_blossomShadow]),
+            ),
+          ])),
+        ),
+        IconButton.filled(
+          onPressed: _promptDelete,
+          icon: const Icon(Icons.delete_outline_outlined),
+          style: IconButton.styleFrom(
+            backgroundColor: PinkColors.shade100,
+            foregroundColor: PinkColors.shade700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScrollableContent() {
+    return RawScrollbar(
+      controller: _scrollController,
+      thumbVisibility: true,
+      thickness: 1,
+      thumbColor: Theme.of(context).colorScheme.primary,
+      child: ClipRRect(
+        borderRadius: BorderRadiusGeometry.circular(4),
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                const StyledText(value: 'Memory'),
+                if (_mood != null && _mood!.isNotEmpty)
+                  MoodPill(fn: () {}, mood: _mood),
+                const SizedBox(height: 16),
+                Text('${_entry?.content}', style: const TextStyle(fontSize: 24)),
+                const SizedBox(height: 24),
+                if (_entry?.images != null && _entry!.images!.isNotEmpty)
+                  _buildImageSection(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageSection() {
+    return Column(
+      children: [
+        const Divider(),
+        const SizedBox(height: 24),
+        const StyledText(value: 'Images'),
+        const SizedBox(height: 16),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _entry!.images!.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 20),
+          itemBuilder: (context, index) => GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FullScreenGallery(
+                  imagePaths: _entry!.images!,
+                  initialIndex: index,
+                ),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadiusGeometry.circular(6),
+              child: Image.file(
+                File('$_directory/${_entry!.images![index]}'),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
+
+// ─── FullScreenGallery ────────────────────────────────────────────────────────
 
 class FullScreenGallery extends StatefulWidget {
   final List<String> imagePaths;
@@ -330,64 +337,64 @@ class FullScreenGallery extends StatefulWidget {
 }
 
 class _FullScreenGalleryState extends State<FullScreenGallery> {
-  late PageController _pageController;
+  late final PageController _pageController;
   late int _currentIndex;
   String? _directory;
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
-    _getImageDirectory();
+    _loadDirectory();
   }
 
-  void _getImageDirectory() async {
-    Directory imageDirectory = await getApplicationDocumentsDirectory();
-    setState(() {
-      _directory = imageDirectory.path;
-      _isLoading = false;
-    });
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadDirectory() async {
+    final dir = await getApplicationDocumentsDirectory();
+    if (mounted) setState(() => _directory = dir.path);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          if (_isLoading) ...[Center(child: CircularProgressIndicator())],
-          if (!_isLoading) ...[
-            PhotoViewGallery.builder(
-              pageController: _pageController,
-              itemCount: widget.imagePaths.length,
-              builder: (context, index) {
-                return PhotoViewGalleryPageOptions(
-                  imageProvider: FileImage(
-                      File("$_directory/${widget.imagePaths[index]}")),
-                  heroAttributes:
-                      PhotoViewHeroAttributes(tag: widget.imagePaths[index]),
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.covered * 3,
-                );
-              },
-              onPageChanged: (index) => setState(() => _currentIndex = index),
-              scrollPhysics: const BouncingScrollPhysics(),
-              backgroundDecoration: const BoxDecoration(color: Colors.black),
+      body: _directory == null
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                PhotoViewGallery.builder(
+                  pageController: _pageController,
+                  itemCount: widget.imagePaths.length,
+                  scrollPhysics: const BouncingScrollPhysics(),
+                  backgroundDecoration: const BoxDecoration(color: Colors.black),
+                  onPageChanged: (index) => setState(() => _currentIndex = index),
+                  builder: (context, index) => PhotoViewGalleryPageOptions(
+                    imageProvider: FileImage(
+                      File('$_directory/${widget.imagePaths[index]}'),
+                    ),
+                    heroAttributes: PhotoViewHeroAttributes(
+                      tag: widget.imagePaths[index],
+                    ),
+                    minScale: PhotoViewComputedScale.contained,
+                    maxScale: PhotoViewComputedScale.covered * 3,
+                  ),
+                ),
+                Positioned(
+                  bottom: 30,
+                  child: Text(
+                    '${_currentIndex + 1} / ${widget.imagePaths.length}',
+                    style: const TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                ),
+              ],
             ),
-            // Optional image index indicator
-            Positioned(
-              bottom: 30,
-              child: Text(
-                "${_currentIndex + 1} / ${widget.imagePaths.length}",
-                style: const TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }

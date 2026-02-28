@@ -1,47 +1,51 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Storages {
-  final _storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
-  Future<String?> readSavedPassword() async {
-    try {
-      String? savedPassword = await _storage.read(key: 'password');
-      return savedPassword;
-    } catch (e) {
-      return null;
-    }
-  }
+  // ─── Password ─────────────────────────────────────────────────────────────
 
-  Future writeNewPassword(newPassword) async {
-    _storage.write(key: 'password', value: newPassword);
-  }
+  Future<String?> readSavedPassword() => _read('password');
+
+  Future<void> writeNewPassword(String password) =>
+      _storage.write(key: 'password', value: password);
+
+  // ─── Notification status ──────────────────────────────────────────────────
 
   Future<bool> readNotificationStatus() async {
-    try {
-      String? notificationStatus = await _storage.read(key: 'notification');
-      return notificationStatus == "true";
-    } catch (e) {
-      return true;
-    }
+    final value = await _read('notification');
+    return value == null ? true : value == 'true';
   }
 
-  Future writeNotificationStatus(newStatus) async {
-    _storage.write(key: 'notification', value: newStatus.toString());
-  }
+  Future<void> writeNotificationStatus(bool status) =>
+      _storage.write(key: 'notification', value: status.toString());
+
+  // ─── Notification time ────────────────────────────────────────────────────
 
   Future<(String?, String?)> readNotificationTime() async {
-    try {
-      String? hour = await _storage.read(key: 'hour');
-      String? minute = await _storage.read(key: 'minute');
-
-      return (hour, minute);
-    } catch (e) {
-      return (null, null);
-    }
+    final hour = await _read('hour');
+    final minute = await _read('minute');
+    return (hour, minute);
   }
 
-  Future writeNotificationTime(newHour, newMinute) async {
-    _storage.write(key: "hour", value: newHour.toString().padLeft(2, '0'));
-    _storage.write(key: 'minute', value: newMinute.toString().padLeft(2, '0'));
+  Future<void> writeNotificationTime(int hour, int minute) async {
+    await _storage.write(
+      key: 'hour',
+      value: hour.toString().padLeft(2, '0'),
+    );
+    await _storage.write(
+      key: 'minute',
+      value: minute.toString().padLeft(2, '0'),
+    );
+  }
+
+  // ─── Private ──────────────────────────────────────────────────────────────
+
+  Future<String?> _read(String key) async {
+    try {
+      return await _storage.read(key: key);
+    } catch (_) {
+      return null;
+    }
   }
 }

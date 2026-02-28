@@ -1,6 +1,7 @@
+import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/add_entry.dart';
-import 'package:adiary/screens/alevated_button.dart';
+import 'package:adiary/compnents/alevated_button.dart';
 import 'package:adiary/screens/display_entry.dart';
 import 'package:flutter/material.dart';
 
@@ -17,112 +18,83 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    _countEntries();
+    _refreshCount();
   }
 
-  void _countEntries() async {
-    int count = await EntryProvider().getCount();
-    setState(() {
-      _entryCount = count;
-    });
+  Future<void> _refreshCount() async {
+    final count = await EntryProvider().getCount();
+    if (mounted) setState(() => _entryCount = count);
   }
 
-  Widget showCount() {
-    return Column(
-      children: [
-        Text(
-          '🌸',
-          style: TextStyle(
-              shadows: [
-                Shadow(
-                    color: Colors.pink.shade900,
-                    blurRadius: 10,
-                    offset: Offset(0, 0))
-              ],
-              fontSize: 32,
-              color: Colors.pink.shade900,
-              fontFamily: 'IndieFlower',
-              fontWeight: FontWeight.bold),
-        ),
-        SizedBox(
-          height: 32,
-        ),
-        Text.rich(
-          TextSpan(
-            text: 'You have collected',
-            children: [
-              TextSpan(
-                  text: ' $_entryCount',
-                  style: TextStyle(color: Colors.pink.shade600)),
-              TextSpan(text: ' good memories so far...'),
-            ],
-            style: TextStyle(
-                fontSize: 32,
-                color: Colors.pink.shade900,
-                fontFamily: 'IndieFlower',
-                fontWeight: FontWeight.bold),
-          ),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(
-          height: 32,
-        ),
-        Text(
-          '🌸🌸🌸',
-          style: TextStyle(
-              shadows: [
-                Shadow(
-                    color: Colors.pink.shade900,
-                    blurRadius: 10,
-                    offset: Offset(0, 0))
-              ],
-              fontSize: 32,
-              color: Colors.pink.shade900,
-              fontFamily: 'IndieFlower',
-              fontWeight: FontWeight.bold),
-        ),
-      ],
+  void _navigate(Widget screen) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => screen),
     );
-  }
-
-  Widget addEntryButton() {
-    return AlevatedButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-                builder: (context) => AddEntry(fn: _countEntries)),
-          );
-        },
-        icon: Icons.add,
-        text: 'Add More');
-  }
-
-  Widget memoryButton() {
-    return AlevatedButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-                builder: (context) => DisplayEntry(fn: _countEntries)),
-          );
-        },
-        icon: Icons.sentiment_very_satisfied,
-        text: 'Go down the memory lane');
   }
 
   @override
   Widget build(BuildContext context) {
+    final headingStyle = TextStyle(
+      fontSize: 32,
+      color: PinkColors.shade900,
+      fontFamily: 'IndieFlower',
+      fontWeight: FontWeight.bold,
+    );
+
+    final blossomShadow = Shadow(
+      color: PinkColors.shade900,
+      blurRadius: 10,
+      offset: Offset.zero,
+    );
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          showCount(),
-          SizedBox(
-            height: 64,
+          // Blossom header
+          Text(
+            '🌸',
+            style: headingStyle.copyWith(shadows: [blossomShadow]),
           ),
-          addEntryButton(),
-          memoryButton(),
+          const SizedBox(height: 32),
+
+          // Entry count
+          Text.rich(
+            TextSpan(
+              text: 'You have collected',
+              style: headingStyle,
+              children: [
+                TextSpan(
+                  text: ' $_entryCount',
+                  style: TextStyle(color: PinkColors.shade600),
+                ),
+                const TextSpan(text: ' good memories so far...'),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+
+          // Blossom footer
+          Text(
+            '🌸🌸🌸',
+            style: headingStyle.copyWith(shadows: [blossomShadow]),
+          ),
+          const SizedBox(height: 64),
+
+          // Actions
+          AlevatedButton(
+            onPressed: () => _navigate(AddEntry(fn: _refreshCount)),
+            icon: Icons.add,
+            text: 'Add More',
+          ),
+          AlevatedButton(
+            onPressed: () => _navigate(DisplayEntry(fn: _refreshCount)),
+            icon: Icons.sentiment_very_satisfied,
+            text: 'Go down the memory lane',
+          ),
         ],
       ),
     );

@@ -1,4 +1,4 @@
-import 'package:adiary/screens/alevated_button.dart';
+import 'package:adiary/compnents/alevated_button.dart';
 import 'package:adiary/services/authentication.dart';
 import 'package:adiary/services/password.dart';
 import 'package:flutter/material.dart';

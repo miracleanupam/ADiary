@@ -1,4 +1,5 @@
-import 'package:adiary/screens/alevated_button.dart';
+import 'package:adiary/compnents/alevated_button.dart';
+import 'package:adiary/constants.dart';
 import 'package:flutter/material.dart';
 
 class UnauthenticatedScreen extends StatelessWidget {
@@ -10,7 +11,7 @@ class UnauthenticatedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink.shade100,
+      backgroundColor: PinkColors.shade100,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Padding(

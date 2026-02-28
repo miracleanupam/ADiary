@@ -1,21 +1,24 @@
+import 'dart:math';
+
+import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
+
+// ─── Data model ───────────────────────────────────────────────────────────────
 
 class DailyRecord {
   final DateTime date;
   final int count;
+
   const DailyRecord(this.date, this.count);
 }
 
+// ─── LineChart widget ─────────────────────────────────────────────────────────
+
 class LineChart extends StatefulWidget {
-  /// Pixel height of the chart canvas (excludes the year selector).
   final double chartHeight;
 
-  const LineChart({
-    super.key,
-    this.chartHeight = 300,
-  });
+  const LineChart({super.key, this.chartHeight = 300});
 
   @override
   State<LineChart> createState() => _LineChartState();
@@ -25,203 +28,177 @@ class _LineChartState extends State<LineChart> {
   late List<int> _years;
   int _selectedYear = DateTime.now().year;
   late List<DailyRecord> _cumulativeData;
-  bool isLoading = true;
-
-  // ── Tooltip state ─────────────────────────────────────────────────────
-  // Index into cumulativeData of the currently highlighted point, or null.
+  bool _isLoading = true;
   int? _tooltipIndex;
+
+  // ─── Lifecycle ─────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
-    _setYears();
-    _setup(null);
+    _loadYears();
+    _loadData(null);
   }
 
-  List<int> createListRange(int a, int b) {
-    // Determine the length (number of items) in the range, inclusive of a and b.
-    int length = (b - a).abs() + 1;
-    int start = (a < b) ? a : b;
+  // ─── Data loading ──────────────────────────────────────────────────────────
 
-    return List<int>.generate(length, (i) => start + i);
+  Future<void> _loadYears() async {
+    final earliest = await EntryProvider().getEarliestYear();
+    if (earliest != null && mounted) {
+      setState(() => _years = _rangeInclusive(earliest, DateTime.now().year));
+    }
   }
 
-  Future<void> _setYears() async {
-    final res = await EntryProvider().getEarliestYear();
-    if (res != null) {
+  Future<void> _loadData(int? year) async {
+    final res = await EntryProvider().getYearlyCumulativeCounts(year ?? _selectedYear);
+    if (mounted) {
       setState(() {
-        _years = createListRange(res, DateTime.now().year);
+        _cumulativeData = _convertToDailyData(res);
+        if (year == null) _isLoading = false;
       });
     }
   }
 
-  Future<void> _setup(int? year) async {
-    final res =
-        await EntryProvider().getYearlyCumulativeCounts(year ?? _selectedYear);
-    final convertedData = convertToDailyData(res);
-    setState(() {
-      _cumulativeData = convertedData;
-      if (year == null) isLoading = false;
-    });
+  List<int> _rangeInclusive(int a, int b) {
+    final start = a < b ? a : b;
+    return List<int>.generate((b - a).abs() + 1, (i) => start + i);
   }
 
-  List<DailyRecord> convertToDailyData(Map<String, int> data) {
+  List<DailyRecord> _convertToDailyData(Map<String, int> data) {
     final sortedKeys = data.keys.toList()..sort();
-
-    return sortedKeys.map((key) {
-      return DailyRecord(DateTime.parse(key), data[key] as int);
-    }).toList();
+    return sortedKeys
+        .map((key) => DailyRecord(DateTime.parse(key), data[key] as int))
+        .toList();
   }
 
-  /// Converts a tap's local X position into the nearest data-point index.
-  ///
-  /// [tapX]  – x coordinate of the tap in the widget's local space.
-  /// [width] – total width of the chart widget.
-  /// [total] – number of data points (days in the year).
-  ///
-  /// Returns null if the tap is outside the drawable chart area.
-  int? _indexFromTap(double tapX, double width, int total) {
+  // ─── Interaction ───────────────────────────────────────────────────────────
+
+  int? _indexFromTap(double tapX, double width) {
     const pL = _ChartPainter.pL;
     const pR = _ChartPainter.pR;
     final cw = width - pL - pR;
-
     if (tapX < pL || tapX > pL + cw) return null;
 
-    // Map tap to a day-of-year index (0…daysInYear-1)
-    final fraction = (tapX - pL) / cw;
     final daysInYear = DateTime(_selectedYear + 1, 1, 1)
         .difference(DateTime(_selectedYear, 1, 1))
         .inDays;
-    final dayIndex =
-        (fraction * (daysInYear - 1)).round().clamp(0, daysInYear - 1);
+    final dayIndex = ((tapX - pL) / cw * (daysInYear - 1))
+        .round()
+        .clamp(0, daysInYear - 1);
 
-    // Clamp to the range of available data so we never go out of bounds.
-    // Also return null if the tap is beyond the last available data point.
-    if (dayIndex >= _cumulativeData.length) return null;
-
-    return dayIndex;
+    return dayIndex >= _cumulativeData.length ? null : dayIndex;
   }
+
+  void _onYearChanged(int year) {
+    setState(() {
+      _selectedYear = year;
+      _tooltipIndex = null;
+    });
+    _loadData(year);
+  }
+
+  // ─── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? CircularProgressIndicator()
-        : Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Happy monents in the year!!",
-                style: TextStyle(
-                    color: Colors.pink.shade900,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(
-                height: 32,
-              ),
-              // ── Year selector ────────────────────────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    "Choose Year: ",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.pink.shade900,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 8,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: Colors.pink.shade200,
-                        borderRadius: BorderRadius.circular(4)),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                      child: DropdownButton<int>(
-                        underline: Container(),
-                        iconEnabledColor: Colors.pink.shade900,
-                        iconDisabledColor:
-                            Colors.pink.shade900.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(4),
-                        dropdownColor: Colors.pink.shade100,
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.pink.shade900,
-                            fontWeight: FontWeight.bold),
-                        value: _selectedYear,
-                        items: _years
-                            .map((y) => DropdownMenuItem<int>(
-                                value: y, child: Text('$y')))
-                            .toList(),
-                        onChanged: (y) {
-                          if (y == null) return;
-                          setState(() {
-                            _selectedYear = y;
-                            _tooltipIndex = null;
-                          });
-                          _setup(y);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+    if (_isLoading) return const CircularProgressIndicator();
 
-              const SizedBox(height: 8),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Happy moments in the year!!',
+          style: TextStyle(
+            color: PinkColors.shade900,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 32),
+        _buildYearSelector(),
+        const SizedBox(height: 8),
+        _buildChartArea(),
+      ],
+    );
+  }
 
-              // ── Chart + gesture layer ────────────────────────────────────────
-              SizedBox(
-                height: widget.chartHeight,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return GestureDetector(
-                      // Tap down: snap tooltip to the nearest data point.
-                      onTapDown: (details) {
-                        final idx = _indexFromTap(
-                          details.localPosition.dx,
-                          constraints.maxWidth,
-                          _cumulativeData.length,
-                        );
-                        setState(() => _tooltipIndex = idx);
-                      },
+  Widget _buildYearSelector() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          'Choose Year: ',
+          style: TextStyle(
+            fontSize: 16,
+            color: PinkColors.shade900,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: PinkColors.shade200,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: DropdownButton<int>(
+            value: _selectedYear,
+            underline: const SizedBox.shrink(),
+            iconEnabledColor: PinkColors.shade900,
+            iconDisabledColor: PinkColors.shade900.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(4),
+            dropdownColor: PinkColors.shade100,
+            style: TextStyle(
+              fontSize: 16,
+              color: PinkColors.shade900,
+              fontWeight: FontWeight.bold,
+            ),
+            items: _years
+                .map((y) => DropdownMenuItem<int>(value: y, child: Text('$y')))
+                .toList(),
+            onChanged: (y) {
+              if (y != null) _onYearChanged(y);
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
-                      // Horizontal drag: slide tooltip along the line.
-                      onHorizontalDragUpdate: (details) {
-                        final idx = _indexFromTap(
-                          details.localPosition.dx,
-                          constraints.maxWidth,
-                          _cumulativeData.length,
-                        );
-                        setState(() => _tooltipIndex = idx);
-                      },
-                      child: _LineChart(
-                        data: _cumulativeData,
-                        year: _selectedYear,
-                        tooltipIndex: _tooltipIndex,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
+  Widget _buildChartArea() {
+    return SizedBox(
+      height: widget.chartHeight,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          void updateTooltip(double dx) {
+            final idx = _indexFromTap(dx, constraints.maxWidth);
+            setState(() => _tooltipIndex = idx);
+          }
+
+          return GestureDetector(
+            onTapDown: (d) => updateTooltip(d.localPosition.dx),
+            onHorizontalDragUpdate: (d) => updateTooltip(d.localPosition.dx),
+            child: _LineChartCanvas(
+              data: _cumulativeData,
+              year: _selectedYear,
+              tooltipIndex: _tooltipIndex,
+            ),
           );
+        },
+      ),
+    );
   }
 }
 
-// ═════════════════════════════════════════════
-// INTERNAL CHART WIDGET
-// ═════════════════════════════════════════════
+// ─── Internal canvas widget ───────────────────────────────────────────────────
 
-class _LineChart extends StatelessWidget {
+class _LineChartCanvas extends StatelessWidget {
   final List<DailyRecord> data;
   final int year;
   final int? tooltipIndex;
 
-  const _LineChart({
+  const _LineChartCanvas({
     required this.data,
     required this.year,
     required this.tooltipIndex,
@@ -231,89 +208,98 @@ class _LineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       size: Size.infinite,
-      painter: _ChartPainter(
-        data: data,
-        year: year,
-        tooltipIndex: tooltipIndex,
-      ),
+      painter: _ChartPainter(data: data, year: year, tooltipIndex: tooltipIndex),
     );
   }
 }
 
-// ═════════════════════════════════════════════
-// CUSTOM PAINTER
-// ═════════════════════════════════════════════
+// ─── CustomPainter ────────────────────────────────────────────────────────────
 
 class _ChartPainter extends CustomPainter {
   final List<DailyRecord> data;
   final int year;
   final int? tooltipIndex;
 
-  // Exposed as static so _CumulativeChartWidgetState can reference them
-  // when converting a tap X position into a data index.
   static const double pL = 64, pR = 0, pT = 16, pB = 48;
+  static const double _topPad = 0.1;
+  static const double _tooltipPad = 8.0;
+  static const double _arrowHeight = 6.0;
 
-  _ChartPainter({
+  static const _months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  const _ChartPainter({
     required this.data,
     required this.year,
     required this.tooltipIndex,
   });
 
   @override
+  bool shouldRepaint(_ChartPainter old) =>
+      old.data != data || old.year != year || old.tooltipIndex != tooltipIndex;
+
+  @override
   void paint(Canvas canvas, Size size) {
     if (data.isEmpty) return;
 
-    // ── Derived dimensions ─────────────────────────────────────────────
     final cw = size.width - pL - pR;
     final ch = size.height - pT - pB;
     final maxVal = data.last.count.toDouble();
-    // final total = data.length.toDouble();
-    final daysInYear =
-        DateTime(year + 1, 1, 1).difference(DateTime(year, 1, 1)).inDays;
-    final total = daysInYear.toDouble();
-    // ── Coordinate helpers ─────────────────────────────────────────────
-    // Maps a day index (0…total-1) to canvas X.
-    double xOf(int i) => pL + (i / (total - 1)) * cw;
-    // Maps a cumulative value to canvas Y (inverted: 0 is top).
-    // double yOf(num v) => pT + ch - (v / maxVal) * ch;
-    const topPad = 0.1; // 10% breathing room above the max value
-    double yOf(num v) => pT + ch - (v / maxVal) * ch * (1 - topPad);
+    final daysInYear = DateTime(year + 1, 1, 1)
+        .difference(DateTime(year, 1, 1))
+        .inDays
+        .toDouble();
 
-    // ── Shared styles ──────────────────────────────────────────────────
-    final labelStyle = TextStyle(color: Colors.pink.shade900, fontSize: 11);
+    double xOf(int i) => pL + (i / (daysInYear - 1)) * cw;
+    double yOf(num v) => pT + ch - (v / maxVal) * ch * (1 - _topPad);
+
+    final labelStyle = TextStyle(color: PinkColors.shade900, fontSize: 11);
     final gridPaint = Paint()
-      ..color = Colors.pink.shade200
+      ..color = PinkColors.shade200
       ..strokeWidth = 1;
 
-    // ── Y-axis grid lines & labels ─────────────────────────────────────
+    _drawGrid(canvas, size, cw, ch, maxVal, yOf, gridPaint, labelStyle);
+    _drawXAxis(canvas, ch, cw, xOf, daysInYear.toInt(), gridPaint, labelStyle);
+    _drawYAxisTitle(canvas, ch);
+    _drawFill(canvas, cw, ch, xOf, yOf);
+    _drawLine(canvas, xOf, yOf);
+    _drawAxes(canvas, cw, ch);
+    if (tooltipIndex != null) {
+      _drawTooltip(canvas, cw, ch, xOf, yOf, tooltipIndex!);
+    }
+  }
+
+  void _drawGrid(Canvas canvas, Size size, double cw, double ch, double maxVal,
+      double Function(num) yOf, Paint gridPaint, TextStyle labelStyle) {
     for (int i = 0; i <= 5; i++) {
       final v = (maxVal * i / 5).round();
       final y = yOf(v);
       canvas.drawLine(Offset(pL, y), Offset(pL + cw, y), gridPaint);
-      // Right-align within [0, pL-8] so labels sit flush left of the axis.
-      _text(canvas, '$v'.padLeft(4, ' '), Offset(35, y - 7), labelStyle,
+      _paintText(canvas, '$v'.padLeft(4, ' '), Offset(35, y - 7), labelStyle,
           width: pL - 8, align: TextAlign.right);
     }
+  }
 
-    // ── X-axis month ticks & labels ────────────────────────────────────
+  void _drawXAxis(Canvas canvas, double ch, double cw, double Function(int) xOf,
+      int daysInYear, Paint gridPaint, TextStyle labelStyle) {
     for (int m = 1; m <= 12; m++) {
       final idx = DateTime(year, m, 1).difference(DateTime(year, 1, 1)).inDays;
       if (idx >= daysInYear) continue;
       final x = xOf(idx);
       canvas.drawLine(Offset(x, pT + ch), Offset(x, pT + ch + 4), gridPaint);
-      _text(canvas, _mon(m), Offset(x - 8, pT + ch + 8), labelStyle, width: 24);
+      _paintText(canvas, _months[m - 1], Offset(x - 8, pT + ch + 8), labelStyle,
+          width: 24);
     }
+  }
 
-    // ── Y-axis title ───────────────────────────────────────────────────────
-    // The title is rotated 90° counter-clockwise, so we save/restore the
-    // canvas transform to avoid affecting anything else.
-    const yTitle = 'Cumulative Entry Count'; // ← change to your label
-
-    final titlePainter = TextPainter(
+  void _drawYAxisTitle(Canvas canvas, double ch) {
+    final tp = TextPainter(
       text: TextSpan(
-        text: yTitle,
+        text: 'Cumulative Entry Count',
         style: TextStyle(
-          color: Colors.pink.shade900,
+          color: PinkColors.shade900,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
@@ -322,178 +308,126 @@ class _ChartPainter extends CustomPainter {
     )..layout();
 
     canvas.save();
-
-    // Rotate around the point where we want the text centred.
-    // Centre vertically on the chart, and place it against the left edge.
-    final titleX = titlePainter.height; // distance from left edge
-    final titleY = pT + ch / 2; // vertical midpoint of chart
-
-    canvas.translate(titleX, titleY);
-    canvas.rotate(-pi / 2); // 90° counter-clockwise
-
-    // After rotation, "right" is "up" — paint centred on origin.
-    titlePainter.paint(
-      canvas,
-      Offset(-titlePainter.width / 2, -titlePainter.height / 2),
-    );
-
+    canvas.translate(tp.height, pT + ch / 2);
+    canvas.rotate(-pi / 2);
+    tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
     canvas.restore();
+  }
 
-    // ── Gradient fill under the line ───────────────────────────────────
-    final fillPath = Path()..moveTo(xOf(0), yOf(data[0].count));
+  void _drawFill(Canvas canvas, double cw, double ch,
+      double Function(int) xOf, double Function(num) yOf) {
+    final path = Path()..moveTo(xOf(0), yOf(data[0].count));
     for (int i = 1; i < data.length; i++) {
-      fillPath.lineTo(xOf(i), yOf(data[i].count));
+      path.lineTo(xOf(i), yOf(data[i].count));
     }
-    fillPath
+    path
       ..lineTo(xOf(data.length - 1), pT + ch)
       ..lineTo(xOf(0), pT + ch)
       ..close();
 
     canvas.drawPath(
-      fillPath,
+      path,
       Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.pink.shade900.withOpacity(0.35),
-            Colors.pink.shade900.withOpacity(0.0),
+            PinkColors.shade900.withValues(alpha: 0.35),
+            PinkColors.shade900.withValues(alpha: 0.0),
           ],
         ).createShader(Rect.fromLTWH(pL, pT, cw, ch)),
     );
+  }
 
-    // ── Line ───────────────────────────────────────────────────────────
-    final linePath = Path()..moveTo(xOf(0), yOf(data[0].count));
+  void _drawLine(Canvas canvas, double Function(int) xOf, double Function(num) yOf) {
+    final path = Path()..moveTo(xOf(0), yOf(data[0].count));
     for (int i = 1; i < data.length; i++) {
-      linePath.lineTo(xOf(i), yOf(data[i].count));
+      path.lineTo(xOf(i), yOf(data[i].count));
     }
     canvas.drawPath(
-      linePath,
+      path,
       Paint()
-        ..color = Colors.pink.shade500
+        ..color = PinkColors.shade500
         ..strokeWidth = 2
         ..style = PaintingStyle.stroke
         ..strokeJoin = StrokeJoin.round,
     );
-
-    // ── Axes ───────────────────────────────────────────────────────────
-    final axisPaint = Paint()
-      ..color = Colors.pink.shade900
-      ..strokeWidth = 1.5;
-    canvas.drawLine(Offset(pL, pT), Offset(pL, pT + ch), axisPaint);
-    canvas.drawLine(Offset(pL, pT + ch), Offset(pL + cw, pT + ch), axisPaint);
-
-    // ── Tooltip ────────────────────────────────────────────────────────
-    // Only rendered while the user is touching the chart.
-    if (tooltipIndex != null) {
-      final idx = tooltipIndex!;
-      final entry = data[idx];
-      final px = xOf(idx);
-      final py = yOf(entry.count);
-
-      // Vertical crosshair from top of chart to X axis.
-      canvas.drawLine(
-        Offset(px, pT),
-        Offset(px, pT + ch),
-        Paint()
-          ..color = Colors.pink.shade300.withOpacity(0.5)
-          ..strokeWidth = 1,
-      );
-
-      // Highlight dot — outer filled circle.
-      canvas.drawCircle(
-          Offset(px, py), 5, Paint()..color = Colors.pink.shade700);
-      // Inner white dot to create a ring effect.
-      canvas.drawCircle(Offset(px, py), 3, Paint()..color = Colors.white);
-
-      // ── Bubble ──────────────────────────────────────────────────────
-      // Label: "15 Mar" on the first line, cumulative value on the second.
-      final date = entry.date;
-      final dateStr = '${date.day} ${_mon(date.month)}';
-      final valueStr = entry.count.toString();
-      final tooltipText = '$dateStr\n$valueStr';
-
-      // Lay out the text first so we know how large to make the bubble.
-      final tp = TextPainter(
-        text: TextSpan(
-          text: tooltipText,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            height: 1.5,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-        textAlign: TextAlign.center,
-      )..layout();
-
-      const pad = 8.0; // inner padding inside the bubble
-      const arrowH = 6.0; // height of the downward-pointing arrow
-
-      final bubbleW = tp.width + pad * 2;
-      final bubbleH = tp.height + pad * 2;
-
-      // Centre the bubble on px; clamp so it never overflows left/right edges.
-      double bx = px - bubbleW / 2;
-      bx = bx.clamp(pL, pL + cw - bubbleW);
-
-      // Position the bubble above the highlight dot with a small gap.
-      final by = py - bubbleH - arrowH - 6;
-
-      // Rounded rectangle background.
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(bx, by, bubbleW, bubbleH),
-          const Radius.circular(6),
-        ),
-        Paint()..color = Colors.pink.shade800,
-      );
-
-      // Downward-pointing triangle arrow connecting bubble to dot.
-      canvas.drawPath(
-        Path()
-          ..moveTo(px - 6, by + bubbleH) // left base of arrow
-          ..lineTo(px + 6, by + bubbleH) // right base of arrow
-          ..lineTo(px, by + bubbleH + arrowH) // tip pointing at the dot
-          ..close(),
-        Paint()..color = Colors.pink.shade800,
-      );
-
-      // Render the text centred inside the bubble.
-      tp.paint(canvas, Offset(bx + pad, by + pad));
-    }
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────
+  void _drawAxes(Canvas canvas, double cw, double ch) {
+    final paint = Paint()
+      ..color = PinkColors.shade900
+      ..strokeWidth = 1.5;
+    canvas.drawLine(Offset(pL, pT), Offset(pL, pT + ch), paint);
+    canvas.drawLine(Offset(pL, pT + ch), Offset(pL + cw, pT + ch), paint);
+  }
 
-  void _text(Canvas canvas, String s, Offset o, TextStyle style,
+  void _drawTooltip(Canvas canvas, double cw, double ch,
+      double Function(int) xOf, double Function(num) yOf, int idx) {
+    final entry = data[idx];
+    final px = xOf(idx);
+    final py = yOf(entry.count);
+
+    // Crosshair
+    canvas.drawLine(
+      Offset(px, pT),
+      Offset(px, pT + ch),
+      Paint()
+        ..color = PinkColors.shade300.withValues(alpha: 0.5)
+        ..strokeWidth = 1,
+    );
+
+    // Dot
+    canvas.drawCircle(Offset(px, py), 5, Paint()..color = PinkColors.shade700);
+    canvas.drawCircle(Offset(px, py), 3, Paint()..color = Colors.white);
+
+    // Bubble
+    final dateStr = '${entry.date.day} ${_months[entry.date.month - 1]}';
+    final tp = TextPainter(
+      text: TextSpan(
+        text: '$dateStr\n${entry.count}',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          height: 1.5,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    )..layout();
+
+    final bubbleW = tp.width + _tooltipPad * 2;
+    final bubbleH = tp.height + _tooltipPad * 2;
+    final bx = (px - bubbleW / 2).clamp(pL, pL + cw - bubbleW);
+    final by = py - bubbleH - _arrowHeight - 6;
+    final bgPaint = Paint()..color = PinkColors.shade800;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(bx, by, bubbleW, bubbleH),
+        const Radius.circular(6),
+      ),
+      bgPaint,
+    );
+    canvas.drawPath(
+      Path()
+        ..moveTo(px - 6, by + bubbleH)
+        ..lineTo(px + 6, by + bubbleH)
+        ..lineTo(px, by + bubbleH + _arrowHeight)
+        ..close(),
+      bgPaint,
+    );
+    tp.paint(canvas, Offset(bx + _tooltipPad, by + _tooltipPad));
+  }
+
+  void _paintText(Canvas canvas, String text, Offset offset, TextStyle style,
       {double width = 40, TextAlign align = TextAlign.left}) {
     (TextPainter(
-      text: TextSpan(text: s, style: style),
+      text: TextSpan(text: text, style: style),
       textDirection: TextDirection.ltr,
       textAlign: align,
     )..layout(maxWidth: width))
-        .paint(canvas, o);
+        .paint(canvas, offset);
   }
-
-  String _mon(int m) => const [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec'
-      ][m - 1];
-
-  // Repaint whenever data, year, or the active tooltip index changes.
-  @override
-  bool shouldRepaint(_ChartPainter old) =>
-      old.data != data || old.year != year || old.tooltipIndex != tooltipIndex;
 }

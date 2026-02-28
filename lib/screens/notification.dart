@@ -1,5 +1,6 @@
-import 'package:adiary/screens/alevated_button.dart';
-import 'package:adiary/screens/styled_text.dart';
+import 'package:adiary/compnents/alevated_button.dart';
+import 'package:adiary/compnents/styled_text.dart';
+import 'package:adiary/constants.dart';
 import 'package:adiary/services/notification.dart';
 import 'package:adiary/services/storages.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +82,7 @@ class _NotificationManagerState extends State<NotificationManager> {
                         value:
                             "** If no notification is received, ensure battery optimization for the app is disabled and the app is not put to sleep by the OS.",
                         fontSize: 16,
-                        color: Colors.pink.shade300,
+                        color: PinkColors.shade300,
                       ),
                       SizedBox(
                         height: 10,

@@ -1,97 +1,85 @@
 import 'dart:io';
 
-import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
 import 'package:uuid/uuid.dart';
 
 class RecorderService {
   final _recorder = AudioRecorder();
-  String? tempAudioPath;
-  String? audioName;
-  bool hasAudio = false;
-  bool hasRemovedAudio = false;
+  final _uuid = const Uuid();
 
-  Future<bool> hasPermission() async {
-    return await _recorder.hasPermission();
+  String? _tempAudioPath;
+  String? _audioName;
+  bool _hasRemovedAudio = false;
+
+  // ─── Permissions ──────────────────────────────────────────────────────────
+
+  Future<bool> hasPermission() => _recorder.hasPermission();
+
+  // ─── Name ─────────────────────────────────────────────────────────────────
+
+  String _getOrCreateAudioName() {
+    return _audioName ??= '${_uuid.v7()}.m4a';
   }
 
-  String getAudioName() {
-    if (audioName != null) {
-      return audioName!;
-    }
-
-    var uuid = Uuid();
-    String uuidString = uuid.v7();
-    audioName = '$uuidString.m4a';
-    return audioName!;
-  }
+  // ─── Record ───────────────────────────────────────────────────────────────
 
   Future<void> startRecording() async {
     if (!await hasPermission()) return;
-
-    final directory = await getTemporaryDirectory();
-
+    final dir = await getTemporaryDirectory();
     await _recorder.start(
       const RecordConfig(
         encoder: AudioEncoder.aacLc,
         sampleRate: 44100,
         bitRate: 128000,
       ),
-      path: '${directory.path}/${getAudioName()}',
+      path: '${dir.path}/${_getOrCreateAudioName()}',
     );
   }
 
   Future<String?> stopRecording() async {
     if (!await _recorder.isRecording()) return null;
-    tempAudioPath = await _recorder.stop();
-    hasRemovedAudio = false;
-    return tempAudioPath;
+    _tempAudioPath = await _recorder.stop();
+    _hasRemovedAudio = false;
+    return _tempAudioPath;
   }
 
-  Future<void> pauseRecording() async {
-    await _recorder.pause();
-  }
+  Future<void> pauseRecording() => _recorder.pause();
+  Future<void> resumeRecording() => _recorder.resume();
 
-  Future<void> resumeRecording() async {
-    await _recorder.resume();
-  }
+  // ─── File management ──────────────────────────────────────────────────────
 
   Future<void> deleteFile() async {
-    if (tempAudioPath == null || tempAudioPath == '') {
-      return;
-    }
-    final File targetFile = File(tempAudioPath!);
-    if (await targetFile.exists()) {
-      targetFile.delete();
-    }
-    tempAudioPath = null;
-    hasRemovedAudio = true;
+    if (_tempAudioPath == null) return;
+    final file = File(_tempAudioPath!);
+    if (await file.exists()) await file.delete();
+    _tempAudioPath = null;
+    _hasRemovedAudio = true;
   }
 
   Future<String?> saveFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final audioPath = '${directory.path}/${getAudioName()}';
-    final File audioToRemove = File(audioPath);
+    final dir = await getApplicationDocumentsDirectory();
+    final destPath = '${dir.path}/${_getOrCreateAudioName()}';
 
-    if (hasRemovedAudio && await audioToRemove.exists()) {
-      audioToRemove.delete();
-      hasRemovedAudio = false;
+    if (_hasRemovedAudio) {
+      final file = File(destPath);
+      if (await file.exists()) await file.delete();
+      _hasRemovedAudio = false;
       return null;
     }
 
-    if (tempAudioPath == null || tempAudioPath == '') {
-      return null;
+    if (_tempAudioPath == null) return null;
+
+    final source = File(_tempAudioPath!);
+    if (await source.exists()) {
+      await source.copy(destPath);
+      return _getOrCreateAudioName();
     }
 
-    final File sourceFile = File(tempAudioPath!);
-    if (await sourceFile.exists()) {
-      await sourceFile.copy(audioPath);
-      return getAudioName();
-    }
     return null;
   }
 
-  void dispose() {
-    _recorder.dispose();
-  }
+  // ─── Dispose ──────────────────────────────────────────────────────────────
+
+  void dispose() => _recorder.dispose();
 }

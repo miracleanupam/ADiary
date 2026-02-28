@@ -1,165 +1,110 @@
+import 'package:adiary/constants.dart';
 import 'package:flutter/material.dart';
 
 class ADrawer extends StatefulWidget {
   final Function onTapCallback;
   final String selectedItem;
-  const ADrawer(
-      {super.key, required this.onTapCallback, required this.selectedItem});
+
+  const ADrawer({
+    super.key,
+    required this.onTapCallback,
+    required this.selectedItem,
+  });
 
   @override
   State<ADrawer> createState() => _ADrawerState();
 }
 
 class _ADrawerState extends State<ADrawer> {
-  String currentSelection = 'dashboard';
+  late String _currentSelection;
+
+  // ─── Config ───────────────────────────────────────────────────────────────
+
+  static const _navItems = [
+    [
+      {'id': 'dashboard', 'label': 'Home', 'icon': Icons.home},
+      {'id': 'summary', 'label': 'Summary', 'icon': Icons.summarize},
+      {'id': 'visualization', 'label': 'Visualization', 'icon': Icons.bar_chart},
+    ],
+    [
+      {'id': 'notification', 'label': 'Notification', 'icon': Icons.notification_important},
+      {'id': 'export', 'label': 'Export Data', 'icon': Icons.download},
+      {'id': 'import', 'label': 'Import Data', 'icon': Icons.upload},
+    ],
+    [
+      {'id': 'password', 'label': 'Password', 'icon': Icons.key},
+    ],
+    [
+      {'id': 'about', 'label': 'About App', 'icon': Icons.info},
+    ],
+  ];
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
   void initState() {
-    currentSelection = widget.selectedItem;
     super.initState();
+    _currentSelection = widget.selectedItem;
   }
+
+  // ─── Actions ──────────────────────────────────────────────────────────────
+
+  void _onSelect(String id) {
+    setState(() => _currentSelection = id);
+    widget.onTapCallback(id);
+    Navigator.pop(context);
+  }
+
+  // ─── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-        child: ListView(
-      children: [
-        DrawerHeader(
-          decoration: BoxDecoration(
-              image: DecorationImage(
-                  opacity: 0.8,
-                  fit: BoxFit.cover,
-                  colorFilter:
-                      ColorFilter.mode(Colors.pink.shade200, BlendMode.color),
-                  image:
-                      AssetImage('assets/images/drawer_header_background.png')),
-              color: Colors.pink.shade200),
-          child: Container(
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                'xoxo',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.pink.shade900),
-              )),
+      child: ListView(
+        children: [
+          _buildHeader(),
+          for (final group in _navItems) ...[
+            ..._buildGroup(group),
+            const Divider(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return DrawerHeader(
+      decoration: BoxDecoration(
+        color: PinkColors.shade200,
+        image: DecorationImage(
+          opacity: 0.8,
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(PinkColors.shade200, BlendMode.color),
+          image: const AssetImage('assets/images/drawer_header_background.png'),
         ),
-        ListTile(
-          leading: Icon(Icons.home),
-          title: Text(
-            'Home',
+      ),
+      child: Container(
+        alignment: Alignment.bottomLeft,
+        child: Text(
+          'xoxo',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: PinkColors.shade900,
           ),
-          selected: currentSelection == 'dashboard',
-          onTap: () {
-            setState(() {
-              currentSelection = 'dashboard';
-            });
-            widget.onTapCallback('dashboard');
-            Navigator.pop(context);
-          },
         ),
-        ListTile(
-          leading: Icon(Icons.summarize),
-          title: Text(
-            'Summary',
-          ),
-          selected: currentSelection == 'summary',
-          onTap: () {
-            setState(() {
-              currentSelection = 'summary';
-            });
-            widget.onTapCallback('summary');
-            Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: Icon(Icons.bar_chart),
-          title: Text(
-            'Visualization',
-          ),
-          selected: currentSelection == 'visualization',
-          onTap: () {
-            setState(() {
-              currentSelection = 'visualization';
-            });
-            widget.onTapCallback('visualization');
-            Navigator.pop(context);
-          },
-        ),
-        Divider(),
-        ListTile(
-          leading: Icon(Icons.notification_important),
-          title: Text(
-            'Notification',
-          ),
-          selected: currentSelection == 'notification',
-          onTap: () {
-            setState(() {
-              currentSelection = 'notification';
-            });
-            widget.onTapCallback('notification');
-            Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: Icon(Icons.download),
-          title: Text(
-            'Export Data',
-          ),
-          selected: currentSelection == 'export',
-          onTap: () {
-            setState(() {
-              currentSelection = 'export';
-            });
-            widget.onTapCallback('export');
-            Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: Icon(Icons.upload),
-          title: Text(
-            'Import Data',
-          ),
-          selected: currentSelection == 'import',
-          onTap: () {
-            setState(() {
-              currentSelection = 'import';
-            });
-            widget.onTapCallback('import');
-            Navigator.pop(context);
-          },
-        ),
-        Divider(),
-        ListTile(
-          leading: Icon(Icons.key),
-          title: Text(
-            'Password',
-          ),
-          selected: currentSelection == 'password',
-          onTap: () {
-            setState(() {
-              currentSelection = 'password';
-            });
-            widget.onTapCallback('password');
-            Navigator.pop(context);
-          },
-        ),
-        Divider(),
-        ListTile(
-          leading: Icon(Icons.info),
-          title: Text(
-            'About App',
-          ),
-          selected: currentSelection == 'about',
-          onTap: () {
-            setState(() {
-              currentSelection = 'about';
-            });
-            widget.onTapCallback('about');
-            Navigator.pop(context);
-          },
-        ),
-      ],
-    ));
+      ),
+    );
+  }
+
+  List<Widget> _buildGroup(List<Map<String, Object>> items) {
+    return items
+        .map((item) => ListTile(
+              leading: Icon(item['icon'] as IconData),
+              title: Text(item['label'] as String),
+              selected: _currentSelection == item['id'],
+              onTap: () => _onSelect(item['id'] as String),
+            ))
+        .toList();
   }
 }

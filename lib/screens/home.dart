@@ -1,3 +1,4 @@
+import 'package:adiary/constants.dart';
 import 'package:adiary/screens/drawer.dart';
 import 'package:adiary/services/password.dart';
 import 'package:flutter/material.dart';
@@ -11,44 +12,46 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String _drawerScreen = 'dashboard';
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
+
   @override
   void initState() {
     super.initState();
     _checkPassword();
   }
 
+  // ─── Password ─────────────────────────────────────────────────────────────
+
   Future<void> _checkPassword() async {
-    if (mounted) {
-      ADiaryPasswordService passwordService =
-          ADiaryPasswordService(context: context);
-      String? storedPassword = await passwordService.getPassword();
-
-      if (storedPassword == null && mounted) {
-        passwordService.promptForPassword(false);
-      }
-    }
+    if (!mounted) return;
+    final passwordService = ADiaryPasswordService(context: context);
+    final stored = await passwordService.getPassword();
+    if (stored == null && mounted) passwordService.promptForPassword(false);
   }
 
-  String _drawerScreen = 'dashboard';
+  // ─── Navigation ───────────────────────────────────────────────────────────
 
-  void _drawerItemTapped(String newScreen) {
-    setState(() {
-      _drawerScreen = newScreen;
-    });
+  void _onDrawerItemTapped(String screen) {
+    setState(() => _drawerScreen = screen);
   }
+
+  // ─── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink.shade100,
+      backgroundColor: PinkColors.shade100,
       appBar: AppBar(
         flexibleSpace: constants.appBarBg,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(
-            "${constants.homePageWidgetTitleListsForAppBar[_drawerScreen]}"),
+        title: Text(constants.homePageWidgetTitleListsForAppBar[_drawerScreen]!),
       ),
       drawer: ADrawer(
-          onTapCallback: _drawerItemTapped, selectedItem: _drawerScreen),
+        onTapCallback: _onDrawerItemTapped,
+        selectedItem: _drawerScreen,
+      ),
       body: Container(
         decoration: constants.bgDecoration,
         height: double.infinity,

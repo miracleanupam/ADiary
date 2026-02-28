@@ -1,3 +1,4 @@
+import 'package:adiary/constants.dart';
 import 'package:adiary/screens/home.dart';
 import 'package:adiary/screens/unauthenticated_screen.dart';
 import 'package:adiary/services/authentication.dart';
@@ -34,7 +35,7 @@ class _MeroAppState extends State<MeroApp> {
   }
 
   void _notificate() async {
-    notificationService.initNotifications();
+    notificationService.init();
     notificationService.cancelNotifications();
     notificationService.scheduleNotification();
   }
@@ -74,22 +75,22 @@ class _MeroAppState extends State<MeroApp> {
         fontFamily: 'IndieFlower',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
         drawerTheme: DrawerThemeData(
-          backgroundColor: Colors.pink.shade100,
+          backgroundColor: PinkColors.shade100,
           elevation: 1,
         ),
         listTileTheme: ListTileThemeData(
-            iconColor: Colors.pink.shade900,
-            selectedColor: Colors.pink.shade700,
-            textColor: Colors.pink.shade900,
+            iconColor: PinkColors.shade900,
+            selectedColor: PinkColors.shade700,
+            textColor: PinkColors.shade900,
             titleTextStyle: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'IndieFlower')),
-        dividerTheme: DividerThemeData(color: Colors.pink.shade200),
+        dividerTheme: DividerThemeData(color: PinkColors.shade200),
         dialogTheme: DialogThemeData(
           titleTextStyle: TextStyle(
               fontFamily: 'IndieFlower',
-              color: Colors.pink.shade900,
+              color: PinkColors.shade900,
               fontSize: 24),
           contentTextStyle: TextStyle(
               fontFamily: 'IndieFlower', color: Colors.pink, fontSize: 24),
@@ -98,14 +99,14 @@ class _MeroAppState extends State<MeroApp> {
             elevation: 1,
             shadowColor: Colors.black,
             iconTheme: IconThemeData(
-              color: Colors.pink.shade900,
+              color: PinkColors.shade900,
             ),
             titleSpacing: 0,
             titleTextStyle: TextStyle(
               fontFamily: 'IndieFlower',
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.pink.shade900,
+              color: PinkColors.shade900,
             )),
         useMaterial3: true,
       ),

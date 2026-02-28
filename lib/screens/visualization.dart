@@ -12,7 +12,7 @@ class Visualization extends StatefulWidget {
 }
 
 class _VisualizationState extends State<Visualization> {
-  bool hasRecords = false;
+  bool _hasRecords = false;
 
   @override
   void initState() {
@@ -22,39 +22,37 @@ class _VisualizationState extends State<Visualization> {
 
   Future<void> _setup() async {
     final count = await EntryProvider().getCount();
-    setState(() {
-      hasRecords = count > 0 ? true : false;
-    });
+    if (mounted) setState(() => _hasRecords = count > 0);
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: hasRecords
-          ? SingleChildScrollView(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 16,
-                  ),
-                  BarChart(),
-                  Divider(),
-                  SizedBox(
-                    height: 16,
-                  ),
-                  LineChart(),
-                  Divider(),
-                  SizedBox(
-                    height: 16,
-                  ),
-                  WordCloud()
-                ],
-              ),
-            )
-          : Center(
-              child: Text("No data to visualize yet!!! :("),
-            ),
+      child: _hasRecords ? _buildCharts() : _buildEmptyState(),
+    );
+  }
+
+  Widget _buildCharts() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          const BarChart(),
+          const Divider(),
+          const SizedBox(height: 16),
+          const LineChart(),
+          const Divider(),
+          const SizedBox(height: 16),
+          const WordCloud(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return const Center(
+      child: Text('No data to visualize yet!!'),
     );
   }
 }

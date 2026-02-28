@@ -1,23 +1,14 @@
 import 'package:local_auth/local_auth.dart';
 
 class ADauthenticationService {
-  final LocalAuthentication auth = LocalAuthentication();
-
-  ADauthenticationService();
+  final _auth = LocalAuthentication();
 
   Future<bool> authenticate() async {
-    bool authenticated = false;
+    if (!await _auth.isDeviceSupported()) return false;
 
-    bool isSupported = await auth.isDeviceSupported();
-    if (isSupported) {
-      authenticated = await auth.authenticate(
-          localizedReason: 'Please Authenticate',
-          options: const AuthenticationOptions(
-            stickyAuth: true,
-          ));
-      return authenticated;
-    } else {
-      return false;
-    }
+    return _auth.authenticate(
+      localizedReason: 'Please Authenticate',
+      options: const AuthenticationOptions(stickyAuth: true),
+    );
   }
 }

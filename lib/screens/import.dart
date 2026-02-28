@@ -1,6 +1,7 @@
+import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
-import 'package:adiary/screens/alevated_button.dart';
-import 'package:adiary/screens/styled_text.dart';
+import 'package:adiary/compnents/alevated_button.dart';
+import 'package:adiary/compnents/styled_text.dart';
 import 'package:flutter/material.dart';
 
 class ImportData extends StatefulWidget {
@@ -77,7 +78,7 @@ class _ImportDataState extends State<ImportData> {
                                     'You can change the password in the app to match the password on exported file.'),
                             StyledText(
                                 fontSize: 36,
-                                color: Colors.pink.shade300,
+                                color: PinkColors.shade300,
                                 value:
                                     'Careful: Importing will override the existing data.'),
                             StyledText(value: 'Begin import when ready...'),
