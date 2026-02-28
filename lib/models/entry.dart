@@ -29,7 +29,7 @@ class Entry {
   String? discardedAt;
 
   Map<String, Object?> toMap() {
-    var jsonImages = jsonEncode(images);
+    var jsonImages = images == null ? null : jsonEncode(images);
     var map = <String, Object?>{
       columnContent: content,
       columnDate: date,
@@ -163,6 +163,12 @@ class EntryProvider {
             .execute('''alter table $tableEntry drop column $columnContent''');
       }
     });
+  }
+
+  Future<void> reEncryptDb(String newPassword) async {
+    await _open();
+    await db.execute("PRAGMA rekey = '$newPassword'");
+    await db.close();
   }
 
   Future<Entry> upsert(Entry entry) async {
@@ -622,6 +628,9 @@ class EntryProvider {
   }
 
   Future<void> import() async {
+    await _open();
+    await db.close();
+
     if (Platform.isAndroid) {
       if (!await requestStoragePermission()) {
         throw Exception("No permission granted");

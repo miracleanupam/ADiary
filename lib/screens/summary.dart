@@ -10,26 +10,26 @@ import 'package:flutter/material.dart';
 const _kCardRadius = 16.0;
 const _kSectionGap = 16.0;
 
-TextStyle _labelStyle(BuildContext context) => TextStyle(
+TextStyle _labelStyle() => TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w700,
       color: PinkColors.shade900,
     );
 
-TextStyle _bigNumberStyle(BuildContext context) => TextStyle(
+TextStyle _bigNumberStyle() => TextStyle(
       fontSize: 40,
       fontWeight: FontWeight.w900,
       color: PinkColors.shade500,
     );
 
-TextStyle _unitStyle(BuildContext context) => TextStyle(
+TextStyle _unitStyle() => TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w600,
       color: PinkColors.shade700,
       fontFamily: 'IndieFlower',
     );
 
-TextStyle _captionStyle(BuildContext context) => TextStyle(
+TextStyle _captionStyle() => TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.bold,
       color: PinkColors.shade400,
@@ -87,7 +87,7 @@ class _SummaryState extends State<Summary> {
       audioCount         = results[4] as int;
       frequentMood       = '${results[5]}';
       happyDays          = results[6] as int;
-      dayWithMostEntries = results[7] as String;
+      dayWithMostEntries = results[7] as String? ?? '';
       deletedEntries     = results[8] as int;
       isLoading          = false;
     });
@@ -98,6 +98,20 @@ class _SummaryState extends State<Summary> {
     if (isLoading) {
       return Center(
         child: CircularProgressIndicator(color: PinkColors.shade900),
+      );
+    }
+
+    if (totalEntries == 0) {
+      return Center(
+        child: const Text(
+          "There is no data to summarize yet!",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: PinkColors.shade900
+          ),
+        ),
       );
     }
 
@@ -354,13 +368,13 @@ class _FrequentMoodCard extends StatelessWidget {
           _ScaledRichText(
             minHeight: 56,
             children: [
-              TextSpan(text: mood, style: _bigNumberStyle(context)),
+              TextSpan(text: mood, style: _bigNumberStyle()),
             ],
           ),
 
           const SizedBox(height: 8),
 
-          Text('$count times', style: _captionStyle(context)),
+          Text('$count times', style: _captionStyle()),
         ],
       ),
     );
@@ -443,7 +457,7 @@ class _CardTitle extends StatelessWidget {
           child: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(label, style: _labelStyle(context)),
+            child: Text(label, style: _labelStyle()),
           ),
         ),
       ],
@@ -505,7 +519,7 @@ class _StatBlock extends StatelessWidget {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: Text(title, style: _labelStyle(context)),
+                  child: Text(title, style: _labelStyle()),
                 ),
               ),
             ],
@@ -519,10 +533,10 @@ class _StatBlock extends StatelessWidget {
             children: [
               TextSpan(
                 text: valueText ?? '$value',
-                style: _bigNumberStyle(context),
+                style: _bigNumberStyle(),
               ),
               if (unit != null)
-                TextSpan(text: ' $unit', style: _unitStyle(context)),
+                TextSpan(text: ' $unit', style: _unitStyle()),
             ],
           ),
 
@@ -531,7 +545,7 @@ class _StatBlock extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(caption, style: _captionStyle(context)),
+              Text(caption, style: _captionStyle()),
               if (captionIcon != null) ...[
                 const SizedBox(width: 8),
                 Icon(

@@ -1,6 +1,7 @@
 import 'package:adiary/compnents/bar_chart.dart';
 import 'package:adiary/compnents/line_chart.dart';
 import 'package:adiary/compnents/word_cloud.dart';
+import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:flutter/material.dart';
 
@@ -52,7 +53,15 @@ class _VisualizationState extends State<Visualization> {
 
   Widget _buildEmptyState() {
     return const Center(
-      child: Text('No data to visualize yet!!'),
+      child: Text(
+        "There is no data to visualize yet!",
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: PinkColors.shade900
+        ),
+      ),
     );
   }
 }

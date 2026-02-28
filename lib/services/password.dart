@@ -1,3 +1,4 @@
+import 'package:adiary/models/entry.dart';
 import 'package:adiary/services/storages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -77,10 +78,11 @@ class ADiaryPasswordService {
 
   // ─── Private ──────────────────────────────────────────────────────────────
 
-  void _savePassword() {
+  Future<void> _savePassword() async {
     final password = _passwordController.text;
     if (password.isEmpty) return;
-    Storages().writeNewPassword(password);
-    Navigator.pop(context);
+    await Storages().writeNewPassword(password);
+    await EntryProvider().reEncryptDb(password);
+    if (context.mounted) Navigator.pop(context);
   }
 }

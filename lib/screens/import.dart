@@ -44,7 +44,7 @@ class _ImportDataState extends State<ImportData> {
   @override
   Widget build(BuildContext context) {
     return importing
-        ? CircularProgressIndicator()
+        ? const Center(child: CircularProgressIndicator())
         : Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

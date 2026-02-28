@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:collection/collection.dart';
@@ -65,9 +67,10 @@ class _BarChartState extends State<BarChart> {
 
   Future<void> _fetchData() async {
     final data = await EntryProvider().getMonthlyCounts();
+    final maxVal = data.values.toList().max.toDouble();
     setState(() {
       _monthlyData = _convertToBarData(data);
-      _maxValue = data.values.toList().max.toDouble();
+      _maxValue = maxVal + min(50, (maxVal * 0.5).ceil());
       _isLoading = false;
     });
   }

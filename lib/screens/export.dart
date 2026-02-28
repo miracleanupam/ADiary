@@ -39,7 +39,7 @@ class _ExportDataState extends State<ExportData> {
   @override
   Widget build(BuildContext context) {
     return exporting
-        ? CircularProgressIndicator()
+        ? const Center(child: CircularProgressIndicator())
         : Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
