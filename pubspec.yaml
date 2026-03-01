@@ -115,7 +115,7 @@ flutter:
   fonts:
     - family: IndieFlower
       fonts:
-        - asset: assets/fonts/IndieFlower.ttf
+        - asset: assets/fonts/Iansui.ttf
 
   #
   # For details regarding fonts from package dependencies,

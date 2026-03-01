@@ -22,20 +22,20 @@ class _ADrawerState extends State<ADrawer> {
 
   static const _navItems = [
     [
-      {'id': 'dashboard', 'label': 'Home', 'icon': Icons.home},
-      {'id': 'summary', 'label': 'Summary', 'icon': Icons.summarize},
-      {'id': 'visualization', 'label': 'Visualization', 'icon': Icons.bar_chart},
+      {'id': 'dashboard', 'label': 'Home', 'icon': Icons.home_outlined},
+      {'id': 'summary', 'label': 'Summary', 'icon': Icons.summarize_outlined},
+      {'id': 'visualization', 'label': 'Visualization', 'icon': Icons.stacked_line_chart_outlined},
     ],
     [
-      {'id': 'notification', 'label': 'Notification', 'icon': Icons.notification_important},
-      {'id': 'export', 'label': 'Export Data', 'icon': Icons.download},
-      {'id': 'import', 'label': 'Import Data', 'icon': Icons.upload},
+      {'id': 'notification', 'label': 'Notification', 'icon': Icons.notification_important_outlined},
+      {'id': 'export', 'label': 'Export Data', 'icon': Icons.download_outlined},
+      {'id': 'import', 'label': 'Import Data', 'icon': Icons.upload_outlined},
     ],
     [
-      {'id': 'password', 'label': 'Password', 'icon': Icons.key},
+      {'id': 'password', 'label': 'Password', 'icon': Icons.password_outlined},
     ],
     [
-      {'id': 'about', 'label': 'About App', 'icon': Icons.info},
+      {'id': 'about', 'label': 'About App', 'icon': Icons.info_outline},
     ],
   ];
 
@@ -100,7 +100,14 @@ class _ADrawerState extends State<ADrawer> {
   List<Widget> _buildGroup(List<Map<String, Object>> items) {
     return items
         .map((item) => ListTile(
-              leading: Icon(item['icon'] as IconData),
+              horizontalTitleGap: 4,
+              leading: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(item['icon'] as IconData),
+                  VerticalDivider()
+                ],
+              ),
               title: Text(item['label'] as String),
               selected: _currentSelection == item['id'],
               onTap: () => _onSelect(item['id'] as String),

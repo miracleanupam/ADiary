@@ -403,9 +403,10 @@ class _AffirmationCard extends StatelessWidget {
                   text: "You've recorded happiness on ",
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                     color: PinkColors.shade700,
                     height: 1.5,
+                    fontFamily: 'IndieFlower'
                   ),
                 ),
                 TextSpan(
@@ -420,9 +421,10 @@ class _AffirmationCard extends StatelessWidget {
                   text: " days.\nThat's beautiful.",
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                     color: PinkColors.shade700,
                     height: 1.5,
+                    fontFamily: 'IndieFlower'
                   ),
                 ),
               ],
