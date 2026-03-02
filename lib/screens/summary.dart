@@ -254,7 +254,7 @@ class _StreakRow extends StatelessWidget {
         unit: currentStreak != 1 ? 'days' : 'day',
         captionIcon: Icons.favorite_rounded,
         captionIconColor: PinkColors.shade500,
-        caption: 'Keep going',
+        caption: currentStreak == 0 ? 'Kickstart now' : 'Keep going',
         valueMinHeight: 56,
       ),
       right: _StatBlock(
@@ -377,7 +377,7 @@ class _FrequentMoodCard extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          Text('$count times', style: _captionStyle()),
+          Text(int.tryParse(count) == 0 ? '--' : '$count times', style: _captionStyle()),
         ],
       ),
     );

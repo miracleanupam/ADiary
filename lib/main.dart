@@ -37,10 +37,10 @@ void callbackDispatcher() {
     } else if (taskName == WorkerTasks.taskMemory || taskName == WorkerTasks.taskMemoryOneOff) {
         // Fetch the first entry from exactly one year ago (null if none)
         // final memory = await entries.getEntryFromOneYearAgo();
-        final memory = await EntryProvider(password: password).getRandomEntry(0);
+        final memory = await EntryProvider(password: password).memoryFromLastYear();
         await NotificationService().showMemoryNotification(memoryTitle: memory?.content);
     } else if (taskName == WorkerTasks.taskWeekly || taskName == WorkerTasks.taskWeeklyOneOff) {
-        final count = await EntryProvider(password: password).getCount();
+        final count = await EntryProvider(password: password).countLastWeek();
         await NotificationService().showWeeklyNotification(entryCount: count);
     }
     return Future.value(true);
