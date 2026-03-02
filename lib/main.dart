@@ -1,13 +1,20 @@
 import 'package:adiary/constants.dart';
 import 'package:adiary/screens/home.dart';
 import 'package:adiary/screens/unauthenticated_screen.dart';
+import 'package:adiary/services/app_migration.dart';
 import 'package:adiary/services/authentication.dart';
 import 'package:adiary/services/notification.dart';
+import 'package:adiary/services/workmanager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppMigrationService.runIfNeeded();
+
+  // Workmanager MUST be initialised before runApp
+  await WorkmanagerService.init();
+  await WorkmanagerService.syncWithPreferences();
 
   runApp(const MeroApp());
 }
@@ -36,8 +43,8 @@ class _MeroAppState extends State<MeroApp> {
 
   void _notificate() async {
     notificationService.init();
-    notificationService.cancelNotifications();
-    notificationService.scheduleNotification();
+    // notificationService.cancelNotifications();
+    // notificationService.scheduleNotification();
   }
 
   Future<void> _authenticate() async {

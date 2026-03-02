@@ -1,8 +1,8 @@
 import 'package:adiary/compnents/alevated_button.dart';
 import 'package:adiary/compnents/styled_text.dart';
 import 'package:adiary/constants.dart';
-import 'package:adiary/services/notification.dart';
 import 'package:adiary/services/storages.dart';
+import 'package:adiary/services/workmanager.dart';
 import 'package:flutter/material.dart';
 
 class NotificationManager extends StatefulWidget {
@@ -14,110 +14,238 @@ class NotificationManager extends StatefulWidget {
 
 class _NotificationManagerState extends State<NotificationManager> {
   final Storages _storages = Storages();
-  final NotificationService _notificationService = NotificationService();
-  bool _currentStatus = true;
-  late String _currentHour = "20";
-  late String _currentMinute = "30";
+
+  // ─── State ────────────────────────────────────────────────────────────────
+  bool _masterEnabled  = true;
+  bool _streakEnabled  = true;
+  bool _memoryEnabled  = true;
+  bool _weeklyEnabled  = true;
+  String _hour   = '20';
+  String _minute = '30';
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadDataFromStorages();
+    _loadPreferences();
   }
 
-  Future<void> _loadDataFromStorages() async {
-    bool recordedNotificationStatus = await _storages.readNotificationStatus();
-    var (recordedHour, recordedMinute) = await _storages.readNotificationTime();
+  // ─── Load ─────────────────────────────────────────────────────────────────
+
+  Future<void> _loadPreferences() async {
+    final master = await _storages.readNotificationStatus();
+    final streak = await _storages.readStreakNotificationEnabled();
+    final memory = await _storages.readMemoryNotificationEnabled();
+    final weekly = await _storages.readWeeklyNotificationEnabled();
+    final (hour, minute) = await _storages.readNotificationTime();
 
     setState(() {
-      _currentStatus = recordedNotificationStatus;
-      _currentHour = recordedHour ?? _currentHour.padLeft(2, '0');
-      _currentMinute = recordedMinute ?? _currentMinute.padLeft(2, '0');
+      _masterEnabled = master;
+      _streakEnabled = streak;
+      _memoryEnabled = memory;
+      _weeklyEnabled = weekly;
+      _hour   = hour   ?? '20';
+      _minute = minute ?? '30';
+      _isLoading = false;
     });
   }
 
-  void handleNotificationToggle(bool newStatus) async {
-    setState(() {
-      _currentStatus = newStatus;
-    });
+  // ─── Handlers ─────────────────────────────────────────────────────────────
 
-    _storages.writeNotificationStatus(newStatus);
-    if (newStatus) {
-      _notificationService.scheduleNotification(
-          hour: _currentHour, minute: _currentMinute);
-    } else {
-      _notificationService.cancelNotifications();
-    }
+  Future<void> _onMasterToggle(bool value) async {
+    setState(() => _masterEnabled = value);
+    await _storages.writeNotificationStatus(value);
+    await WorkmanagerService.syncWithPreferences();
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+  Future<void> _onStreakToggle(bool value) async {
+    setState(() => _streakEnabled = value);
+    await _storages.writeStreakNotificationEnabled(value);
+    await WorkmanagerService.syncWithPreferences();
+  }
+
+  Future<void> _onMemoryToggle(bool value) async {
+    setState(() => _memoryEnabled = value);
+    await _storages.writeMemoryNotificationEnabled(value);
+    await WorkmanagerService.syncWithPreferences();
+  }
+
+  Future<void> _onWeeklyToggle(bool value) async {
+    setState(() => _weeklyEnabled = value);
+    await _storages.writeWeeklyNotificationEnabled(value);
+    await WorkmanagerService.syncWithPreferences();
+  }
+
+  Future<void> _onSelectStreakTime(BuildContext context) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour:   int.tryParse(_hour)   ?? 20,
+        minute: int.tryParse(_minute) ?? 30,
+      ),
+    );
     if (picked == null) return;
 
-    _storages.writeNotificationTime(picked.hour, picked.minute);
     setState(() {
-      _currentHour = picked.hour.toString().padLeft(2, '0');
-      _currentMinute = picked.minute.toString().padLeft(2, '0');
+      _hour   = picked.hour.toString().padLeft(2, '0');
+      _minute = picked.minute.toString().padLeft(2, '0');
     });
 
-    _notificationService.scheduleNotification(
-        hour: picked.hour.toString(), minute: picked.minute.toString());
+    // Persists the new time and reschedules only the streak task
+    await WorkmanagerService.rescheduleStreak(
+      hour:   picked.hour,
+      minute: picked.minute,
+    );
   }
+
+  // ─── Build ────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Battery optimisation warning ──────────────────────────
+                  if (_masterEnabled) ...[
+                    StyledText(
+                      value:
+                          '** If no notification is received, ensure battery optimization for the app is disabled and the app is not put to sleep by the OS.',
+                      fontSize: 16,
+                      color: PinkColors.shade300,
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // ── Individual toggles (only visible when master is on) ───
+                  if (_masterEnabled) ...[
+                    _SectionHeader(title: 'Notification Types'),
+                    const SizedBox(height: 8),
+
+                    _NotificationRow(
+                      title:    'Daily Streak Reminder',
+                      subtitle: 'Reminds you to log a happy moment each day',
+                      value:    _streakEnabled,
+                      onChanged: _onStreakToggle,
+                    ),
+
+                    // Time picker — only relevant when streak is enabled
+                    if (_streakEnabled) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            StyledText(value: 'Remind me at: $_hour:$_minute', fontSize: 16,),
+                            // const SizedBox(height: 4),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: AlevatedButton(
+                                onPressed: () => _onSelectStreakTime(context),
+                                icon: Icons.lock_clock_rounded,
+                                text: 'Change',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    _NotificationRow(
+                      title:    'Daily Memory',
+                      subtitle: 'Revisit a moment from 1 year ago if there is one',
+                      value:    _memoryEnabled,
+                      onChanged: _onMemoryToggle,
+                    ),
+
+                    _NotificationRow(
+                      title:    'Weekly Recap',
+                      subtitle: 'Summary of your happy moments last week',
+                      value:    _weeklyEnabled,
+                      onChanged: _onWeeklyToggle,
+                    ),
+
+                    const SizedBox(height: 24),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // ── Master toggle (always visible at the bottom) ─────────────────
+          Row(
+            children: [
+              Expanded(
+                child: StyledText(value: 'Please, remind me...'),
+              ),
+              Switch(value: _masterEnabled, onChanged: _onMasterToggle),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Helper widgets ──────────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return StyledText(value: title, fontSize: 18);
+  }
+}
+
+/// A single notification type row with title, subtitle and a toggle switch.
+class _NotificationRow extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _NotificationRow({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-            child: _currentStatus
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      StyledText(
-                        value:
-                            "** If no notification is received, ensure battery optimization for the app is disabled and the app is not put to sleep by the OS.",
-                        fontSize: 16,
-                        color: PinkColors.shade300,
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      StyledText(
-                          value:
-                              "Currently Selected Time: $_currentHour:$_currentMinute"),
-                      AlevatedButton(
-                          onPressed: () => _selectTime(context),
-                          icon: Icons.lock_clock_rounded,
-                          text: "Set New Time"),
-                    ],
-                  )
-                : SizedBox(
-                    height: 1,
-                  ),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Align(
-                  alignment: AlignmentGeometry.centerLeft,
-                  child: StyledText(value: 'Please, remind me...'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                StyledText(value: title),
+                StyledText(
+                  value: subtitle,
+                  fontSize: 14,
+                  color: PinkColors.shade300,
                 ),
-              ),
-              Switch(value: _currentStatus, onChanged: handleNotificationToggle)
-            ],
+              ],
+            ),
           ),
-          SizedBox(
-            height: 16,
-          )
+          Switch(value: value, onChanged: onChanged),
         ],
       ),
     );
