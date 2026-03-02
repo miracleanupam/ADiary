@@ -1,61 +1,16 @@
 // workmanager_service.dart
-import 'package:adiary/models/entry.dart';
-import 'package:adiary/services/notification.dart';
+import 'package:adiary/constants.dart';
 import 'package:adiary/services/storages.dart';
 import 'package:flutter/foundation.dart';
 import 'package:workmanager/workmanager.dart';
 
-// ─── Task name constants ───────────────────────────────────────────────────
-const kTaskStreak = 'task.streak.daily';
-const kTaskMemory = 'task.memory.daily';
-const kTaskWeekly = 'task.weekly.sunday';
-
-/// Top-level callback required by Workmanager.
-/// Must be a top-level (or static) function — NOT inside a class.
-/// This is the entry point for all background tasks.
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData) async {
-    final notifications = NotificationService();
-    final entries       = EntryProvider();
-    print(taskName);
-
-    switch (taskName) {
-
-      // ── Daily streak check ───────────────────────────────────────────────
-      case kTaskStreak:
-        final hasEntry = await entries.hasEntryToday();
-        await notifications.showStreakNotification(hasEntryToday: hasEntry);
-
-      // ── Daily memory reminder ────────────────────────────────────────────
-      case kTaskMemory:
-        // Fetch the first entry from exactly one year ago (null if none)
-        // final memory = await entries.getEntryFromOneYearAgo();
-        final memory = await entries.getRandomEntry(0);
-        await notifications.showMemoryNotification(memoryTitle: memory?.content);
-
-      // ── Weekly Sunday recap ──────────────────────────────────────────────
-      case kTaskWeekly:
-        final count = await entries.getCount();
-        await notifications.showWeeklyNotification(entryCount: count);
-    }
-
-    return Future.value(true); // Signal success to Workmanager
-  });
-}
-
 class WorkmanagerService {
   WorkmanagerService._();
-
-  static Future<void> init() async {
-    await Workmanager().initialize(callbackDispatcher);
-    if (kDebugMode) debugPrint('[WorkmanagerService] Initialized.');
-  }
 
   /// Reads all user preferences from [Storages] and schedules/cancels
   /// each task accordingly. Call this on app start and whenever
   /// notification settings change.
-  static Future<void> syncWithPreferences() async {
+  static Future<void> syncWithPreferences({ String? password }) async {
     final storages = Storages();
 
     final masterEnabled = await storages.readNotificationStatus();
@@ -77,21 +32,28 @@ class WorkmanagerService {
     // Schedule or cancel each task based on its individual toggle.
     await _syncTask(
       enabled    : streakEnabled,
-      uniqueName : kTaskStreak,
+      uniqueName : WorkerTasks.taskStreak,
+      uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
       initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
+      // initialDelay: Duration(minutes: 1),
+      passedPassword: password
     );
 
     await _syncTask(
       enabled    : memoryEnabled,
-      uniqueName : kTaskMemory,
+      uniqueName : WorkerTasks.taskMemory,
+      uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
       initialDelay: _delayUntil(DateTime.now(), hour: 9, minute: 0),
+      passedPassword: password
     );
 
     await _syncTask(
       enabled    : weeklyEnabled,
-      uniqueName : kTaskWeekly,
+      uniqueName : WorkerTasks.taskWeekly,
+      uniqueNameOneOff: WorkerTasks.taskWeeklyOneOff,
       frequency  : const Duration(days: 7),
       initialDelay: _delayUntilNextSunday(DateTime.now(), hour: 18, minute: 0),
+      passedPassword: password
     );
   }
 
@@ -110,14 +72,16 @@ class WorkmanagerService {
     final streakEnabled = await storages.readStreakNotificationEnabled();
 
     if (!masterEnabled || !streakEnabled) {
-      await Workmanager().cancelByUniqueName(kTaskStreak);
+      await Workmanager().cancelByUniqueName(WorkerTasks.taskStreak);
+      await Workmanager().cancelByUniqueName(WorkerTasks.taskStreakOneOff);
       return;
     }
 
     // Re-register with the new delay, replacing the old task
     await _syncTask(
       enabled    : true,
-      uniqueName : kTaskStreak,
+      uniqueName : WorkerTasks.taskStreak,
+      uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
       initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
     );
 
@@ -126,9 +90,12 @@ class WorkmanagerService {
 
   /// Cancels all registered tasks.
   static Future<void> cancelAll() async {
-    await Workmanager().cancelByUniqueName(kTaskStreak);
-    await Workmanager().cancelByUniqueName(kTaskMemory);
-    await Workmanager().cancelByUniqueName(kTaskWeekly);
+    await Workmanager().cancelByUniqueName(WorkerTasks.taskStreak);
+    await Workmanager().cancelByUniqueName(WorkerTasks.taskMemory);
+    await Workmanager().cancelByUniqueName(WorkerTasks.taskWeekly);
+    await Workmanager().cancelByUniqueName(WorkerTasks.taskStreakOneOff);
+    await Workmanager().cancelByUniqueName(WorkerTasks.taskMemoryOneOff);
+    await Workmanager().cancelByUniqueName(WorkerTasks.taskWeeklyOneOff);
   }
 
   // ─── Private helpers ──────────────────────────────────────────────────────
@@ -137,26 +104,42 @@ class WorkmanagerService {
   static Future<void> _syncTask({
     required bool     enabled,
     required String   uniqueName,
-    Duration frequency    = const Duration(days: 1),
-    Duration initialDelay = Duration.zero,
+    required String   uniqueNameOneOff,
+    Duration frequency = const Duration(days: 1),
+    Duration initialDelay = const Duration(days: 1),
+    String? passedPassword,
   }) async {
+    // Read password here (in foreground) and pass it to the background isolate
+    final password = passedPassword ?? await Storages().readSavedPassword();
+    if (password == null) {
+      debugPrint('[WorkmanagerService] No password found, skipping task registration');
+      return;
+    }
+
     if (!enabled) {
       await Workmanager().cancelByUniqueName(uniqueName);
       if (kDebugMode) debugPrint('[WorkmanagerService] Task cancelled: $uniqueName');
       return;
     }
 
-    print('----Registering periodic task');
+    await Workmanager().registerOneOffTask(
+      uniqueNameOneOff,
+      uniqueNameOneOff,
+      inputData: { 'password': password },
+      initialDelay: Duration(minutes: 1)
+    );
+
     await Workmanager().registerPeriodicTask(
       uniqueName,
       uniqueName,
       frequency          : frequency,
+      // frequency          : Duration(minutes: 15),
       initialDelay       : initialDelay,
+      // initialDelay       : Duration(minutes: 1),
+      inputData          : {'password': password},
       constraints        : Constraints(networkType: NetworkType.notRequired),
       existingWorkPolicy : ExistingPeriodicWorkPolicy.replace,
     );
-
-    if (kDebugMode) debugPrint('[WorkmanagerService] Task scheduled: $uniqueName (delay: $initialDelay)');
   }
 
   static Duration _delayUntil(DateTime now, {required int hour, required int minute}) {

@@ -29,11 +29,6 @@ class NotificationService {
   Future<void> init() async {
     if (_isInitialized) return;
 
-    // Request Android 13+ notification permission
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlugin?.requestNotificationsPermission();
-
     await _configureTimezone();
     await _plugin.initialize(_initSettings);
     _isInitialized = true;
@@ -43,6 +38,12 @@ class NotificationService {
     tz.initializeTimeZones();
     final info = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(info.identifier));
+  }
+
+  Future<bool> hasNotificationPermission() async {
+    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    return await androidPlugin?.areNotificationsEnabled() ?? true; // true = assume granted on iOS
   }
 
   static const _initSettings = InitializationSettings(

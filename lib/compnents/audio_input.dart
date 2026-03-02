@@ -125,6 +125,7 @@ class _AudioInputState extends State<AudioInput>
       children: [
         Text(
           'Use the button below to start/stop or redo the recording.',
+          textAlign: TextAlign.center,
           style: TextStyle(color: PinkColors.shade900),
         ),
         const SizedBox(height: 48),
@@ -155,6 +156,7 @@ class _AudioInputState extends State<AudioInput>
             widget.recordingPath.isEmpty
                 ? 'You can preview the audio here after you record something.'
                 : 'Preview:',
+            textAlign: TextAlign.center,
             style: TextStyle(color: PinkColors.shade900),
           ),
           Padding(

@@ -143,6 +143,17 @@ abstract final class LimeColors {
   static const shade900 = Color(0xFF827717);
 }
 
+// ─── Task name constants ───────────────────────────────────────────────────
+abstract final class WorkerTasks {
+  static const taskStreak = 'task.streak.daily';
+  static const taskMemory = 'task.memory.daily';
+  static const taskWeekly = 'task.weekly.sunday';
+  static const taskStreakOneOff = 'task.streak.daily.one.off';
+  static const taskMemoryOneOff = 'task.memory.daily.one.off';
+  static const taskWeeklyOneOff = 'task.weekly.sunday.one.off';
+}
+
+
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 const homePageWidgetListsForDrawer = <String, Widget>{

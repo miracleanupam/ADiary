@@ -80,15 +80,16 @@ class EntryProvider {
   late Database db;
 
   final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  final String? _injectedPassword;
 
-  EntryProvider();
+  EntryProvider({String? password}) : _injectedPassword = password;
 
   Future<void> _open() async {
-    String? securePassword = await secureStorage.read(key: 'password');
+    // Use injected password if available (background isolate),
+    // otherwise fall back to secure storage (foreground use)
+    String? securePassword = _injectedPassword ?? await secureStorage.read(key: 'password');
 
-    if (securePassword == null) {
-      return;
-    }
+    if (securePassword == null) return;
 
     String dbPath = await getDatabasesPath();
     String path = join(dbPath, 'happy_journal.db');
@@ -160,7 +161,7 @@ class EntryProvider {
           CREATE INDEX idx_entry_date_iso
           ON $tableEntry($columnDate)''');
         await db
-            .execute('''alter table $tableEntry drop column $columnContent''');
+            .execute('''alter table $tableEntry drop column date_iso''');
       }
     });
   }

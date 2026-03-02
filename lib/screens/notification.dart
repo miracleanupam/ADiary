@@ -1,8 +1,7 @@
-import 'package:adiary/compnents/alevated_button.dart';
 import 'package:adiary/compnents/styled_text.dart';
 import 'package:adiary/constants.dart';
 import 'package:adiary/services/storages.dart';
-import 'package:adiary/services/workmanager.dart';
+import 'package:adiary/services/work_manager.dart';
 import 'package:flutter/material.dart';
 
 class NotificationManager extends StatefulWidget {
@@ -16,11 +15,11 @@ class _NotificationManagerState extends State<NotificationManager> {
   final Storages _storages = Storages();
 
   // ─── State ────────────────────────────────────────────────────────────────
-  bool _masterEnabled  = true;
-  bool _streakEnabled  = true;
-  bool _memoryEnabled  = true;
-  bool _weeklyEnabled  = true;
-  String _hour   = '20';
+  bool _masterEnabled = true;
+  bool _streakEnabled = true;
+  bool _memoryEnabled = true;
+  bool _weeklyEnabled = true;
+  String _hour = '20';
   String _minute = '30';
   bool _isLoading = true;
 
@@ -44,7 +43,7 @@ class _NotificationManagerState extends State<NotificationManager> {
       _streakEnabled = streak;
       _memoryEnabled = memory;
       _weeklyEnabled = weekly;
-      _hour   = hour   ?? '20';
+      _hour = hour ?? '20';
       _minute = minute ?? '30';
       _isLoading = false;
     });
@@ -80,20 +79,20 @@ class _NotificationManagerState extends State<NotificationManager> {
     final picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(
-        hour:   int.tryParse(_hour)   ?? 20,
+        hour: int.tryParse(_hour) ?? 20,
         minute: int.tryParse(_minute) ?? 30,
       ),
     );
     if (picked == null) return;
 
     setState(() {
-      _hour   = picked.hour.toString().padLeft(2, '0');
+      _hour = picked.hour.toString().padLeft(2, '0');
       _minute = picked.minute.toString().padLeft(2, '0');
     });
 
     // Persists the new time and reschedules only the streak task
     await WorkmanagerService.rescheduleStreak(
-      hour:   picked.hour,
+      hour: picked.hour,
       minute: picked.minute,
     );
   }
@@ -133,9 +132,9 @@ class _NotificationManagerState extends State<NotificationManager> {
                     const SizedBox(height: 8),
 
                     _NotificationRow(
-                      title:    'Daily Streak Reminder',
+                      title: 'Daily Streak Reminder',
                       subtitle: 'Reminds you to log a happy moment each day',
-                      value:    _streakEnabled,
+                      value: _streakEnabled,
                       onChanged: _onStreakToggle,
                     ),
 
@@ -143,18 +142,32 @@ class _NotificationManagerState extends State<NotificationManager> {
                     if (_streakEnabled) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
-                        child: Row(
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           // crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            StyledText(value: 'Remind me at: $_hour:$_minute', fontSize: 16,),
+                            StyledText(
+                              value: 'Remind me at: $_hour:$_minute',
+                              fontSize: 16,
+                            ),
                             // const SizedBox(height: 4),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: AlevatedButton(
-                                onPressed: () => _onSelectStreakTime(context),
-                                icon: Icons.lock_clock_rounded,
-                                text: 'Change',
+                            ElevatedButton(
+                              onPressed: () => _onSelectStreakTime(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: PinkColors.shade200,
+                                foregroundColor: PinkColors.shade900,
+                                iconColor: PinkColors.shade900,
+                                textStyle: TextStyle(
+                                  color: PinkColors.shade900
+                                )
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.recycling_outlined),
+                                  const SizedBox(width: 5),
+                                  Text("Change"),
+                                ],
                               ),
                             ),
                           ],
@@ -163,16 +176,17 @@ class _NotificationManagerState extends State<NotificationManager> {
                     ],
 
                     _NotificationRow(
-                      title:    'Daily Memory',
-                      subtitle: 'Revisit a moment from 1 year ago if there is one',
-                      value:    _memoryEnabled,
+                      title: 'Daily Memory',
+                      subtitle:
+                          'Revisit a moment from 1 year ago if there is one',
+                      value: _memoryEnabled,
                       onChanged: _onMemoryToggle,
                     ),
 
                     _NotificationRow(
-                      title:    'Weekly Recap',
+                      title: 'Weekly Recap',
                       subtitle: 'Summary of your happy moments last week',
-                      value:    _weeklyEnabled,
+                      value: _weeklyEnabled,
                       onChanged: _onWeeklyToggle,
                     ),
 
@@ -186,9 +200,7 @@ class _NotificationManagerState extends State<NotificationManager> {
           // ── Master toggle (always visible at the bottom) ─────────────────
           Row(
             children: [
-              Expanded(
-                child: StyledText(value: 'Please, remind me...'),
-              ),
+              Expanded(child: StyledText(value: 'Please, remind me...')),
               Switch(value: _masterEnabled, onChanged: _onMasterToggle),
             ],
           ),

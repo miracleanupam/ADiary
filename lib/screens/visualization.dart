@@ -52,14 +52,17 @@ class _VisualizationState extends State<Visualization> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
-      child: Text(
-        "There is no data to visualize yet!",
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: PinkColors.shade900
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: const Center(
+        child: Text(
+          "There is no data to visualize yet!",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: PinkColors.shade900
+          ),
         ),
       ),
     );

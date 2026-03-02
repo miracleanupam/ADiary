@@ -146,7 +146,10 @@ class _DisplayEntryState extends State<DisplayEntry> {
       backgroundColor: PinkColors.shade100,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Oops! Didn't find happy memories."),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: const Text("Oops! Didn't find happy memories :(  "),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -156,6 +159,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
               child: Center(
                 child: Text(
                   'You will find moments of happiness! It will pass. <3',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,

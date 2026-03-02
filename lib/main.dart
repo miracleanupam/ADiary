@@ -1,20 +1,57 @@
 import 'package:adiary/constants.dart';
+import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/home.dart';
 import 'package:adiary/screens/unauthenticated_screen.dart';
 import 'package:adiary/services/app_migration.dart';
 import 'package:adiary/services/authentication.dart';
 import 'package:adiary/services/notification.dart';
-import 'package:adiary/services/workmanager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:workmanager/workmanager.dart';
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((taskName, inputData) async {
+    WidgetsFlutterBinding.ensureInitialized();
+    if (!await NotificationService().hasNotificationPermission()) {
+      return Future.value(true);
+    }
+    String? password = inputData?['password'];
+
+    if (taskName == 'test.one.off') {
+      return Future.value(true);
+    }
+
+    if (taskName == WorkerTasks.taskStreak ||
+        taskName == WorkerTasks.taskStreakOneOff) {
+      try {
+        final hasEntry =
+            await EntryProvider(password: password).hasEntryToday();
+        await NotificationService()
+            .showStreakNotification(hasEntryToday: hasEntry);
+      } catch (e) {
+        print(e);
+        print('-----this was the error------');
+      }
+    } else if (taskName == WorkerTasks.taskMemory || taskName == WorkerTasks.taskMemoryOneOff) {
+        // Fetch the first entry from exactly one year ago (null if none)
+        // final memory = await entries.getEntryFromOneYearAgo();
+        final memory = await EntryProvider(password: password).getRandomEntry(0);
+        await NotificationService().showMemoryNotification(memoryTitle: memory?.content);
+    } else if (taskName == WorkerTasks.taskWeekly || taskName == WorkerTasks.taskWeeklyOneOff) {
+        final count = await EntryProvider(password: password).getCount();
+        await NotificationService().showWeeklyNotification(entryCount: count);
+    }
+    return Future.value(true);
+  });
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppMigrationService.runIfNeeded();
 
-  // Workmanager MUST be initialised before runApp
-  await WorkmanagerService.init();
-  await WorkmanagerService.syncWithPreferences();
+  await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
 
   runApp(const MeroApp());
 }
@@ -37,14 +74,20 @@ class _MeroAppState extends State<MeroApp> {
   @override
   void initState() {
     super.initState();
-    _authenticate();
-    _notificate();
+    _setup();
   }
 
-  void _notificate() async {
-    notificationService.init();
-    // notificationService.cancelNotifications();
-    // notificationService.scheduleNotification();
+  Future<void> _setup() async {
+    await _authenticate();
+    await _askPermissions();
+  }
+
+  Future<void> _askPermissions() async {
+    // Request Android 13+ notification permission
+    final androidPlugin = FlutterLocalNotificationsPlugin()
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.requestNotificationsPermission();
   }
 
   Future<void> _authenticate() async {

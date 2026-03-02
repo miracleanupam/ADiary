@@ -32,7 +32,7 @@ class AudioButton extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(showRecorder ? Icons.edit : Icons.mic),
+          Icon(showRecorder ? Icons.edit_outlined : Icons.mic_none_outlined),
           const SizedBox(width: 5),
           Text(showRecorder ? 'Edit journal' : 'Take Me to Audio'),
         ],

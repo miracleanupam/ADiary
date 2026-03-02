@@ -102,14 +102,17 @@ class _SummaryState extends State<Summary> {
     }
 
     if (totalEntries == 0) {
-      return Center(
-        child: const Text(
-          "There is no data to summarize yet!",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: PinkColors.shade900
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: const Text(
+            "There is no data to summarize yet!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: PinkColors.shade900
+            ),
           ),
         ),
       );

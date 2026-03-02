@@ -1,6 +1,7 @@
 import 'package:adiary/constants.dart';
 import 'package:adiary/screens/drawer.dart';
 import 'package:adiary/services/password.dart';
+import 'package:adiary/services/work_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:adiary/constants.dart' as constants;
 
@@ -27,8 +28,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _checkPassword() async {
     if (!mounted) return;
     final passwordService = ADiaryPasswordService(context: context);
-    final stored = await passwordService.getPassword();
-    if (stored == null && mounted) passwordService.promptForPassword(false);
+    String? stored = await passwordService.getPassword();
+
+    if (stored == null && mounted) {
+      await passwordService.promptForPassword(false);
+      stored = await passwordService.getPassword();
+    }
+
+    await WorkmanagerService.syncWithPreferences(password: stored);
   }
 
   // ─── Navigation ───────────────────────────────────────────────────────────

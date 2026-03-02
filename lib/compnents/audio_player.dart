@@ -163,7 +163,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
       height: 24,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (!_hasFile) return const Placeholder();
+          if (!_hasFile) return const Placeholder(color: Colors.transparent,);
           final count = _waveHeights.length;
           final barW = ((constraints.maxWidth - (count - 1) * 2) / count)
               .clamp(2.0, 8.0);

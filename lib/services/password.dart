@@ -1,5 +1,6 @@
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/services/storages.dart';
+import 'package:adiary/services/work_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -21,7 +22,7 @@ class ADiaryPasswordService {
 
   Future<String?> getPassword() => _secureStorage.read(key: 'password');
 
-  void promptForPassword(bool cancelable) {
+  Future<void> promptForPassword(bool cancelable) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -81,8 +82,11 @@ class ADiaryPasswordService {
   Future<void> _savePassword() async {
     final password = _passwordController.text;
     if (password.isEmpty) return;
+    final existingPassword = await Storages().readSavedPassword();
+    print(existingPassword);
     await Storages().writeNewPassword(password);
-    await EntryProvider().reEncryptDb(password);
+    if (existingPassword != null) await EntryProvider().reEncryptDb(password);
+    await WorkmanagerService.syncWithPreferences(password: password);
     if (context.mounted) Navigator.pop(context);
   }
 }

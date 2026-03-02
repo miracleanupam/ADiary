@@ -16,10 +16,14 @@ class AddEntryTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text.rich(TextSpan(children: [
-      TextSpan(text: '🌸🌸 ', style: _blossomStyle),
-      const TextSpan(text: 'Recording Happiness...'),
-      TextSpan(text: ' 🌸🌸', style: _blossomStyle),
-    ]));
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text.rich(TextSpan(children: [
+        TextSpan(text: '🌸🌸 ', style: _blossomStyle),
+        const TextSpan(text: 'Recording Happiness...'),
+        TextSpan(text: ' 🌸🌸', style: _blossomStyle),
+        TextSpan(text: '  ')
+      ])),
+    );
   }
 }
