@@ -16,9 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:adiary/constants.dart' as constants;
 
 class AddEntry extends StatefulWidget {
-  final Function fn;
-
-  const AddEntry({super.key, required this.fn});
+  const AddEntry({super.key});
 
   @override
   State<AddEntry> createState() => _AddEntryState();
@@ -162,8 +160,6 @@ class _AddEntryState extends State<AddEntry> {
 
     final saved = await EntryProvider().upsert(entry);
     setState(() => _entryId = saved.id);
-
-    await widget.fn();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

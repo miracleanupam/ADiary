@@ -83,7 +83,6 @@ class ADiaryPasswordService {
     final password = _passwordController.text;
     if (password.isEmpty) return;
     final existingPassword = await Storages().readSavedPassword();
-    print(existingPassword);
     await Storages().writeNewPassword(password);
     if (existingPassword != null) await EntryProvider().reEncryptDb(password);
     await WorkmanagerService.syncWithPreferences(password: password);

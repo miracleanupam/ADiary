@@ -21,15 +21,22 @@ class _DashboardState extends State<Dashboard> {
     _refreshCount();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _refreshCount();
+  }
+
   Future<void> _refreshCount() async {
     final count = await EntryProvider().getCount();
     if (mounted) setState(() => _entryCount = count);
   }
 
-  void _navigate(Widget screen) {
-    Navigator.of(context).push(
+  void _navigate(Widget screen) async {
+    await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => screen),
     );
+    _refreshCount();
   }
 
   @override
@@ -86,12 +93,12 @@ class _DashboardState extends State<Dashboard> {
 
           // Actions
           AlevatedButton(
-            onPressed: () => _navigate(AddEntry(fn: _refreshCount)),
+            onPressed: () => _navigate(AddEntry()),
             icon: Icons.add,
             text: 'Add More',
           ),
           AlevatedButton(
-            onPressed: () => _navigate(DisplayEntry(fn: _refreshCount)),
+            onPressed: () => _navigate(DisplayEntry()),
             icon: Icons.sentiment_very_satisfied,
             text: 'Go down the memory lane',
           ),

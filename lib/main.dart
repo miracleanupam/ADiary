@@ -10,6 +10,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 
+// Global navigator key - top level (outside any class)
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// Background handler - top level (outside any class, needs @pragma)
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {}
+
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
@@ -38,7 +45,7 @@ void callbackDispatcher() {
         // Fetch the first entry from exactly one year ago (null if none)
         // final memory = await entries.getEntryFromOneYearAgo();
         final memory = await EntryProvider(password: password).memoryFromLastYear();
-        await NotificationService().showMemoryNotification(memoryTitle: memory?.content);
+        await NotificationService().showMemoryNotification(memoryTitle: memory?.content, id: memory?.id);
     } else if (taskName == WorkerTasks.taskWeekly || taskName == WorkerTasks.taskWeeklyOneOff) {
         final count = await EntryProvider(password: password).countLastWeek();
         await NotificationService().showWeeklyNotification(entryCount: count);
@@ -50,6 +57,8 @@ void callbackDispatcher() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppMigrationService.runIfNeeded();
+  final notificationPlugin = NotificationService();
+  notificationPlugin.init();
 
   await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
 
@@ -120,6 +129,7 @@ class _MeroAppState extends State<MeroApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'ADiary',
       theme: ThemeData(
         fontFamily: 'IndieFlower',

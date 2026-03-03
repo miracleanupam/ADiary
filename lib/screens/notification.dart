@@ -111,40 +111,38 @@ class _NotificationManagerState extends State<NotificationManager> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Battery optimisation warning ──────────────────────────
-                  if (_masterEnabled) ...[
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Battery optimisation warning ──────────────────────────
                     StyledText(
                       value:
-                          '** If no notification is received, ensure battery optimization for the app is disabled and the app is not put to sleep by the OS.',
+                          '** If no notification is received, ensure battery optimization for the app is disabled and the app is not put to sleep by the OS. **',
                       fontSize: 16,
                       color: PinkColors.shade300,
                     ),
                     const SizedBox(height: 24),
-                  ],
-
-                  // ── Individual toggles (only visible when master is on) ───
-                  if (_masterEnabled) ...[
+              
+                    // ── Individual toggles (only visible when master is on) ───
                     _SectionHeader(title: 'Notification Types'),
                     const SizedBox(height: 8),
-
+                    Divider(),
                     _NotificationRow(
                       title: 'Daily Streak Reminder',
                       subtitle: 'Reminds you to log a happy moment each day',
                       value: _streakEnabled,
+                      enabled: _masterEnabled,
                       onChanged: _onStreakToggle,
                     ),
-
+                    
                     // Time picker — only relevant when streak is enabled
                     if (_streakEnabled) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          // crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             StyledText(
                               value: 'Remind me at: $_hour:$_minute',
@@ -154,17 +152,15 @@ class _NotificationManagerState extends State<NotificationManager> {
                             ElevatedButton(
                               onPressed: () => _onSelectStreakTime(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: PinkColors.shade200,
-                                foregroundColor: PinkColors.shade900,
-                                iconColor: PinkColors.shade900,
-                                textStyle: TextStyle(
-                                  color: PinkColors.shade900
-                                )
-                              ),
+                                  backgroundColor: PinkColors.shade200,
+                                  foregroundColor: PinkColors.shade900,
+                                  iconColor: PinkColors.shade900,
+                                  textStyle:
+                                      TextStyle(color: PinkColors.shade900)),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.recycling_outlined),
+                                  Icon(Icons.autorenew),
                                   const SizedBox(width: 5),
                                   Text("Change"),
                                 ],
@@ -175,24 +171,29 @@ class _NotificationManagerState extends State<NotificationManager> {
                       ),
                     ],
 
+                    Divider(),
+              
                     _NotificationRow(
                       title: 'Daily Memory',
                       subtitle:
                           'Revisit a moment from 1 year ago if there is one',
                       value: _memoryEnabled,
+                      enabled: _masterEnabled,
                       onChanged: _onMemoryToggle,
                     ),
-
+              
+                    Divider(),
                     _NotificationRow(
                       title: 'Weekly Recap',
                       subtitle: 'Summary of your happy moments last week',
                       value: _weeklyEnabled,
+                      enabled: _masterEnabled,
                       onChanged: _onWeeklyToggle,
                     ),
-
+              
                     const SizedBox(height: 24),
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -219,7 +220,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StyledText(value: title, fontSize: 18);
+    return StyledText(value: title, fontSize: 32,);
   }
 }
 
@@ -228,6 +229,7 @@ class _NotificationRow extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool value;
+  final bool enabled;
   final ValueChanged<bool> onChanged;
 
   const _NotificationRow({
@@ -235,6 +237,7 @@ class _NotificationRow extends StatelessWidget {
     required this.subtitle,
     required this.value,
     required this.onChanged,
+    required this.enabled,
   });
 
   @override
@@ -257,7 +260,7 @@ class _NotificationRow extends StatelessWidget {
               ],
             ),
           ),
-          Switch(value: value, onChanged: onChanged),
+          Switch(value: value, onChanged: enabled ? onChanged : null),
         ],
       ),
     );

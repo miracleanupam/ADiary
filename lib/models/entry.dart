@@ -219,6 +219,21 @@ class EntryProvider {
     }
   }
 
+  Future<Entry?> getEntryById(int id) async {
+    await _open();
+    try {
+      List<Map> maps = await db.rawQuery(
+          '''select * from $tableEntry where $columnId = ? and $columnDiscardedAt is null order by random() limit 1;''', [id]);
+      if (maps.isNotEmpty) {
+        Entry result = Entry.fromMap(maps.first as Map<String, dynamic>);
+        return result;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<int> getCount() async {
     try {
       await _open();
@@ -555,6 +570,38 @@ class EntryProvider {
     ''');
 
     return (result.first['has_entry'] as int) == 1;
+  }
+
+  Future<int> countLastWeek() async {
+    await _open();
+
+    final res = await db.rawQuery('''
+      SELECT COUNT(*)
+        FROM $tableEntry
+        WHERE date($columnDate) >= date('now', '-8 days')
+        AND date($columnDate) <= date('now', '-1 day')
+        AND $columnDiscardedAt is null
+    ''');
+    return Sqflite.firstIntValue(res) ?? 0;
+  }
+
+  Future<Entry?> memoryFromLastYear() async {
+    await _open();
+    List<Map> result = await db.rawQuery('''
+      SELECT *
+      FROM $tableEntry
+      WHERE strftime('%m-%d', $columnDate) = strftime('%m-%d', 'now')
+      AND strftime('%Y', $columnDate) = strftime('%Y', 'now', '-1 year')
+      AND $columnDiscardedAt is null
+      ORDER BY RANDOM()
+      LIMIT 1
+    ''');
+
+    if (result.isNotEmpty) {
+      Entry ent = Entry.fromMap(result.first as Map<String, dynamic>);
+      return ent;
+    }
+    return null;
   }
 
   Future<bool> requestStoragePermission() async {

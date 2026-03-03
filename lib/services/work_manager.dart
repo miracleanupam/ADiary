@@ -35,7 +35,6 @@ class WorkmanagerService {
       uniqueName : WorkerTasks.taskStreak,
       uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
       initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
-      // initialDelay: Duration(minutes: 1),
       passedPassword: password
     );
 
@@ -43,7 +42,7 @@ class WorkmanagerService {
       enabled    : memoryEnabled,
       uniqueName : WorkerTasks.taskMemory,
       uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
-      initialDelay: _delayUntil(DateTime.now(), hour: 9, minute: 0),
+      initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
       passedPassword: password
     );
 
@@ -126,16 +125,14 @@ class WorkmanagerService {
       uniqueNameOneOff,
       uniqueNameOneOff,
       inputData: { 'password': password },
-      initialDelay: Duration(minutes: 1)
+      initialDelay: initialDelay
     );
 
     await Workmanager().registerPeriodicTask(
       uniqueName,
       uniqueName,
       frequency          : frequency,
-      // frequency          : Duration(minutes: 15),
       initialDelay       : initialDelay,
-      // initialDelay       : Duration(minutes: 1),
       inputData          : {'password': password},
       constraints        : Constraints(networkType: NetworkType.notRequired),
       existingWorkPolicy : ExistingPeriodicWorkPolicy.replace,

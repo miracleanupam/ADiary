@@ -6,6 +6,7 @@ import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/compnents/alevated_button.dart';
 import 'package:adiary/compnents/styled_text.dart';
+import 'package:adiary/screens/home.dart';
 import 'package:adiary/services/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,9 +17,9 @@ import 'package:adiary/constants.dart' as constants;
 // ─── DisplayEntry ─────────────────────────────────────────────────────────────
 
 class DisplayEntry extends StatefulWidget {
-  final Function fn;
+  final int? selectedEntryId;
 
-  const DisplayEntry({super.key, required this.fn});
+  const DisplayEntry({super.key, this.selectedEntryId});
 
   @override
   State<DisplayEntry> createState() => _DisplayEntryState();
@@ -44,7 +45,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
   void initState() {
     super.initState();
     _loadImageDirectory();
-    _loadRandomEntry();
+    _loadEntry();
   }
 
   @override
@@ -58,6 +59,28 @@ class _DisplayEntryState extends State<DisplayEntry> {
   Future<void> _loadImageDirectory() async {
     final dir = await getApplicationDocumentsDirectory();
     if (mounted) setState(() => _directory = dir.path);
+  }
+
+  Future<void> _loadEntry() async {
+    if (widget.selectedEntryId == null) {
+      return _loadRandomEntry();
+    }
+
+    final entry = await EntryProvider().getEntryById(widget.selectedEntryId!);
+    if (entry == null) {
+      return _loadRandomEntry();
+    }
+
+    final mood = _findMood(entry.mood);
+    final audioPath = await _resolveAudioPath(entry.audio);
+
+    if (mounted) {
+      setState(() {
+        _entry = entry;
+        _mood = mood;
+        _audioPath = audioPath;
+      });
+    }
   }
 
   Future<void> _loadRandomEntry() async {
@@ -105,7 +128,8 @@ class _DisplayEntryState extends State<DisplayEntry> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("No, I'll keep it!", style: TextStyle(fontSize: 16)),
+            child:
+                const Text("No, I'll keep it!", style: TextStyle(fontSize: 16)),
           ),
         ],
       ),
@@ -123,7 +147,6 @@ class _DisplayEntryState extends State<DisplayEntry> {
 
     final succeeded = await EntryProvider().delete(_entry?.id);
     if (succeeded) {
-      await widget.fn();
       _loadRandomEntry();
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -181,33 +204,51 @@ class _DisplayEntryState extends State<DisplayEntry> {
   }
 
   Widget _buildEntryView() {
-    return Scaffold(
-      backgroundColor: PinkColors.shade100,
-      appBar: AppBar(
-        flexibleSpace: constants.appBarBg,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: _buildAppBarTitle(),
-      ),
-      body: Container(
-        decoration: constants.bgDecoration,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildEntryHeader(),
-              const Divider(),
-              Expanded(child: _buildScrollableContent()),
-              if (_audioPath != null) AudioPlayerWidget(filePath: _audioPath!),
-              const Divider(),
-              const SizedBox(height: 16),
-              AlevatedButton(
-                onPressed: _loadRandomEntry,
-                icon: Icons.cached,
-                text: 'See Another',
-              ),
-              const SizedBox(height: 16),
-            ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const MyHomePage()),
+          (Route<dynamic> route) =>
+              false, // This condition removes ALL previous routes
+        );
+      },
+      child: Scaffold(
+        backgroundColor: PinkColors.shade100,
+        appBar: AppBar(
+          flexibleSpace: constants.appBarBg,
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: _buildAppBarTitle(),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.maybePop(context), 
+          ),
+        ),
+        body: Container(
+          decoration: constants.bgDecoration,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildEntryHeader(),
+                const Divider(),
+                Expanded(child: _buildScrollableContent()),
+                if (_audioPath != null)
+                  AudioPlayerWidget(filePath: _audioPath!),
+                const Divider(),
+                const SizedBox(height: 16),
+                AlevatedButton(
+                  onPressed: _loadRandomEntry,
+                  icon: Icons.cached,
+                  text: 'See Another',
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
@@ -277,7 +318,8 @@ class _DisplayEntryState extends State<DisplayEntry> {
                 if (_mood != null && _mood!.isNotEmpty)
                   MoodPill(fn: () {}, mood: _mood),
                 const SizedBox(height: 16),
-                Text('${_entry?.content}', style: const TextStyle(fontSize: 24)),
+                Text('${_entry?.content}',
+                    style: const TextStyle(fontSize: 24)),
                 const SizedBox(height: 24),
                 if (_entry?.images != null && _entry!.images!.isNotEmpty)
                   _buildImageSection(),
@@ -377,8 +419,10 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
                   pageController: _pageController,
                   itemCount: widget.imagePaths.length,
                   scrollPhysics: const BouncingScrollPhysics(),
-                  backgroundDecoration: const BoxDecoration(color: Colors.black),
-                  onPageChanged: (index) => setState(() => _currentIndex = index),
+                  backgroundDecoration:
+                      const BoxDecoration(color: Colors.black),
+                  onPageChanged: (index) =>
+                      setState(() => _currentIndex = index),
                   builder: (context, index) => PhotoViewGalleryPageOptions(
                     imageProvider: FileImage(
                       File('$_directory/${widget.imagePaths[index]}'),

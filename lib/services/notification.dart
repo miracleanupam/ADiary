@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:adiary/main.dart';
+import 'package:adiary/screens/display_entry.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -30,8 +35,38 @@ class NotificationService {
     if (_isInitialized) return;
 
     await _configureTimezone();
-    await _plugin.initialize(_initSettings);
+    await _plugin.initialize(
+      _initSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        _handleTap(response.payload);
+      },
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+    );
+    // Handle tap when app was fully closed
+    final launchDetails = await _plugin.getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp == true) {
+      _handleTap(launchDetails?.notificationResponse?.payload);
+    }
     _isInitialized = true;
+  }
+
+  void _handleTap(String? payload) {
+    if (payload == null) return;
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+    final data = jsonDecode(payload);
+    switch (data['kind']) {
+      case 'streak':
+        break;
+      case 'memory':
+        final entryId = data['id'];
+        Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => DisplayEntry(selectedEntryId: entryId,)),
+      );
+        break;
+      case 'weekly':
+        break;
+    }
   }
 
   Future<void> _configureTimezone() async {
@@ -75,6 +110,7 @@ class NotificationService {
   /// Shows a congratulatory message if [hasEntryToday] is true,
   /// otherwise nudges the user to record a happy moment.
   Future<void> showStreakNotification({required bool hasEntryToday}) async {
+
     await _ensureInitialized();
 
     final title  = hasEntryToday ? '🔥 Streak maintained!' : '⏰ Don\'t break your streak!';
@@ -93,7 +129,7 @@ class NotificationService {
   /// Fires the "On this day" memory notification.
   /// [memoryTitle] is the title of the entry from one year ago,
   /// or null if no entry exists.
-  Future<void> showMemoryNotification({String? memoryTitle}) async {
+  Future<void> showMemoryNotification({String? memoryTitle, int? id}) async {
     await _ensureInitialized();
 
     // Silently skip if there's nothing to remind about
@@ -104,6 +140,7 @@ class NotificationService {
       '📸 On this day, 1 year ago...',
       'You wrote: "$memoryTitle" — tap to revisit the memory.',
       _details(_channelMemory, 'Memory Reminders', 'Daily "on this day" memory notifications'),
+      payload: jsonEncode({ 'kind': 'memory', 'id': id })
     );
   }
 
