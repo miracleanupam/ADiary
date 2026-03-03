@@ -150,7 +150,7 @@ class _NotificationManagerState extends State<NotificationManager> {
                             ),
                             // const SizedBox(height: 4),
                             ElevatedButton(
-                              onPressed: () => _onSelectStreakTime(context),
+                              onPressed: (_masterEnabled) ? () => _onSelectStreakTime(context) : null,
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: PinkColors.shade200,
                                   foregroundColor: PinkColors.shade900,
