@@ -138,7 +138,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
 
   Future<void> _confirmDelete() async {
     final auth = ADauthenticationService();
-    final authenticated = await auth.authenticate();
+    final authenticated = await auth.authenticate(context);
 
     if (!authenticated) {
       if (mounted) Navigator.pop(context);

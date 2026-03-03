@@ -83,12 +83,14 @@ class _MeroAppState extends State<MeroApp> {
   @override
   void initState() {
     super.initState();
-    _setup();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _setup();
+    });
   }
 
   Future<void> _setup() async {
-    await _authenticate();
     await _askPermissions();
+    await _authenticate();
   }
 
   Future<void> _askPermissions() async {
@@ -107,7 +109,10 @@ class _MeroAppState extends State<MeroApp> {
         _isAuthenticating = true;
         _authorized = 'Authenticating';
       });
-      authenticated = await auth.authenticate();
+      final dialogContext = navigatorKey.currentContext;
+      if (dialogContext == null) return;
+
+      authenticated = await auth.authenticate(dialogContext);
 
       setState(() {
         _isAuthenticating = false;

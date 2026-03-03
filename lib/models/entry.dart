@@ -406,6 +406,7 @@ class EntryProvider {
               date($columnDate) AS day,
               COUNT(*) AS total
           FROM $tableEntry
+          where $columnDiscardedAt is null
           GROUP BY date($columnDate)
       )
 
@@ -438,7 +439,7 @@ class EntryProvider {
     final rows = await db.rawQuery('''
       SELECT $columnMood, COUNT(*) as count
       FROM $tableEntry
-      WHERE $columnMood IS NOT NULL AND TRIM($columnMood) != ''
+      WHERE $columnMood IS NOT NULL AND TRIM($columnMood) != '' and $columnDiscardedAt is null
       GROUP BY $columnMood
       ORDER BY count DESC
     ''');
@@ -565,7 +566,7 @@ class EntryProvider {
       SELECT EXISTS (
           SELECT 1
           FROM $tableEntry
-          WHERE date($columnDate) = date('now')
+          WHERE date($columnDate) = date('now') and $columnDiscardedAt is null
       ) AS has_entry
     ''');
 

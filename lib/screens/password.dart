@@ -13,7 +13,7 @@ class PasswordManager extends StatefulWidget {
 class _PasswordManagerState extends State<PasswordManager> {
   void _promptForPassword() async {
     final ADauthenticationService auth = ADauthenticationService();
-    bool authenticated = await auth.authenticate();
+    bool authenticated = await auth.authenticate(context);
 
     if (authenticated && mounted) {
       ADiaryPasswordService passwordService =
@@ -34,7 +34,7 @@ class _PasswordManagerState extends State<PasswordManager> {
 
   void _showPassword() async {
     final ADauthenticationService auth = ADauthenticationService();
-    bool authenticated = await auth.authenticate();
+    bool authenticated = await auth.authenticate(context, passwordFallback: false);
 
     if (authenticated && mounted) {
       ADiaryPasswordService passwordService =
@@ -54,11 +54,11 @@ class _PasswordManagerState extends State<PasswordManager> {
         children: [
           AlevatedButton(
               onPressed: _showPassword,
-              icon: Icons.visibility,
+              icon: Icons.visibility_outlined,
               text: 'Show Password'),
           AlevatedButton(
               onPressed: _promptForPassword,
-              icon: Icons.key,
+              icon: Icons.autorenew_outlined,
               text: 'Change Password'),
         ],
       ),

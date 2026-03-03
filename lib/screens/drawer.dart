@@ -27,7 +27,7 @@ class _ADrawerState extends State<ADrawer> {
       {'id': 'visualization', 'label': 'Visualization', 'icon': Icons.stacked_line_chart_outlined},
     ],
     [
-      {'id': 'notification', 'label': 'Notification', 'icon': Icons.notification_important_outlined},
+      {'id': 'notification', 'label': 'Notifications', 'icon': Icons.notification_important_outlined},
       {'id': 'export', 'label': 'Export Data', 'icon': Icons.download_outlined},
       {'id': 'import', 'label': 'Import Data', 'icon': Icons.upload_outlined},
     ],

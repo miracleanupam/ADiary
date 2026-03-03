@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:adiary/main.dart';
+import 'package:adiary/screens/add_entry.dart';
 import 'package:adiary/screens/display_entry.dart';
+import 'package:adiary/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -21,14 +23,14 @@ class NotificationService {
   bool get isInitialized => _isInitialized;
 
   // ─── Notification IDs ────────────────────────────────────────────────────
-  static const int _idStreak   = 1;
-  static const int _idMemory   = 2;
-  static const int _idWeekly   = 3;
+  static const int _idStreak = 1;
+  static const int _idMemory = 2;
+  static const int _idWeekly = 3;
 
   // ─── Channel IDs ─────────────────────────────────────────────────────────
-  static const String _channelStreak  = 'streak_channel';
-  static const String _channelMemory  = 'memory_channel';
-  static const String _channelWeekly  = 'weekly_channel';
+  static const String _channelStreak = 'streak_channel';
+  static const String _channelMemory = 'memory_channel';
+  static const String _channelWeekly = 'weekly_channel';
 
   // ─── Init ─────────────────────────────────────────────────────────────────
   Future<void> init() async {
@@ -57,12 +59,18 @@ class NotificationService {
     final data = jsonDecode(payload);
     switch (data['kind']) {
       case 'streak':
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => data['dashboard'] ? MyHomePage() : AddEntry()),
+        );
         break;
       case 'memory':
         final entryId = data['id'];
         Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => DisplayEntry(selectedEntryId: entryId,)),
-      );
+          MaterialPageRoute(
+              builder: (_) => DisplayEntry(
+                    selectedEntryId: entryId,
+                  )),
+        );
         break;
       case 'weekly':
         break;
@@ -78,7 +86,8 @@ class NotificationService {
   Future<bool> hasNotificationPermission() async {
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
-    return await androidPlugin?.areNotificationsEnabled() ?? true; // true = assume granted on iOS
+    return await androidPlugin?.areNotificationsEnabled() ??
+        true; // true = assume granted on iOS
   }
 
   static const _initSettings = InitializationSettings(
@@ -92,7 +101,8 @@ class NotificationService {
 
   // ─── Notification details helpers ─────────────────────────────────────────
 
-  NotificationDetails _details(String channelId, String channelName, String desc) =>
+  NotificationDetails _details(
+          String channelId, String channelName, String desc) =>
       NotificationDetails(
         android: AndroidNotificationDetails(
           channelId,
@@ -110,11 +120,11 @@ class NotificationService {
   /// Shows a congratulatory message if [hasEntryToday] is true,
   /// otherwise nudges the user to record a happy moment.
   Future<void> showStreakNotification({required bool hasEntryToday}) async {
-
     await _ensureInitialized();
 
-    final title  = hasEntryToday ? '🔥 Streak maintained!' : '⏰ Don\'t break your streak!';
-    final body   = hasEntryToday
+    final title =
+        hasEntryToday ? '🔥 Streak maintained!' : '⏰ Don\'t break your streak!';
+    final body = hasEntryToday
         ? 'Great job! You recorded a happy moment today. Keep it up!'
         : 'You haven\'t logged a happy moment yet today. Take a minute to record one!';
 
@@ -122,7 +132,9 @@ class NotificationService {
       _idStreak,
       title,
       body,
-      _details(_channelStreak, 'Streak Reminders', 'Daily streak check-in notifications'),
+      _details(_channelStreak, 'Streak Reminders',
+          'Daily streak check-in notifications'),
+      payload: jsonEncode({'kind': 'streak', 'dashboard': hasEntryToday })
     );
   }
 
@@ -136,12 +148,13 @@ class NotificationService {
     if (memoryTitle == null) return;
 
     await _plugin.show(
-      _idMemory,
-      '📸 On this day, 1 year ago...',
-      'You wrote: "$memoryTitle" — tap to revisit the memory.',
-      _details(_channelMemory, 'Memory Reminders', 'Daily "on this day" memory notifications'),
-      payload: jsonEncode({ 'kind': 'memory', 'id': id })
-    );
+        _idMemory,
+        '📸 On this day, 1 year ago...',
+        'You wrote: "$memoryTitle" — tap to revisit the memory.',
+        _details(_channelMemory, 'Memory Reminders',
+            'Daily "on this day" memory notifications'),
+        payload: jsonEncode({'kind': 'memory', 'id': id})
+      );
   }
 
   /// Fires the weekly summary notification on Sundays.
@@ -157,7 +170,8 @@ class NotificationService {
       _idWeekly,
       '📅 Your weekly recap',
       body,
-      _details(_channelWeekly, 'Weekly Recap', 'Weekly summary of your happy moments'),
+      _details(_channelWeekly, 'Weekly Recap',
+          'Weekly summary of your happy moments'),
     );
   }
 
