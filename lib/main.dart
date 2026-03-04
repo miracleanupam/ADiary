@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/screens/home.dart';
@@ -20,37 +22,42 @@ void notificationTapBackground(NotificationResponse response) {}
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
-    WidgetsFlutterBinding.ensureInitialized();
-    if (!await NotificationService().hasNotificationPermission()) {
-      return Future.value(true);
-    }
-    String? password = inputData?['password'];
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      DartPluginRegistrant.ensureInitialized();
 
-    if (taskName == 'test.one.off') {
-      return Future.value(true);
-    }
+      final notificationService = NotificationService();
+      final password = inputData?['password'] as String?;
 
-    if (taskName == WorkerTasks.taskStreak ||
-        taskName == WorkerTasks.taskStreakOneOff) {
-      try {
-        final hasEntry =
-            await EntryProvider(password: password).hasEntryToday();
-        await NotificationService()
-            .showStreakNotification(hasEntryToday: hasEntry);
-      } catch (e) {
-        print(e);
-        print('-----this was the error------');
+      if (!await notificationService.hasNotificationPermission()) {
+        return true;
       }
-    } else if (taskName == WorkerTasks.taskMemory || taskName == WorkerTasks.taskMemoryOneOff) {
-        // Fetch the first entry from exactly one year ago (null if none)
-        // final memory = await entries.getEntryFromOneYearAgo();
-        final memory = await EntryProvider(password: password).memoryFromLastYear();
-        await NotificationService().showMemoryNotification(memoryTitle: memory?.content, id: memory?.id);
-    } else if (taskName == WorkerTasks.taskWeekly || taskName == WorkerTasks.taskWeeklyOneOff) {
-        final count = await EntryProvider(password: password).countLastWeek();
-        await NotificationService().showWeeklyNotification(entryCount: count);
+      final entryProvider = EntryProvider(password: password);
+
+      if (taskName == WorkerTasks.taskStreak ||
+          taskName == WorkerTasks.taskStreakOneOff) {
+        final hasEntry = await entryProvider.hasEntryToday();
+        await notificationService.showStreakNotification(hasEntryToday: hasEntry);
+
+      } else if (taskName == WorkerTasks.taskMemory ||
+          taskName == WorkerTasks.taskMemoryOneOff) {
+        final memory = await entryProvider.memoryFromLastYear();
+        await notificationService.showMemoryNotification(
+          memoryTitle: memory?.content,
+          id: memory?.id,
+        );
+
+      } else if (taskName == WorkerTasks.taskWeekly ||
+          taskName == WorkerTasks.taskWeeklyOneOff) {
+        final count = await entryProvider.countLastWeek();
+        await notificationService.showWeeklyNotification(entryCount: count);
+
+      } else {
+      }
+      return true;
+    } catch (e) {
+      return true;
     }
-    return Future.value(true);
   });
 }
 

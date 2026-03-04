@@ -61,20 +61,13 @@ class WorkmanagerService {
   static Future<void> rescheduleStreak({
     required int hour,
     required int minute,
+    required String? password,
   }) async {
     final storages = Storages();
 
     // Persist the new time
     await storages.writeNotificationTime(hour, minute);
-
-    final masterEnabled = await storages.readNotificationStatus();
-    final streakEnabled = await storages.readStreakNotificationEnabled();
-
-    if (!masterEnabled || !streakEnabled) {
-      await Workmanager().cancelByUniqueName(WorkerTasks.taskStreak);
-      await Workmanager().cancelByUniqueName(WorkerTasks.taskStreakOneOff);
-      return;
-    }
+    await _cancelStreak();
 
     // Re-register with the new delay, replacing the old task
     await _syncTask(
@@ -82,18 +75,28 @@ class WorkmanagerService {
       uniqueName : WorkerTasks.taskStreak,
       uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
       initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
+      passedPassword: password
     );
-
-    if (kDebugMode) debugPrint('[WorkmanagerService] Streak rescheduled → $hour:$minute');
   }
 
   /// Cancels all registered tasks.
   static Future<void> cancelAll() async {
+    await _cancelStreak();
+    await _cancelMemory();
+    await _cancelWeekly();
+  }
+
+  static Future<void> _cancelStreak() async {
     await Workmanager().cancelByUniqueName(WorkerTasks.taskStreak);
-    await Workmanager().cancelByUniqueName(WorkerTasks.taskMemory);
-    await Workmanager().cancelByUniqueName(WorkerTasks.taskWeekly);
     await Workmanager().cancelByUniqueName(WorkerTasks.taskStreakOneOff);
+  }
+  static Future<void> _cancelMemory() async {
+    await Workmanager().cancelByUniqueName(WorkerTasks.taskMemory);
     await Workmanager().cancelByUniqueName(WorkerTasks.taskMemoryOneOff);
+  }
+
+  static Future<void> _cancelWeekly() async {
+    await Workmanager().cancelByUniqueName(WorkerTasks.taskWeekly);
     await Workmanager().cancelByUniqueName(WorkerTasks.taskWeeklyOneOff);
   }
 
@@ -111,13 +114,12 @@ class WorkmanagerService {
     // Read password here (in foreground) and pass it to the background isolate
     final password = passedPassword ?? await Storages().readSavedPassword();
     if (password == null) {
-      debugPrint('[WorkmanagerService] No password found, skipping task registration');
       return;
     }
 
+
     if (!enabled) {
       await Workmanager().cancelByUniqueName(uniqueName);
-      if (kDebugMode) debugPrint('[WorkmanagerService] Task cancelled: $uniqueName');
       return;
     }
 
@@ -135,7 +137,7 @@ class WorkmanagerService {
       initialDelay       : initialDelay,
       inputData          : {'password': password},
       constraints        : Constraints(networkType: NetworkType.notRequired),
-      existingWorkPolicy : ExistingPeriodicWorkPolicy.replace,
+      existingWorkPolicy : ExistingPeriodicWorkPolicy.update,
     );
   }
 

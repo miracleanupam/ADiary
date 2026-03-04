@@ -14,7 +14,6 @@ class AppMigrationService {
   }
 
   static Future<void> _runMigrations() async {
-    print('----Running App Migration');
     await FlutterLocalNotificationsPlugin().cancelAll();
   }
 }

@@ -434,6 +434,6 @@ class BarChartPainter extends CustomPainter {
   String _formatLabel(String rawLabel) {
     final parts = rawLabel.split('-');
     final monthInt = int.parse(parts.last);
-    return monthInt == 1 ? '${parts.first}-1' : '$monthInt';
+    return monthInt == 1 ? '${parts.first} - 1' : '$monthInt';
   }
 }

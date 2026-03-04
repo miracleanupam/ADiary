@@ -82,6 +82,14 @@ class _NotificationManagerState extends State<NotificationManager> {
         hour: int.tryParse(_hour) ?? 20,
         minute: int.tryParse(_minute) ?? 30,
       ),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(1.0), // Prevent text scaling issues
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked == null) return;
 
@@ -92,9 +100,9 @@ class _NotificationManagerState extends State<NotificationManager> {
 
     // Persists the new time and reschedules only the streak task
     await WorkmanagerService.rescheduleStreak(
-      hour: picked.hour,
-      minute: picked.minute,
-    );
+        hour: picked.hour,
+        minute: picked.minute,
+        password: await _storages.readSavedPassword());
   }
 
   // ─── Build ────────────────────────────────────────────────────────────────
@@ -136,40 +144,38 @@ class _NotificationManagerState extends State<NotificationManager> {
                       enabled: _masterEnabled,
                       onChanged: _onStreakToggle,
                     ),
-                    
-                    // Time picker — only relevant when streak is enabled
-                    if (_streakEnabled) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            StyledText(
-                              value: 'Remind me at: $_hour:$_minute',
-                              fontSize: 16,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          StyledText(
+                            value: 'Remind me at: $_hour:$_minute',
+                            fontSize: 16,
+                          ),
+                          // const SizedBox(height: 4),
+                          ElevatedButton(
+                            onPressed: (_masterEnabled && _streakEnabled)
+                                ? () => _onSelectStreakTime(context)
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: PinkColors.shade200,
+                                foregroundColor: PinkColors.shade900,
+                                iconColor: PinkColors.shade900,
+                                textStyle:
+                                    TextStyle(color: PinkColors.shade900)),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.autorenew),
+                                const SizedBox(width: 5),
+                                Text("Change"),
+                              ],
                             ),
-                            // const SizedBox(height: 4),
-                            ElevatedButton(
-                              onPressed: (_masterEnabled) ? () => _onSelectStreakTime(context) : null,
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: PinkColors.shade200,
-                                  foregroundColor: PinkColors.shade900,
-                                  iconColor: PinkColors.shade900,
-                                  textStyle:
-                                      TextStyle(color: PinkColors.shade900)),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.autorenew),
-                                  const SizedBox(width: 5),
-                                  Text("Change"),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
 
                     Divider(),
               
@@ -220,7 +226,10 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StyledText(value: title, fontSize: 32,);
+    return StyledText(
+      value: title,
+      fontSize: 32,
+    );
   }
 }
 

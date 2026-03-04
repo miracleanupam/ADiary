@@ -158,7 +158,7 @@ class EntryProvider {
           ''');
         await db.execute('''update $tableEntry set date = date_iso''');
         await db.execute('''
-          CREATE INDEX idx_entry_date_iso
+          CREATE INDEX idx_entry_date
           ON $tableEntry($columnDate)''');
         await db
             .execute('''alter table $tableEntry drop column date_iso''');
@@ -317,8 +317,8 @@ class EntryProvider {
 
     final rows = await db.rawQuery('''
       WITH RECURSIVE months(month) AS (
-        -- Start from earliest available month
-        SELECT substr(MIN($columnDate), 1, 7)
+        -- Start from January of earliest available year
+        SELECT strftime('%Y-01', MIN($columnDate))
         FROM $tableEntry
         WHERE $columnDiscardedAt IS NULL
 
