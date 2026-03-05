@@ -109,10 +109,9 @@ class _SummaryState extends State<Summary> {
             "There is no data to summarize yet!",
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: PinkColors.shade900
-            ),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: PinkColors.shade900),
           ),
         ),
       );
@@ -129,7 +128,8 @@ class _SummaryState extends State<Summary> {
             const SizedBox(height: _kSectionGap),
 
             // Streak pair
-            _StreakRow(currentStreak: currentStreak, longestStreak: longestStreak),
+            _StreakRow(
+                currentStreak: currentStreak, longestStreak: longestStreak),
 
             const SizedBox(height: _kSectionGap),
 
@@ -229,7 +229,8 @@ class _HeaderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(CupertinoIcons.sparkles, color: PinkColors.shade500, size: 16),
+              Icon(CupertinoIcons.sparkles,
+                  color: PinkColors.shade500, size: 16),
             ],
           ),
         ],
@@ -290,17 +291,23 @@ class _MediaSummaryCard extends StatelessWidget {
           _CardTitle(icon: Icons.photo_camera_outlined, label: 'Media Summary'),
           Divider(color: PinkColors.shade100),
           const SizedBox(height: 8),
-
           Padding(
             padding: const EdgeInsets.only(left: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _MediaRow(icon: Icons.photo_library,      label: 'Images',      value: imageCount),
+                _MediaRow(
+                    icon: Icons.photo_library,
+                    label: 'Images',
+                    value: imageCount),
                 const SizedBox(height: 8),
-                _MediaRow(icon: Icons.music_note, label: 'Audio',       value: audioCount),
+                _MediaRow(
+                    icon: Icons.music_note, label: 'Audio', value: audioCount),
                 const SizedBox(height: 8),
-                _MediaRow(icon: Icons.bar_chart_outlined,  label: 'Total Media', value: imageCount + audioCount),
+                _MediaRow(
+                    icon: Icons.bar_chart_outlined,
+                    label: 'Total Media',
+                    value: imageCount + audioCount),
               ],
             ),
           ),
@@ -324,7 +331,7 @@ class _DayAndDeletedRow extends StatelessWidget {
   Widget build(BuildContext context) {
     // Provider format: "<day>=<count>"
     final parts = dayWithMostEntries.split('=');
-    final day   = parts.first;
+    final day = parts.first;
     final count = parts.last;
 
     return _TwoColumnRow(
@@ -366,20 +373,24 @@ class _FrequentMoodCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CardTitle(icon: Icons.emoji_emotions_outlined, label: 'Frequent Mood'),
+          _CardTitle(
+              icon: Icons.emoji_emotions_outlined, label: 'Frequent Mood'),
           Divider(color: PinkColors.shade100),
           const SizedBox(height: 8),
-
           _ScaledRichText(
             minHeight: 56,
             children: [
-              TextSpan(text: mood.isEmpty ? "--" : mood, style: _bigNumberStyle()),
+              TextSpan(
+                  text: mood.isEmpty ? "--" : mood, style: _bigNumberStyle()),
             ],
           ),
-
           const SizedBox(height: 8),
-          Divider(color: PinkColors.shade100,),
-          Text(count.isEmpty || int.tryParse(count) == 0 ? '--' : '$count times', style: _captionStyle()),
+          Divider(
+            color: PinkColors.shade100,
+          ),
+          Text(
+              count.isEmpty || int.tryParse(count) == 0 ? '--' : '$count times',
+              style: _captionStyle()),
         ],
       ),
     );
@@ -398,7 +409,8 @@ class _AffirmationCard extends StatelessWidget {
       tint: const Color(0xFFFFF0F5),
       child: Row(
         children: [
-          Icon(Icons.local_florist_rounded, color: PinkColors.shade300, size: 32),
+          Icon(Icons.local_florist_rounded,
+              color: PinkColors.shade300, size: 32),
           const SizedBox(width: 16),
           Expanded(
             child: _ScaledRichText(
@@ -407,12 +419,11 @@ class _AffirmationCard extends StatelessWidget {
                 TextSpan(
                   text: "You've recorded happiness on ",
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: PinkColors.shade700,
-                    height: 1.5,
-                    fontFamily: 'IndieFlower'
-                  ),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: PinkColors.shade700,
+                      height: 1.5,
+                      fontFamily: 'IndieFlower'),
                 ),
                 TextSpan(
                   text: '$happyDays',
@@ -425,18 +436,18 @@ class _AffirmationCard extends StatelessWidget {
                 TextSpan(
                   text: " days.\nThat's beautiful.",
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: PinkColors.shade700,
-                    height: 1.5,
-                    fontFamily: 'IndieFlower'
-                  ),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: PinkColors.shade700,
+                      height: 1.5,
+                      fontFamily: 'IndieFlower'),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 16),
-          Icon(Icons.local_florist_rounded, color: PinkColors.shade300, size: 32),
+          Icon(Icons.local_florist_rounded,
+              color: PinkColors.shade300, size: 32),
         ],
       ),
     );
@@ -543,8 +554,7 @@ class _StatBlock extends StatelessWidget {
                 text: valueText ?? '$value',
                 style: _bigNumberStyle(),
               ),
-              if (unit != null)
-                TextSpan(text: ' $unit', style: _unitStyle()),
+              if (unit != null) TextSpan(text: ' $unit', style: _unitStyle()),
             ],
           ),
 

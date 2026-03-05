@@ -9,7 +9,7 @@ class WorkmanagerService {
   /// Reads all user preferences from [Storages] and schedules/cancels
   /// each task accordingly. Call this on app start and whenever
   /// notification settings change.
-  static Future<void> syncWithPreferences({ String? password }) async {
+  static Future<void> syncWithPreferences({String? password}) async {
     final storages = Storages();
 
     final masterEnabled = await storages.readNotificationStatus();
@@ -25,36 +25,33 @@ class WorkmanagerService {
     final weeklyEnabled = await storages.readWeeklyNotificationEnabled();
     final (hourStr, minuteStr) = await storages.readNotificationTime();
 
-    final hour   = int.tryParse(hourStr   ?? '') ?? 12;
+    final hour = int.tryParse(hourStr ?? '') ?? 12;
     final minute = int.tryParse(minuteStr ?? '') ?? 0;
 
     // Schedule or cancel each task based on its individual toggle.
     await _syncTask(
-      enabled    : streakEnabled,
-      uniqueName : WorkerTasks.taskStreak,
-      uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
-      initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
-      frequency: Duration(days: 1),
-      passedPassword: password
-    );
+        enabled: streakEnabled,
+        uniqueName: WorkerTasks.taskStreak,
+        uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
+        initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
+        frequency: Duration(days: 1),
+        passedPassword: password);
 
     await _syncTask(
-      enabled    : memoryEnabled,
-      uniqueName : WorkerTasks.taskMemory,
-      uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
-      initialDelay: _delayUntil(DateTime.now(), hour: 8, minute: 00),
-      frequency: Duration(days: 1),
-      passedPassword: password
-    );
+        enabled: memoryEnabled,
+        uniqueName: WorkerTasks.taskMemory,
+        uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
+        initialDelay: _delayUntil(DateTime.now(), hour: 8, minute: 00),
+        frequency: Duration(days: 1),
+        passedPassword: password);
 
     await _syncTask(
-      enabled    : weeklyEnabled,
-      uniqueName : WorkerTasks.taskWeekly,
-      uniqueNameOneOff: WorkerTasks.taskWeeklyOneOff,
-      frequency  : const Duration(days: 7),
-      initialDelay: _delayUntilNextSunday(DateTime.now(), hour: 9, minute: 0),
-      passedPassword: password
-    );
+        enabled: weeklyEnabled,
+        uniqueName: WorkerTasks.taskWeekly,
+        uniqueNameOneOff: WorkerTasks.taskWeeklyOneOff,
+        frequency: const Duration(days: 7),
+        initialDelay: _delayUntilNextSunday(DateTime.now(), hour: 9, minute: 0),
+        passedPassword: password);
   }
 
   /// Only reschedules the streak task — leaves memory and weekly untouched.
@@ -71,14 +68,12 @@ class WorkmanagerService {
 
     // Re-register with the new delay, replacing the old task
     await _syncTask(
-      enabled    : true,
-      uniqueName : WorkerTasks.taskStreak,
-      uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
-      initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
-      // initialDelay: Duration(seconds: 30),
-      frequency: Duration(minutes: 15),
-      passedPassword: password
-    );
+        enabled: true,
+        uniqueName: WorkerTasks.taskStreak,
+        uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
+        initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
+        frequency: Duration(minutes: 15),
+        passedPassword: password);
   }
 
   // Cancels all registered tasks.
@@ -92,6 +87,7 @@ class WorkmanagerService {
     await Workmanager().cancelByUniqueName(WorkerTasks.taskStreak);
     await Workmanager().cancelByUniqueName(WorkerTasks.taskStreakOneOff);
   }
+
   static Future<void> _cancelMemory() async {
     await Workmanager().cancelByUniqueName(WorkerTasks.taskMemory);
     await Workmanager().cancelByUniqueName(WorkerTasks.taskMemoryOneOff);
@@ -106,9 +102,9 @@ class WorkmanagerService {
 
   /// Schedules the task if [enabled], cancels it if not.
   static Future<void> _syncTask({
-    required bool     enabled,
-    required String   uniqueName,
-    required String   uniqueNameOneOff,
+    required bool enabled,
+    required String uniqueName,
+    required String uniqueNameOneOff,
     Duration frequency = const Duration(days: 1),
     Duration initialDelay = const Duration(days: 1),
     String? passedPassword,
@@ -125,35 +121,35 @@ class WorkmanagerService {
       return;
     }
 
-    await Workmanager().registerOneOffTask(
-      uniqueNameOneOff,
-      uniqueNameOneOff,
-      inputData: { 'password': password },
-      existingWorkPolicy: ExistingWorkPolicy.replace,
-      constraints        : Constraints(networkType: NetworkType.notRequired),
-      initialDelay: initialDelay
-    );
+    await Workmanager().registerOneOffTask(uniqueNameOneOff, uniqueNameOneOff,
+        inputData: {'password': password},
+        existingWorkPolicy: ExistingWorkPolicy.replace,
+        constraints: Constraints(networkType: NetworkType.notRequired),
+        initialDelay: initialDelay);
 
     await Workmanager().registerPeriodicTask(
       uniqueName,
       uniqueName,
-      frequency          : frequency,
-      initialDelay       : initialDelay,
-      inputData          : {'password': password},
-      constraints        : Constraints(networkType: NetworkType.notRequired),
-      existingWorkPolicy : ExistingPeriodicWorkPolicy.replace,
+      frequency: frequency,
+      initialDelay: initialDelay,
+      inputData: {'password': password},
+      constraints: Constraints(networkType: NetworkType.notRequired),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
     );
   }
 
-  static Duration _delayUntil(DateTime now, {required int hour, required int minute}) {
+  static Duration _delayUntil(DateTime now,
+      {required int hour, required int minute}) {
     var target = DateTime(now.year, now.month, now.day, hour, minute);
     if (target.isBefore(now)) target = target.add(const Duration(days: 1));
     return target.difference(now);
   }
 
-  static Duration _delayUntilNextSunday(DateTime now, {required int hour, required int minute}) {
+  static Duration _delayUntilNextSunday(DateTime now,
+      {required int hour, required int minute}) {
     final daysUntilSunday = (DateTime.sunday - now.weekday) % 7;
-    var target = DateTime(now.year, now.month, now.day + daysUntilSunday, hour, minute);
+    var target =
+        DateTime(now.year, now.month, now.day + daysUntilSunday, hour, minute);
     if (target.isBefore(now)) target = target.add(const Duration(days: 7));
     return target.difference(now);
   }

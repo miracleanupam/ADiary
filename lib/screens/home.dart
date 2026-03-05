@@ -53,7 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         flexibleSpace: constants.appBarBg,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(constants.homePageWidgetTitleListsForAppBar[_drawerScreen]!),
+        title:
+            Text(constants.homePageWidgetTitleListsForAppBar[_drawerScreen]!),
       ),
       drawer: ADrawer(
         onTapCallback: _onDrawerItemTapped,

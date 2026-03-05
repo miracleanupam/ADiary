@@ -87,7 +87,8 @@ class EntryProvider {
   Future<void> _open() async {
     // Use injected password if available (background isolate),
     // otherwise fall back to secure storage (foreground use)
-    String? securePassword = _injectedPassword ?? await secureStorage.read(key: 'password');
+    String? securePassword =
+        _injectedPassword ?? await secureStorage.read(key: 'password');
 
     if (securePassword == null) return;
 
@@ -160,8 +161,7 @@ class EntryProvider {
         await db.execute('''
           CREATE INDEX idx_entry_date
           ON $tableEntry($columnDate)''');
-        await db
-            .execute('''alter table $tableEntry drop column date_iso''');
+        await db.execute('''alter table $tableEntry drop column date_iso''');
       }
     });
   }
@@ -196,7 +196,8 @@ class EntryProvider {
     try {
       await _open();
       await db.execute(
-          '''update $tableEntry set $columnDiscardedAt=? where $columnId = ?''', [(DateFormat('yyyy/MM/dd').format(DateTime.now())), id]);
+          '''update $tableEntry set $columnDiscardedAt=? where $columnId = ?''',
+          [(DateFormat('yyyy/MM/dd').format(DateTime.now())), id]);
       return true;
     } catch (e) {
       return false;
@@ -223,7 +224,8 @@ class EntryProvider {
     await _open();
     try {
       List<Map> maps = await db.rawQuery(
-          '''select * from $tableEntry where $columnId = ? and $columnDiscardedAt is null order by random() limit 1;''', [id]);
+          '''select * from $tableEntry where $columnId = ? and $columnDiscardedAt is null order by random() limit 1;''',
+          [id]);
       if (maps.isNotEmpty) {
         Entry result = Entry.fromMap(maps.first as Map<String, dynamic>);
         return result;

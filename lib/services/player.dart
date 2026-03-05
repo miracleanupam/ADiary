@@ -3,7 +3,8 @@ import 'package:audioplayers/audioplayers.dart';
 class AudioPlayerService {
   final _player = AudioPlayer();
 
-  Future<void> play(String filePath) => _player.play(DeviceFileSource(filePath));
+  Future<void> play(String filePath) =>
+      _player.play(DeviceFileSource(filePath));
   Future<void> pause() => _player.pause();
   Future<void> resume() => _player.resume();
   Future<void> stop() => _player.stop();

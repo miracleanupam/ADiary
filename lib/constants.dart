@@ -8,7 +8,6 @@ import 'package:adiary/screens/summary.dart';
 import 'package:adiary/screens/visualization.dart';
 import 'package:flutter/material.dart';
 
-
 // ─── Colors ───────────────────────────────────────────────────────────────
 abstract final class PinkColors {
   static const shade50  = Color(0xFFFCE4EC);
@@ -152,7 +151,6 @@ abstract final class WorkerTasks {
   static const taskMemoryOneOff = 'task.memory.daily.one.off';
   static const taskWeeklyOneOff = 'task.weekly.sunday.one.off';
 }
-
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 

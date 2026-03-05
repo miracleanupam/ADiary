@@ -98,7 +98,8 @@ class _AddEntryState extends State<AddEntry> {
           children: constants.MOOD_OPTIONS
               .map((opt) => GestureDetector(
                     onTap: () => Navigator.pop(context, opt),
-                    child: MoodPill(fn: () => Navigator.pop(context, opt), mood: opt),
+                    child: MoodPill(
+                        fn: () => Navigator.pop(context, opt), mood: opt),
                   ))
               .toList(),
         ),

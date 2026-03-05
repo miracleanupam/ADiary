@@ -266,7 +266,8 @@ class _WordCloudPainter extends CustomPainter {
     final pillLeft = w.center.dx - pillW / 2;
     final pillTop = w.center.dy - pillH / 2;
     final pillRect = Rect.fromLTWH(pillLeft, pillTop, pillW, pillH);
-    final pillRRect = RRect.fromRectAndRadius(pillRect, Radius.circular(pillRadius));
+    final pillRRect =
+        RRect.fromRectAndRadius(pillRect, Radius.circular(pillRadius));
 
     // Shadow
     canvas.drawRRect(

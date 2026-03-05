@@ -49,14 +49,18 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
       _player.onStateChanged.listen((state) {
         final playing = state == PlayerState.playing;
         setState(() => _isPlaying = playing);
-        playing ? _playPauseController.forward() : _playPauseController.reverse();
+        playing
+            ? _playPauseController.forward()
+            : _playPauseController.reverse();
       }),
-      _player.onPositionChanged.listen((pos) => setState(() => _position = pos)),
-      _player.onDurationChanged.listen((dur) => setState(() => _duration = dur)),
+      _player.onPositionChanged
+          .listen((pos) => setState(() => _position = pos)),
+      _player.onDurationChanged
+          .listen((dur) => setState(() => _duration = dur)),
     ];
   }
 
-@override
+  @override
   void dispose() {
     for (final sub in _subs) {
       sub.cancel();
@@ -76,7 +80,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
 
   double get _progress {
     if (_duration.inMilliseconds == 0) return 0;
-    return (_position.inMilliseconds / _duration.inMilliseconds).clamp(0.0, 1.0);
+    return (_position.inMilliseconds / _duration.inMilliseconds)
+        .clamp(0.0, 1.0);
   }
 
   void _togglePlay() {
@@ -163,7 +168,11 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
       height: 24,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (!_hasFile) return const Placeholder(color: Colors.transparent,);
+          if (!_hasFile) {
+            return const Placeholder(
+              color: Colors.transparent,
+            );
+          }
           final count = _waveHeights.length;
           final barW = ((constraints.maxWidth - (count - 1) * 2) / count)
               .clamp(2.0, 8.0);

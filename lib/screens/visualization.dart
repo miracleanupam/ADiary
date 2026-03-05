@@ -59,10 +59,9 @@ class _VisualizationState extends State<Visualization> {
           "There is no data to visualize yet!",
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: PinkColors.shade900
-          ),
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: PinkColors.shade900),
         ),
       ),
     );

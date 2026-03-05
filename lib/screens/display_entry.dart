@@ -222,8 +222,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
               _buildEntryHeader(),
               const Divider(),
               Expanded(child: _buildScrollableContent()),
-              if (_audioPath != null)
-                AudioPlayerWidget(filePath: _audioPath!),
+              if (_audioPath != null) AudioPlayerWidget(filePath: _audioPath!),
               const Divider(),
               const SizedBox(height: 16),
               AlevatedButton(
@@ -275,10 +274,9 @@ class _DisplayEntryState extends State<DisplayEntry> {
           onPressed: _promptDelete,
           icon: const Icon(Icons.delete_outline_outlined),
           style: IconButton.styleFrom(
-            backgroundColor: PinkColors.shade100,
-            foregroundColor: PinkColors.shade300,
-            side: const BorderSide(color: PinkColors.shade300, width: 1)
-          ),
+              backgroundColor: PinkColors.shade100,
+              foregroundColor: PinkColors.shade300,
+              side: const BorderSide(color: PinkColors.shade300, width: 1)),
         ),
       ],
     );

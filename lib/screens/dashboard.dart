@@ -13,7 +13,6 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-
   void _navigate(Widget screen) async {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => screen),

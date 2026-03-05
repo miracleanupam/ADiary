@@ -132,7 +132,7 @@ class _NotificationManagerState extends State<NotificationManager> {
                       color: PinkColors.shade300,
                     ),
                     const SizedBox(height: 24),
-              
+
                     // ── Individual toggles (only visible when master is on) ───
                     _SectionHeader(title: 'Notification Types'),
                     const SizedBox(height: 8),
@@ -178,7 +178,7 @@ class _NotificationManagerState extends State<NotificationManager> {
                     ),
 
                     Divider(),
-              
+
                     _NotificationRow(
                       title: 'Daily Memory',
                       subtitle:
@@ -187,7 +187,7 @@ class _NotificationManagerState extends State<NotificationManager> {
                       enabled: _masterEnabled,
                       onChanged: _onMemoryToggle,
                     ),
-              
+
                     Divider(),
                     _NotificationRow(
                       title: 'Weekly Recap',
@@ -196,7 +196,7 @@ class _NotificationManagerState extends State<NotificationManager> {
                       enabled: _masterEnabled,
                       onChanged: _onWeeklyToggle,
                     ),
-              
+
                     const SizedBox(height: 24),
                   ],
                 ),

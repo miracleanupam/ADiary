@@ -19,8 +19,7 @@ class MoodPicker extends StatelessWidget {
     return Stack(
       children: [
         MoodPill(fn: fn, mood: mood),
-        if (mood != null)
-          AnimatedCloseButton(top: 0, right: 0, fn: clearMood),
+        if (mood != null) AnimatedCloseButton(top: 0, right: 0, fn: clearMood),
       ],
     );
   }

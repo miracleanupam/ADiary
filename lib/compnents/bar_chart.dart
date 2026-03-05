@@ -62,7 +62,8 @@ class _BarChartState extends State<BarChart> {
   Future<void> _setup() async {
     await _fetchData();
     _scrollController = ScrollController();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentMonth());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _scrollToCurrentMonth());
   }
 
   Future<void> _fetchData() async {
@@ -185,7 +186,8 @@ class _BarChartState extends State<BarChart> {
           controller: _scrollController,
           scrollDirection: Axis.horizontal,
           child: SizedBox(
-            width: _monthlyData.length * (_barWidth + _barSpacing) + _barSpacing,
+            width:
+                _monthlyData.length * (_barWidth + _barSpacing) + _barSpacing,
             height: _chartHeight + BarChart.xAxisHeight,
             child: CustomPaint(
               painter: BarChartPainter(
@@ -330,9 +332,7 @@ class BarChartPainter extends CustomPainter {
       final y = chartHeight - barHeight;
       final isSelected = i == selectedIndex;
 
-      final topColor = isSelected
-          ? barColor.withValues(alpha: 1)
-          : barColor;
+      final topColor = isSelected ? barColor.withValues(alpha: 1) : barColor;
       final bottomColor = isSelected
           ? barColor.withValues(alpha: 0.9)
           : barColor.withValues(alpha: 0.5);
@@ -362,12 +362,15 @@ class BarChartPainter extends CustomPainter {
 
       final color = isSelected
           ? barColor.withValues(alpha: 1)
-          : (selectedIndex == null ? labelColor : labelColor.withValues(alpha: 0.6));
+          : (selectedIndex == null
+              ? labelColor
+              : labelColor.withValues(alpha: 0.6));
 
       final textPainter = TextPainter(
         text: TextSpan(
           text: _formatLabel(data[i].label),
-          style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              color: color, fontSize: 12, fontWeight: FontWeight.w500),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
@@ -375,7 +378,8 @@ class BarChartPainter extends CustomPainter {
       canvas.save();
       canvas.translate(centerX, chartHeight + 10);
       canvas.rotate(_rotationAngle);
-      textPainter.paint(canvas, Offset(-textPainter.width, -textPainter.height / 2));
+      textPainter.paint(
+          canvas, Offset(-textPainter.width, -textPainter.height / 2));
       canvas.restore();
     }
   }
@@ -405,14 +409,18 @@ class BarChartPainter extends CustomPainter {
 
     final tooltipWidth = textPainter.width + _tooltipPadding * 2;
     final tooltipHeight = textPainter.height + _tooltipPadding * 2;
-    final tooltipLeft = (barCenterX - tooltipWidth / 2).clamp(0.0, size.width - tooltipWidth);
-    final tooltipTop = barTopY - tooltipHeight - _tooltipArrowHeight - _tooltipGap;
-    final tooltipRect = Rect.fromLTWH(tooltipLeft, tooltipTop, tooltipWidth, tooltipHeight);
+    final tooltipLeft =
+        (barCenterX - tooltipWidth / 2).clamp(0.0, size.width - tooltipWidth);
+    final tooltipTop =
+        barTopY - tooltipHeight - _tooltipArrowHeight - _tooltipGap;
+    final tooltipRect =
+        Rect.fromLTWH(tooltipLeft, tooltipTop, tooltipWidth, tooltipHeight);
 
     final bgPaint = Paint()..color = PinkColors.shade900;
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(tooltipRect, const Radius.circular(_tooltipRadius)),
+      RRect.fromRectAndRadius(
+          tooltipRect, const Radius.circular(_tooltipRadius)),
       bgPaint,
     );
 

@@ -61,7 +61,8 @@ class NotificationService {
     switch (data['kind']) {
       case 'streak':
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => data['dashboard'] ? MyHomePage() : AddEntry()),
+          MaterialPageRoute(
+              builder: (_) => data['dashboard'] ? MyHomePage() : AddEntry()),
         );
         break;
       case 'memory':
@@ -130,19 +131,19 @@ class NotificationService {
         : 'You haven\'t logged a happy moment yet today. Take a minute to record one!';
 
     await _plugin.show(
-      _idStreak,
-      title,
-      body,
-      _details(_channelStreak, 'Streak Reminders',
-          'Daily streak check-in notifications'),
-      payload: jsonEncode({'kind': 'streak', 'dashboard': hasEntryToday })
-    );
+        _idStreak,
+        title,
+        body,
+        _details(_channelStreak, 'Streak Reminders',
+            'Daily streak check-in notifications'),
+        payload: jsonEncode({'kind': 'streak', 'dashboard': hasEntryToday}));
   }
 
   /// Fires the "On this day" memory notification.
   /// [memoryTitle] is the title of the entry from one year ago,
   /// or null if no entry exists.
-  Future<void> showMemoryNotification({String? memoryTitle, int? id, int? yearsAgo}) async {
+  Future<void> showMemoryNotification(
+      {String? memoryTitle, int? id, int? yearsAgo}) async {
     await _ensureInitialized();
 
     // Silently skip if there's nothing to remind about
@@ -154,8 +155,7 @@ class NotificationService {
         'You wrote: "$memoryTitle" — tap to revisit the memory.',
         _details(_channelMemory, 'Memory Reminders',
             'Daily "on this day" memory notifications'),
-        payload: jsonEncode({'kind': 'memory', 'id': id})
-      );
+        payload: jsonEncode({'kind': 'memory', 'id': id}));
   }
 
   /// Fires the weekly summary notification on Sundays.

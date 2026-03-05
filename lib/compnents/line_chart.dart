@@ -50,7 +50,8 @@ class _LineChartState extends State<LineChart> {
   }
 
   Future<void> _loadData(int? year) async {
-    final res = await EntryProvider().getYearlyCumulativeCounts(year ?? _selectedYear);
+    final res =
+        await EntryProvider().getYearlyCumulativeCounts(year ?? _selectedYear);
     if (mounted) {
       setState(() {
         _cumulativeData = _convertToDailyData(res);
@@ -82,9 +83,8 @@ class _LineChartState extends State<LineChart> {
     final daysInYear = DateTime(_selectedYear + 1, 1, 1)
         .difference(DateTime(_selectedYear, 1, 1))
         .inDays;
-    final dayIndex = ((tapX - pL) / cw * (daysInYear - 1))
-        .round()
-        .clamp(0, daysInYear - 1);
+    final dayIndex =
+        ((tapX - pL) / cw * (daysInYear - 1)).round().clamp(0, daysInYear - 1);
 
     return dayIndex >= _cumulativeData.length ? null : dayIndex;
   }
@@ -208,7 +208,8 @@ class _LineChartCanvas extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       size: Size.infinite,
-      painter: _ChartPainter(data: data, year: year, tooltipIndex: tooltipIndex),
+      painter:
+          _ChartPainter(data: data, year: year, tooltipIndex: tooltipIndex),
     );
   }
 }
@@ -314,8 +315,8 @@ class _ChartPainter extends CustomPainter {
     canvas.restore();
   }
 
-  void _drawFill(Canvas canvas, double cw, double ch,
-      double Function(int) xOf, double Function(num) yOf) {
+  void _drawFill(Canvas canvas, double cw, double ch, double Function(int) xOf,
+      double Function(num) yOf) {
     final path = Path()..moveTo(xOf(0), yOf(data[0].count));
     for (int i = 1; i < data.length; i++) {
       path.lineTo(xOf(i), yOf(data[i].count));
@@ -339,7 +340,8 @@ class _ChartPainter extends CustomPainter {
     );
   }
 
-  void _drawLine(Canvas canvas, double Function(int) xOf, double Function(num) yOf) {
+  void _drawLine(
+      Canvas canvas, double Function(int) xOf, double Function(num) yOf) {
     final path = Path()..moveTo(xOf(0), yOf(data[0].count));
     for (int i = 1; i < data.length; i++) {
       path.lineTo(xOf(i), yOf(data[i].count));

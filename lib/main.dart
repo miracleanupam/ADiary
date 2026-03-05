@@ -35,25 +35,22 @@ void callbackDispatcher() {
       if (taskName == WorkerTasks.taskStreak ||
           taskName == WorkerTasks.taskStreakOneOff) {
         final hasEntry = await entryProvider.hasEntryToday();
-        await notificationService.showStreakNotification(hasEntryToday: hasEntry);
-
+        await notificationService.showStreakNotification(
+            hasEntryToday: hasEntry);
       } else if (taskName == WorkerTasks.taskMemory ||
           taskName == WorkerTasks.taskMemoryOneOff) {
         final memory = await entryProvider.memoryFromLastYear();
-        final yearsAgo = memory != null ? DateTime.now().year - DateTime.parse(memory.date).year : null;
+        final yearsAgo = memory != null
+            ? DateTime.now().year - DateTime.parse(memory.date).year
+            : null;
 
         await notificationService.showMemoryNotification(
-          memoryTitle: memory?.content,
-          id: memory?.id,
-          yearsAgo: yearsAgo
-        );
-
+            memoryTitle: memory?.content, id: memory?.id, yearsAgo: yearsAgo);
       } else if (taskName == WorkerTasks.taskWeekly ||
           taskName == WorkerTasks.taskWeeklyOneOff) {
         final count = await entryProvider.countLastWeek();
         await notificationService.showWeeklyNotification(entryCount: count);
-      } else {
-      }
+      } else {}
       return true;
     } catch (e) {
       return true;
@@ -69,10 +66,7 @@ void main() async {
 
   await Workmanager().initialize(callbackDispatcher);
 
-  runApp(EntryNotifierScope(
-    notifier: entryNotifier,
-    child: const MeroApp()
-  ));
+  runApp(EntryNotifierScope(notifier: entryNotifier, child: const MeroApp()));
 }
 
 class MeroApp extends StatefulWidget {

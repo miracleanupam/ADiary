@@ -24,10 +24,18 @@ class _ADrawerState extends State<ADrawer> {
     [
       {'id': 'dashboard', 'label': 'Home', 'icon': Icons.home_outlined},
       {'id': 'summary', 'label': 'Summary', 'icon': Icons.summarize_outlined},
-      {'id': 'visualization', 'label': 'Visualization', 'icon': Icons.stacked_line_chart_outlined},
+      {
+        'id': 'visualization',
+        'label': 'Visualization',
+        'icon': Icons.stacked_line_chart_outlined
+      },
     ],
     [
-      {'id': 'notification', 'label': 'Notifications', 'icon': Icons.notification_important_outlined},
+      {
+        'id': 'notification',
+        'label': 'Notifications',
+        'icon': Icons.notification_important_outlined
+      },
       {'id': 'export', 'label': 'Export Data', 'icon': Icons.download_outlined},
       {'id': 'import', 'label': 'Import Data', 'icon': Icons.upload_outlined},
     ],
@@ -103,10 +111,7 @@ class _ADrawerState extends State<ADrawer> {
               horizontalTitleGap: 4,
               leading: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(item['icon'] as IconData),
-                  VerticalDivider()
-                ],
+                children: [Icon(item['icon'] as IconData), VerticalDivider()],
               ),
               title: Text(item['label'] as String),
               selected: _currentSelection == item['id'],

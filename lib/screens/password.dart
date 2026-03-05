@@ -34,7 +34,8 @@ class _PasswordManagerState extends State<PasswordManager> {
 
   void _showPassword() async {
     final ADauthenticationService auth = ADauthenticationService();
-    bool authenticated = await auth.authenticate(context, passwordFallback: false);
+    bool authenticated =
+        await auth.authenticate(context, passwordFallback: false);
 
     if (authenticated && mounted) {
       ADiaryPasswordService passwordService =
