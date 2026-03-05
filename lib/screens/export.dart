@@ -82,7 +82,7 @@ class _ExportDataState extends State<ExportData> {
                       ),
                       AlevatedButton(
                           onPressed: _export,
-                          icon: Icons.download,
+                          icon: Icons.download_outlined,
                           text: 'Export'),
                       SizedBox(
                         height: 16,

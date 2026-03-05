@@ -97,7 +97,7 @@ class _ImportDataState extends State<ImportData> {
                       ),
                       AlevatedButton(
                           onPressed: _import,
-                          icon: Icons.upload,
+                          icon: Icons.upload_outlined,
                           text: 'Import'),
                       SizedBox(
                         height: 16,

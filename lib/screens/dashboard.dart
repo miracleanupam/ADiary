@@ -13,6 +13,14 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      EntryNotifierScope.of(context).refresh();
+    });
+  }
+
   void _navigate(Widget screen) async {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => screen),
