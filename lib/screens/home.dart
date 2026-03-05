@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
       stored = await passwordService.getPassword();
     }
 
+    print('-----------home bata syncing-----------------');
     await WorkmanagerService.syncWithPreferences(password: stored);
   }
 

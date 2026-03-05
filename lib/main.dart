@@ -23,39 +23,52 @@ void notificationTapBackground(NotificationResponse response) {}
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
     try {
+      print('------------------111111-------------- $taskName $inputData');
       WidgetsFlutterBinding.ensureInitialized();
-      DartPluginRegistrant.ensureInitialized();
+      // DartPluginRegistrant.ensureInitialized();
 
       final notificationService = NotificationService();
+      print('-------notification service initialized-------------');
       final password = inputData?['password'] as String?;
+      print('---------password received-----------------');
 
       if (!await notificationService.hasNotificationPermission()) {
+        print('-----------no permissions--------------');
         return true;
       }
       final entryProvider = EntryProvider(password: password);
-
+      print('------------entry provider initialized--------------');
       if (taskName == WorkerTasks.taskStreak ||
           taskName == WorkerTasks.taskStreakOneOff) {
+        print('------------streaks task---------------');
         final hasEntry = await entryProvider.hasEntryToday();
+        print('-------------It has an entry--------------');
         await notificationService.showStreakNotification(hasEntryToday: hasEntry);
+        print('----------noitification service ko show called--------------');
 
       } else if (taskName == WorkerTasks.taskMemory ||
           taskName == WorkerTasks.taskMemoryOneOff) {
+        print('--------------memory-----------');
         final memory = await entryProvider.memoryFromLastYear();
+        print('-------$memory---------');
         await notificationService.showMemoryNotification(
           memoryTitle: memory?.content,
           id: memory?.id,
         );
+        print('---------notification service called---------');
 
       } else if (taskName == WorkerTasks.taskWeekly ||
           taskName == WorkerTasks.taskWeeklyOneOff) {
+        print('-------------weekly----------');
         final count = await entryProvider.countLastWeek();
         await notificationService.showWeeklyNotification(entryCount: count);
-
+        print('----------notification service called---------------');
       } else {
+        print('-------khoi k aayo hai----------');
       }
       return true;
     } catch (e) {
+      print('------------_EEEEEEERRRRRROOOOOOORRRRRR_------------------\n\n');
       return true;
     }
   });

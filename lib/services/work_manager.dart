@@ -26,8 +26,8 @@ class WorkmanagerService {
     final weeklyEnabled = await storages.readWeeklyNotificationEnabled();
     final (hourStr, minuteStr) = await storages.readNotificationTime();
 
-    final hour   = int.tryParse(hourStr   ?? '') ?? 20;
-    final minute = int.tryParse(minuteStr ?? '') ?? 30;
+    final hour   = int.tryParse(hourStr   ?? '') ?? 12;
+    final minute = int.tryParse(minuteStr ?? '') ?? 0;
 
     // Schedule or cancel each task based on its individual toggle.
     await _syncTask(
@@ -35,25 +35,32 @@ class WorkmanagerService {
       uniqueName : WorkerTasks.taskStreak,
       uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
       initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
+      frequency: Duration(minutes: 15),
+      // initialDelay: Duration(seconds: 30),
       passedPassword: password
     );
 
-    await _syncTask(
-      enabled    : memoryEnabled,
-      uniqueName : WorkerTasks.taskMemory,
-      uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
-      initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
-      passedPassword: password
-    );
+    // await _syncTask(
+    //   enabled    : memoryEnabled,
+    //   uniqueName : WorkerTasks.taskMemory,
+    //   uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
+    //   // :TODO: Fix time for morning
+    //   initialDelay: _delayUntil(DateTime.now(), hour: 8, minute: 00),
+    //   frequency: Duration(minutes: 15),
+    //   // initialDelay: Duration(minutes: 1),
+    //   passedPassword: password
+    // );
 
-    await _syncTask(
-      enabled    : weeklyEnabled,
-      uniqueName : WorkerTasks.taskWeekly,
-      uniqueNameOneOff: WorkerTasks.taskWeeklyOneOff,
-      frequency  : const Duration(days: 7),
-      initialDelay: _delayUntilNextSunday(DateTime.now(), hour: 18, minute: 0),
-      passedPassword: password
-    );
+    // await _syncTask(
+    //   enabled    : weeklyEnabled,
+    //   uniqueName : WorkerTasks.taskWeekly,
+    //   uniqueNameOneOff: WorkerTasks.taskWeeklyOneOff,
+    //   frequency: Duration(hours: 1),
+    //   initialDelay: Duration(minutes: 10),
+    //   // frequency  : const Duration(days: 7),
+    //   // initialDelay: _delayUntilNextSunday(DateTime.now(), hour: 18, minute: 0),
+    //   passedPassword: password
+    // );
   }
 
   /// Call this when the user changes their preferred streak notification time.
@@ -75,6 +82,8 @@ class WorkmanagerService {
       uniqueName : WorkerTasks.taskStreak,
       uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
       initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
+      // initialDelay: Duration(seconds: 30),
+      frequency: Duration(minutes: 15),
       passedPassword: password
     );
   }
@@ -117,9 +126,9 @@ class WorkmanagerService {
       return;
     }
 
-
     if (!enabled) {
       await Workmanager().cancelByUniqueName(uniqueName);
+      await Workmanager().cancelByUniqueName(uniqueNameOneOff);
       return;
     }
 
@@ -127,6 +136,8 @@ class WorkmanagerService {
       uniqueNameOneOff,
       uniqueNameOneOff,
       inputData: { 'password': password },
+      existingWorkPolicy: ExistingWorkPolicy.replace,
+      constraints        : Constraints(networkType: NetworkType.notRequired),
       initialDelay: initialDelay
     );
 
@@ -134,10 +145,10 @@ class WorkmanagerService {
       uniqueName,
       uniqueName,
       frequency          : frequency,
-      initialDelay       : initialDelay,
+      // initialDelay       : initialDelay,
       inputData          : {'password': password},
       constraints        : Constraints(networkType: NetworkType.notRequired),
-      existingWorkPolicy : ExistingPeriodicWorkPolicy.update,
+      existingWorkPolicy : ExistingPeriodicWorkPolicy.replace,
     );
   }
 
