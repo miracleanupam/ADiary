@@ -255,6 +255,7 @@ class _NotificationRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
             child: Column(
@@ -265,6 +266,7 @@ class _NotificationRow extends StatelessWidget {
                   value: subtitle,
                   fontSize: 14,
                   color: PinkColors.shade300,
+                  align: TextAlign.start,
                 ),
               ],
             ),

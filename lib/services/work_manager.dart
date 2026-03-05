@@ -1,7 +1,6 @@
 // workmanager_service.dart
 import 'package:adiary/constants.dart';
 import 'package:adiary/services/storages.dart';
-import 'package:flutter/foundation.dart';
 import 'package:workmanager/workmanager.dart';
 
 class WorkmanagerService {
@@ -35,35 +34,29 @@ class WorkmanagerService {
       uniqueName : WorkerTasks.taskStreak,
       uniqueNameOneOff: WorkerTasks.taskStreakOneOff,
       initialDelay: _delayUntil(DateTime.now(), hour: hour, minute: minute),
-      frequency: Duration(minutes: 15),
-      // initialDelay: Duration(seconds: 30),
+      frequency: Duration(days: 1),
       passedPassword: password
     );
 
-    // await _syncTask(
-    //   enabled    : memoryEnabled,
-    //   uniqueName : WorkerTasks.taskMemory,
-    //   uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
-    //   // :TODO: Fix time for morning
-    //   initialDelay: _delayUntil(DateTime.now(), hour: 8, minute: 00),
-    //   frequency: Duration(minutes: 15),
-    //   // initialDelay: Duration(minutes: 1),
-    //   passedPassword: password
-    // );
+    await _syncTask(
+      enabled    : memoryEnabled,
+      uniqueName : WorkerTasks.taskMemory,
+      uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
+      initialDelay: _delayUntil(DateTime.now(), hour: 8, minute: 00),
+      frequency: Duration(days: 1),
+      passedPassword: password
+    );
 
-    // await _syncTask(
-    //   enabled    : weeklyEnabled,
-    //   uniqueName : WorkerTasks.taskWeekly,
-    //   uniqueNameOneOff: WorkerTasks.taskWeeklyOneOff,
-    //   frequency: Duration(hours: 1),
-    //   initialDelay: Duration(minutes: 10),
-    //   // frequency  : const Duration(days: 7),
-    //   // initialDelay: _delayUntilNextSunday(DateTime.now(), hour: 18, minute: 0),
-    //   passedPassword: password
-    // );
+    await _syncTask(
+      enabled    : weeklyEnabled,
+      uniqueName : WorkerTasks.taskWeekly,
+      uniqueNameOneOff: WorkerTasks.taskWeeklyOneOff,
+      frequency  : const Duration(days: 7),
+      initialDelay: _delayUntilNextSunday(DateTime.now(), hour: 9, minute: 0),
+      passedPassword: password
+    );
   }
 
-  /// Call this when the user changes their preferred streak notification time.
   /// Only reschedules the streak task — leaves memory and weekly untouched.
   static Future<void> rescheduleStreak({
     required int hour,
@@ -74,7 +67,7 @@ class WorkmanagerService {
 
     // Persist the new time
     await storages.writeNotificationTime(hour, minute);
-    await _cancelStreak();
+    // await _cancelStreak();
 
     // Re-register with the new delay, replacing the old task
     await _syncTask(
@@ -88,7 +81,7 @@ class WorkmanagerService {
     );
   }
 
-  /// Cancels all registered tasks.
+  // Cancels all registered tasks.
   static Future<void> cancelAll() async {
     await _cancelStreak();
     await _cancelMemory();
@@ -145,7 +138,7 @@ class WorkmanagerService {
       uniqueName,
       uniqueName,
       frequency          : frequency,
-      // initialDelay       : initialDelay,
+      initialDelay       : initialDelay,
       inputData          : {'password': password},
       constraints        : Constraints(networkType: NetworkType.notRequired),
       existingWorkPolicy : ExistingPeriodicWorkPolicy.replace,

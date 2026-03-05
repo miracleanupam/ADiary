@@ -8,7 +8,7 @@ import 'package:adiary/compnents/mood_picker.dart';
 import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/compnents/alevated_button.dart';
-import 'package:adiary/screens/home.dart';
+import 'package:adiary/models/entry_notifier.dart';
 import 'package:adiary/services/images.dart';
 import 'package:adiary/services/recording.dart';
 import 'package:flutter/material.dart';
@@ -160,6 +160,11 @@ class _AddEntryState extends State<AddEntry> {
     if (_entryId != null) entry.id = _entryId;
 
     final saved = await EntryProvider().upsert(entry);
+
+    if (mounted) {
+      EntryNotifierScope.of(context).refresh();
+    }
+
     setState(() => _entryId = saved.id);
 
     if (mounted) {
@@ -187,60 +192,44 @@ class _AddEntryState extends State<AddEntry> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          return;
-        }
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const MyHomePage()),
-          (Route<dynamic> route) => false,
-        );
-      },
-      child: Scaffold(
-        backgroundColor: PinkColors.shade100,
-        appBar: AppBar(
-          flexibleSpace: constants.appBarBg,
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: const AddEntryTitle(),
-          leading: IconButton(
-            onPressed: () => Navigator.maybePop(context),
-            icon: const Icon(Icons.arrow_back)
-          ),
-        ),
-        body: Container(
-          decoration: constants.bgDecoration,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTopRow(),
-                const SizedBox(height: 16),
-                Expanded(child: _buildContentInput()),
-                const SizedBox(height: 5),
-                AudioButton(
-                  showRecorder: _showRecorder,
-                  fn: () => setState(() => _showRecorder = !_showRecorder),
-                ),
-                const SizedBox(height: 16),
-                ImagesInput(
-                  handleImagesSelection: _addImages,
-                  pickedImages: _pickedImages,
-                  directory: _directory,
-                  removePickedImage: _removeImage,
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-                AlevatedButton(
-                  onPressed: _saveEntry,
-                  icon: Icons.favorite_border,
-                  text: 'Save Memory',
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: PinkColors.shade100,
+      appBar: AppBar(
+        flexibleSpace: constants.appBarBg,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const AddEntryTitle(),
+      ),
+      body: Container(
+        decoration: constants.bgDecoration,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopRow(),
+              const SizedBox(height: 16),
+              Expanded(child: _buildContentInput()),
+              const SizedBox(height: 5),
+              AudioButton(
+                showRecorder: _showRecorder,
+                fn: () => setState(() => _showRecorder = !_showRecorder),
+              ),
+              const SizedBox(height: 16),
+              ImagesInput(
+                handleImagesSelection: _addImages,
+                pickedImages: _pickedImages,
+                directory: _directory,
+                removePickedImage: _removeImage,
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              AlevatedButton(
+                onPressed: _saveEntry,
+                icon: Icons.favorite_border,
+                text: 'Save Memory',
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
       ),

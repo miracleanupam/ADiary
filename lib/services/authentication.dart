@@ -9,6 +9,9 @@ class ADauthenticationService {
       {bool passwordFallback = true}) async {
     if (!await _auth.isDeviceSupported()) {
       if (!passwordFallback) return true;
+      if (!context.mounted) {
+        return false;
+      }
 
       return await _authenticateWithAppPassword(context);
     }
@@ -21,6 +24,9 @@ class ADauthenticationService {
     );
     if (didAuthenticate) {
       return true;
+    }
+    if (!context.mounted) {
+      return false;
     }
     return await _authenticateWithAppPassword(context);
   }
@@ -35,6 +41,7 @@ class ADauthenticationService {
     String? error;
 
     while (true) {
+      if (!context.mounted) return false;
       final entered = await _showPasswordDialog(context, errorText: error);
 
       if (entered == null) return false;

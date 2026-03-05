@@ -182,6 +182,7 @@ class _HeaderCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _CardTitle(icon: Icons.favorite_outline, label: 'Total Memories'),
+          Divider(color: PinkColors.shade100),
 
           const SizedBox(height: 8),
 
@@ -210,6 +211,7 @@ class _HeaderCard extends StatelessWidget {
           ),
 
           const SizedBox(height: 8),
+          Divider(color: PinkColors.shade100),
 
           // Happy-days line with sparkle icons (no emoji text)
           Row(
@@ -286,7 +288,7 @@ class _MediaSummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _CardTitle(icon: Icons.photo_camera_outlined, label: 'Media Summary'),
-
+          Divider(color: PinkColors.shade100),
           const SizedBox(height: 8),
 
           Padding(
@@ -365,19 +367,19 @@ class _FrequentMoodCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _CardTitle(icon: Icons.emoji_emotions_outlined, label: 'Frequent Mood'),
-
+          Divider(color: PinkColors.shade100),
           const SizedBox(height: 8),
 
           _ScaledRichText(
             minHeight: 56,
             children: [
-              TextSpan(text: mood, style: _bigNumberStyle()),
+              TextSpan(text: mood.isEmpty ? "--" : mood, style: _bigNumberStyle()),
             ],
           ),
 
           const SizedBox(height: 8),
-
-          Text(int.tryParse(count) == 0 ? '--' : '$count times', style: _captionStyle()),
+          Divider(color: PinkColors.shade100,),
+          Text(count.isEmpty || int.tryParse(count) == 0 ? '--' : '$count times', style: _captionStyle()),
         ],
       ),
     );
@@ -529,6 +531,7 @@ class _StatBlock extends StatelessWidget {
               ),
             ],
           ),
+          Divider(color: PinkColors.shade100),
 
           const SizedBox(height: 8),
 
@@ -546,6 +549,7 @@ class _StatBlock extends StatelessWidget {
           ),
 
           const SizedBox(height: 8),
+          Divider(color: PinkColors.shade100),
 
           Row(
             mainAxisSize: MainAxisSize.min,

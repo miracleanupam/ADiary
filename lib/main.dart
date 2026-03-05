@@ -1,7 +1,6 @@
-import 'dart:ui';
-
 import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
+import 'package:adiary/models/entry_notifier.dart';
 import 'package:adiary/screens/home.dart';
 import 'package:adiary/screens/unauthenticated_screen.dart';
 import 'package:adiary/services/app_migration.dart';
@@ -14,6 +13,7 @@ import 'package:workmanager/workmanager.dart';
 
 // Global navigator key - top level (outside any class)
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final entryNotifier = EntryNotifier();
 
 // Background handler - top level (outside any class, needs @pragma)
 @pragma('vm:entry-point')
@@ -23,52 +23,39 @@ void notificationTapBackground(NotificationResponse response) {}
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
     try {
-      print('------------------111111-------------- $taskName $inputData');
       WidgetsFlutterBinding.ensureInitialized();
-      // DartPluginRegistrant.ensureInitialized();
 
       final notificationService = NotificationService();
-      print('-------notification service initialized-------------');
       final password = inputData?['password'] as String?;
-      print('---------password received-----------------');
 
       if (!await notificationService.hasNotificationPermission()) {
-        print('-----------no permissions--------------');
         return true;
       }
       final entryProvider = EntryProvider(password: password);
-      print('------------entry provider initialized--------------');
       if (taskName == WorkerTasks.taskStreak ||
           taskName == WorkerTasks.taskStreakOneOff) {
-        print('------------streaks task---------------');
         final hasEntry = await entryProvider.hasEntryToday();
-        print('-------------It has an entry--------------');
         await notificationService.showStreakNotification(hasEntryToday: hasEntry);
-        print('----------noitification service ko show called--------------');
 
       } else if (taskName == WorkerTasks.taskMemory ||
           taskName == WorkerTasks.taskMemoryOneOff) {
-        print('--------------memory-----------');
         final memory = await entryProvider.memoryFromLastYear();
-        print('-------$memory---------');
+        final yearsAgo = memory != null ? DateTime.now().year - DateTime.parse(memory.date).year : null;
+
         await notificationService.showMemoryNotification(
           memoryTitle: memory?.content,
           id: memory?.id,
+          yearsAgo: yearsAgo
         );
-        print('---------notification service called---------');
 
       } else if (taskName == WorkerTasks.taskWeekly ||
           taskName == WorkerTasks.taskWeeklyOneOff) {
-        print('-------------weekly----------');
         final count = await entryProvider.countLastWeek();
         await notificationService.showWeeklyNotification(entryCount: count);
-        print('----------notification service called---------------');
       } else {
-        print('-------khoi k aayo hai----------');
       }
       return true;
     } catch (e) {
-      print('------------_EEEEEEERRRRRROOOOOOORRRRRR_------------------\n\n');
       return true;
     }
   });
@@ -80,9 +67,12 @@ void main() async {
   final notificationPlugin = NotificationService();
   notificationPlugin.init();
 
-  await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  await Workmanager().initialize(callbackDispatcher);
 
-  runApp(const MeroApp());
+  runApp(EntryNotifierScope(
+    notifier: entryNotifier,
+    child: const MeroApp()
+  ));
 }
 
 class MeroApp extends StatefulWidget {

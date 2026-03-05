@@ -5,12 +5,14 @@ class StyledText extends StatelessWidget {
   final String value;
   final double fontSize;
   final Color? color;
+  final TextAlign align;
 
   const StyledText({
     super.key,
     required this.value,
     this.fontSize = 24,
     this.color,
+    this.align = TextAlign.center,
   });
 
   @override
@@ -19,7 +21,7 @@ class StyledText extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Text(
         value,
-        textAlign: TextAlign.center,
+        textAlign: align,
         style: TextStyle(
           fontSize: fontSize,
           fontWeight: FontWeight.bold,

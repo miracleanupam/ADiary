@@ -56,6 +56,7 @@ class NotificationService {
     if (payload == null) return;
     final context = navigatorKey.currentContext;
     if (context == null) return;
+    entryNotifier.refresh();
     final data = jsonDecode(payload);
     switch (data['kind']) {
       case 'streak':
@@ -141,7 +142,7 @@ class NotificationService {
   /// Fires the "On this day" memory notification.
   /// [memoryTitle] is the title of the entry from one year ago,
   /// or null if no entry exists.
-  Future<void> showMemoryNotification({String? memoryTitle, int? id}) async {
+  Future<void> showMemoryNotification({String? memoryTitle, int? id, int? yearsAgo}) async {
     await _ensureInitialized();
 
     // Silently skip if there's nothing to remind about
@@ -149,7 +150,7 @@ class NotificationService {
 
     await _plugin.show(
         _idMemory,
-        '📸 On this day, 1 year ago...',
+        '📸 On this day, $yearsAgo year ago...',
         'You wrote: "$memoryTitle" — tap to revisit the memory.',
         _details(_channelMemory, 'Memory Reminders',
             'Daily "on this day" memory notifications'),

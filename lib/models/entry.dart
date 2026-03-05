@@ -592,7 +592,7 @@ class EntryProvider {
       SELECT *
       FROM $tableEntry
       WHERE strftime('%m-%d', $columnDate) = strftime('%m-%d', 'now')
-      AND strftime('%Y', $columnDate) = strftime('%Y', 'now', '-1 year')
+      AND strftime('%Y', $columnDate) != strftime('%Y', 'now')
       AND $columnDiscardedAt is null
       ORDER BY RANDOM()
       LIMIT 1

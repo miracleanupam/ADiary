@@ -6,7 +6,7 @@ import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:adiary/compnents/alevated_button.dart';
 import 'package:adiary/compnents/styled_text.dart';
-import 'package:adiary/screens/home.dart';
+import 'package:adiary/models/entry_notifier.dart';
 import 'package:adiary/services/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -146,7 +146,8 @@ class _DisplayEntryState extends State<DisplayEntry> {
     }
 
     final succeeded = await EntryProvider().delete(_entry?.id);
-    if (succeeded) {
+    if (succeeded && mounted) {
+      EntryNotifierScope.of(context).refresh();
       _loadRandomEntry();
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,51 +205,34 @@ class _DisplayEntryState extends State<DisplayEntry> {
   }
 
   Widget _buildEntryView() {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          return;
-        }
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const MyHomePage()),
-          (Route<dynamic> route) =>
-              false, // This condition removes ALL previous routes
-        );
-      },
-      child: Scaffold(
-        backgroundColor: PinkColors.shade100,
-        appBar: AppBar(
-          flexibleSpace: constants.appBarBg,
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: _buildAppBarTitle(),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.maybePop(context), 
-          ),
-        ),
-        body: Container(
-          decoration: constants.bgDecoration,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildEntryHeader(),
-                const Divider(),
-                Expanded(child: _buildScrollableContent()),
-                if (_audioPath != null)
-                  AudioPlayerWidget(filePath: _audioPath!),
-                const Divider(),
-                const SizedBox(height: 16),
-                AlevatedButton(
-                  onPressed: _loadRandomEntry,
-                  icon: Icons.cached,
-                  text: 'See Another',
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: PinkColors.shade100,
+      appBar: AppBar(
+        flexibleSpace: constants.appBarBg,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: _buildAppBarTitle(),
+      ),
+      body: Container(
+        decoration: constants.bgDecoration,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildEntryHeader(),
+              const Divider(),
+              Expanded(child: _buildScrollableContent()),
+              if (_audioPath != null)
+                AudioPlayerWidget(filePath: _audioPath!),
+              const Divider(),
+              const SizedBox(height: 16),
+              AlevatedButton(
+                onPressed: _loadRandomEntry,
+                icon: Icons.cached,
+                text: 'See Another',
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
       ),
@@ -292,7 +276,8 @@ class _DisplayEntryState extends State<DisplayEntry> {
           icon: const Icon(Icons.delete_outline_outlined),
           style: IconButton.styleFrom(
             backgroundColor: PinkColors.shade100,
-            foregroundColor: PinkColors.shade700,
+            foregroundColor: PinkColors.shade300,
+            side: const BorderSide(color: PinkColors.shade300, width: 1)
           ),
         ),
       ],

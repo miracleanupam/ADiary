@@ -1,5 +1,5 @@
 import 'package:adiary/constants.dart';
-import 'package:adiary/models/entry.dart';
+import 'package:adiary/models/entry_notifier.dart';
 import 'package:adiary/screens/add_entry.dart';
 import 'package:adiary/compnents/alevated_button.dart';
 import 'package:adiary/screens/display_entry.dart';
@@ -13,30 +13,11 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  int _entryCount = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshCount();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _refreshCount();
-  }
-
-  Future<void> _refreshCount() async {
-    final count = await EntryProvider().getCount();
-    if (mounted) setState(() => _entryCount = count);
-  }
 
   void _navigate(Widget screen) async {
-    await Navigator.of(context).push(
+    Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => screen),
     );
-    _refreshCount();
   }
 
   @override
@@ -53,6 +34,8 @@ class _DashboardState extends State<Dashboard> {
       blurRadius: 10,
       offset: Offset.zero,
     );
+
+    final notifier = EntryNotifierScope.of(context);
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -74,7 +57,7 @@ class _DashboardState extends State<Dashboard> {
               style: headingStyle,
               children: [
                 TextSpan(
-                  text: ' $_entryCount',
+                  text: ' ${notifier.count}',
                   style: TextStyle(color: PinkColors.shade600),
                 ),
                 const TextSpan(text: ' good memories so far...'),
