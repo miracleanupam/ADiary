@@ -13,7 +13,6 @@ import 'package:adiary/services/images.dart';
 import 'package:adiary/services/recording.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:adiary/constants.dart' as constants;
 
 class AddEntry extends StatefulWidget {
@@ -29,7 +28,7 @@ class _AddEntryState extends State<AddEntry> {
   DateTime _selectedDate = DateTime.now();
   Map<String, dynamic>? _selectedMood;
   List<String> _pickedImages = [];
-  String? _directory;
+  late final Future<String> _tempDirFuture = _imageService.tempDirPath;
 
   // — UI state —
   bool _showRecorder = false;
@@ -46,23 +45,10 @@ class _AddEntryState extends State<AddEntry> {
   // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
-  void initState() {
-    super.initState();
-    _loadImageDirectory();
-  }
-
-  @override
   void dispose() {
     _journalController.dispose();
     _recorderService.dispose();
     super.dispose();
-  }
-
-  // ─── Setup ────────────────────────────────────────────────────────────────
-
-  Future<void> _loadImageDirectory() async {
-    final dir = await getTemporaryDirectory();
-    if (mounted) setState(() => _directory = dir.path);
   }
 
   // ─── Date ─────────────────────────────────────────────────────────────────
@@ -133,13 +119,21 @@ class _AddEntryState extends State<AddEntry> {
   // ─── Images ───────────────────────────────────────────────────────────────
 
   Future<void> _addImages() async {
-    final picked = await _imageService.pickImages();
-    setState(() => _pickedImages = [..._pickedImages, ...picked]);
+    await _imageService.pickImages();
+    _setImages();
+  }
+
+  void _setImages() {
+    final res = _imageService.imagePaths;
+
+    setState(() {
+      _pickedImages = res;
+    });
   }
 
   Future<void> _removeImage(int index) async {
-    await _imageService.removeImage(_pickedImages[index]);
-    setState(() => _pickedImages.removeAt(index));
+    await _imageService.removeImage(index);
+    _setImages();
   }
 
   // ─── Save ─────────────────────────────────────────────────────────────────
@@ -148,12 +142,19 @@ class _AddEntryState extends State<AddEntry> {
     if (!_validate()) return;
 
     final audioName = await _recorderService.saveFile();
-    await _imageService.saveFiles();
+
+    final List<String> savedImages;
+    try {
+      savedImages = await _imageService.saveFiles();
+    } catch (e) {
+      _showSnackBar('Images were lost. Please re-select them.');
+      return;
+    }
 
     final entry = Entry(
       content: _journalController.text,
       date: DateFormat('yyyy-MM-dd').format(_selectedDate),
-      images: _pickedImages.isEmpty ? null : _pickedImages,
+      images: savedImages.isEmpty ? null : savedImages,
       audio: audioName,
       mood: _selectedMood?['label'],
     );
@@ -216,11 +217,14 @@ class _AddEntryState extends State<AddEntry> {
                 fn: () => setState(() => _showRecorder = !_showRecorder),
               ),
               const SizedBox(height: 16),
-              ImagesInput(
-                handleImagesSelection: _addImages,
-                pickedImages: _pickedImages,
-                directory: _directory,
-                removePickedImage: _removeImage,
+              FutureBuilder<String>(
+                future: _tempDirFuture,
+                builder: (context, snapshot) => ImagesInput(
+                  handleImagesSelection: _addImages,
+                  pickedImages: _pickedImages,
+                  directory: snapshot.data,
+                  removePickedImage: _removeImage,
+                ),
               ),
               const SizedBox(height: 16),
               const Divider(),

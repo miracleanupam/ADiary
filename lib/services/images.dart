@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,34 +13,54 @@ class ImageService {
 
   // ─── Public API ───────────────────────────────────────────────────────────
 
-  Future<List<String>> pickImages() async {
+  /// Returns display paths (from temp dir) for showing images in the UI
+  List<String> get imagePaths => List.unmodifiable(_imageNames);
+
+  Future<String> get tempDirPath async {
+    final dir = await getTemporaryDirectory();
+    return dir.path;
+  }
+
+  Future<void> pickImages() async {
     final images = await _picker.pickMultiImage(requestFullMetadata: true);
-    _imageNames = await Future.wait(images.map(_saveTemporarily));
-    return _imageNames;
+    final newNames = await Future.wait(images.map(_saveTemporarily));
+    _imageNames = [..._imageNames, ...newNames];
   }
 
-  Future<void> removeImage(String imageName) async {
-    final file = File(await _tempPath(imageName));
+  Future<void> removeImage(int index) async {
+    final name = _imageNames[index];
+    final file = File(await _tempPath(name));
     if (await file.exists()) await file.delete();
-    _imageNames.remove(imageName);
-    _removedNames.add(imageName);
+    _imageNames.removeAt(index);
+    _removedNames.add(name);
   }
 
-  Future<void> saveFiles() async {
+  /// Returns the final saved image names, or throws if any temp file is missing
+  Future<List<String>> saveFiles() async {
+    final tempDir = await getTemporaryDirectory();
+
+    // Verify all temp files exist before making any changes
+    for (final name in _imageNames) {
+      final source = File('${tempDir.path}/$name');
+      if (!await source.exists()) {
+        throw Exception(
+            'Image "$name" was lost from temporary storage. Please re-select your images.');
+      }
+    }
+
+    // All files verified — now safe to make changes
     await _deletePermanent(_removedNames);
     _removedNames = [];
 
-    if (_imageNames.isEmpty) return;
+    if (_imageNames.isEmpty) return [];
 
-    final tempDir = await getTemporaryDirectory();
     final docsDir = await getApplicationDocumentsDirectory();
-
     for (final name in _imageNames) {
       final source = File('${tempDir.path}/$name');
-      if (await source.exists()) {
-        await source.copy('${docsDir.path}/$name');
-      }
+      await source.copy('${docsDir.path}/$name');
     }
+
+    return List.unmodifiable(_imageNames);
   }
 
   // ─── Private helpers ──────────────────────────────────────────────────────

@@ -199,7 +199,7 @@ class _HeaderCard extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: '  entries',
+                text: totalEntries == 1 ? ' entry' : ' entries',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -220,7 +220,7 @@ class _HeaderCard extends StatelessWidget {
               Icon(CupertinoIcons.sparkles, color: Colors.pink, size: 16),
               const SizedBox(width: 8),
               Text(
-                'That\'s $totalEntries doses for the soul ',
+                'That\'s $totalEntries ${totalEntries == 1 ? 'dose' : 'doses'} for the soul',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -332,7 +332,8 @@ class _DayAndDeletedRow extends StatelessWidget {
     // Provider format: "<day>=<count>"
     final parts = dayWithMostEntries.split('=');
     final day = parts.first;
-    final count = parts.last;
+    final dayStr = parts.last;
+    final count = dayStr.isEmpty ? 0 : int.tryParse(dayStr)!;
 
     return _TwoColumnRow(
       left: _StatBlock(
@@ -340,7 +341,7 @@ class _DayAndDeletedRow extends StatelessWidget {
         iconColor: Colors.deepOrange,
         title: 'Most Entries On',
         valueText: day,
-        caption: '$count entries',
+        caption: '$count ${count == 1 ? 'entry' : 'entries'}',
         valueMinHeight: 56,
       ),
       right: _StatBlock(
@@ -367,7 +368,8 @@ class _FrequentMoodCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mood = frequentMood.split('-').first;
-    final count = frequentMood.split('-').last;
+    final countStr = frequentMood.split('-').last;
+    int count = countStr.isEmpty ? 0 : int.tryParse(countStr)!;
 
     return StatCard(
       child: Column(
@@ -389,7 +391,7 @@ class _FrequentMoodCard extends StatelessWidget {
             color: PinkColors.shade100,
           ),
           Text(
-              count.isEmpty || int.tryParse(count) == 0 ? '--' : '$count times',
+              count == 0 ? '--' : '$count ${count == 1 ? 'time' : 'times'}',
               style: _captionStyle()),
         ],
       ),
@@ -434,7 +436,7 @@ class _AffirmationCard extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text: " days.\nThat's beautiful.",
+                  text: " ${happyDays == 1 ? 'day' : 'days'}.\nThat's beautiful.",
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
