@@ -197,7 +197,7 @@ class EntryProvider {
       await _open();
       await db.execute(
           '''update $tableEntry set $columnDiscardedAt=? where $columnId = ?''',
-          [(DateFormat('yyyy/MM/dd').format(DateTime.now())), id]);
+          [(DateFormat('yyyy-MM-dd').format(DateTime.now())), id]);
       return true;
     } catch (e) {
       return false;
