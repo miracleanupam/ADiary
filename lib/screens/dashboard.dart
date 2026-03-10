@@ -89,7 +89,7 @@ class _DashboardState extends State<Dashboard> {
           ),
           AlevatedButton(
             onPressed: () => _navigate(DisplayEntry()),
-            icon: Icons.sentiment_very_satisfied,
+            icon: Icons.history_outlined,
             text: 'Go down the memory lane',
           ),
         ],
