@@ -299,7 +299,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                 const SizedBox(height: 24),
                 const StyledText(value: 'Memory'),
                 if (_mood != null && _mood!.isNotEmpty)
-                  MoodPill(fn: () {}, mood: _mood),
+                  Transform.scale(scale: 0.6, child: MoodPill(fn: () {}, mood: _mood)),
                 const SizedBox(height: 16),
                 Text('${_entry?.content}',
                     style: const TextStyle(fontSize: 24)),

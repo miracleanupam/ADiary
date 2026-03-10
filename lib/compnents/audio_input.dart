@@ -135,7 +135,7 @@ class _AudioInputState extends State<AudioInput>
             iconSize: 48,
             icon: Icon(
               widget.isRecording ? Icons.stop_circle : Icons.mic,
-              color: widget.isRecording ? Colors.red : null,
+              color: widget.isRecording ? Colors.red : PinkColors.shade100,
             ),
             onPressed: () => widget.toggleRecordingState(),
           ),

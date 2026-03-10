@@ -144,7 +144,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
           child: AnimatedIcon(
             icon: AnimatedIcons.play_pause,
             progress: _playPauseController,
-            color: Colors.white,
+            color: PinkColors.shade100,
             size: 24,
           ),
         ),
