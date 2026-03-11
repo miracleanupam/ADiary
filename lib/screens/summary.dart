@@ -229,8 +229,11 @@ class _HeaderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(CupertinoIcons.sparkles,
-                  color: PinkColors.shade500, size: 16),
+              Transform.flip(
+                flipX: true,
+                child: Icon(CupertinoIcons.sparkles,
+                    color: PinkColors.shade500, size: 16),
+              ),
             ],
           ),
         ],

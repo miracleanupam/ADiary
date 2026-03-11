@@ -34,7 +34,7 @@ class _BarChartState extends State<BarChart> {
   int? _selectedIndex;
 
   static const double _barWidth = 10;
-  static const double _barSpacing = 19.5;
+  static const double _barSpacing = 16;
   static const int _yDivisions = 5;
   static const double _chartHeight = 300;
   static const double _scrollToMonthsFromEnd = 1;
@@ -87,7 +87,7 @@ class _BarChartState extends State<BarChart> {
     if (!_scrollController.hasClients) return;
     final monthsFromEnd = 12 - DateTime.now().month + _scrollToMonthsFromEnd;
     final targetIndex = _monthlyData.length - monthsFromEnd;
-    final barRightEdge = (targetIndex + 1) * (_barWidth + _barSpacing);
+    final barRightEdge = (targetIndex + 1) * (_barWidth + _barSpacing) + 13.5;
     final viewportWidth = _scrollController.position.viewportDimension;
     final offset = (barRightEdge - viewportWidth).clamp(
       0.0,
