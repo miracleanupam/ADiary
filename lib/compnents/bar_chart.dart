@@ -87,7 +87,7 @@ class _BarChartState extends State<BarChart> {
     if (!_scrollController.hasClients) return;
     final monthsFromEnd = 12 - DateTime.now().month + _scrollToMonthsFromEnd;
     final targetIndex = _monthlyData.length - monthsFromEnd;
-    final barRightEdge = (targetIndex + 1) * (_barWidth + _barSpacing) + 13.5;
+    final barRightEdge = (targetIndex + 1) * (_barWidth + _barSpacing) + 14.5;
     final viewportWidth = _scrollController.position.viewportDimension;
     final offset = (barRightEdge - viewportWidth).clamp(
       0.0,

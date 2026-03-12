@@ -25,7 +25,7 @@ class LineChart extends StatefulWidget {
 }
 
 class _LineChartState extends State<LineChart> {
-  late List<int> _years;
+  List<int> _years = [];
   int _selectedYear = DateTime.now().year;
   late List<DailyRecord> _cumulativeData;
   bool _isLoading = true;
