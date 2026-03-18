@@ -41,7 +41,7 @@ class WorkmanagerService {
         enabled: memoryEnabled,
         uniqueName: WorkerTasks.taskMemory,
         uniqueNameOneOff: WorkerTasks.taskMemoryOneOff,
-        initialDelay: _delayUntil(DateTime.now(), hour: 8, minute: 00),
+        initialDelay: _delayUntil(DateTime.now(), hour: 8, minute: 0),
         frequency: Duration(days: 1),
         passedPassword: password);
 

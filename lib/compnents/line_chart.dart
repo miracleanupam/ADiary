@@ -243,11 +243,11 @@ class _ChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (data.isEmpty) return;
+    final maxValue = data.last.count.toDouble();
+    final maxVal = maxValue > 0 ? maxValue : 2.0;
 
     final cw = size.width - pL - pR;
     final ch = size.height - pT - pB;
-    final maxVal = data.last.count.toDouble();
     final daysInYear = DateTime(year + 1, 1, 1)
         .difference(DateTime(year, 1, 1))
         .inDays
