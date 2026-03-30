@@ -195,6 +195,7 @@ class _AddEntryState extends State<AddEntry> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: PinkColors.shade100,
       appBar: AppBar(
         flexibleSpace: constants.appBarBg,

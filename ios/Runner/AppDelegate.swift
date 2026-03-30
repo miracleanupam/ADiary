@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import flutter_local_notifications
+import workmanager_apple
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -18,6 +19,14 @@ import flutter_local_notifications
     }
 
     GeneratedPluginRegistrant.register(with: self)
+    WorkmanagerPlugin.registerBGProcessingTask(
+      withIdentifier: "np.com.anupamdahal.adiary.bgNotificationTasksOneOffs"
+    )
+
+    WorkmanagerPlugin.registerPeriodicTask(
+      withIdentifier: "np.com.anupamdahal.adiary.bgNotificationTasks",
+      frequency: NSNumber(value: 15 * 60)
+    )
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
