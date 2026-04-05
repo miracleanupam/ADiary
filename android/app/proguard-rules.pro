@@ -1,1 +1,3 @@
 -keep class net.sqlcipher.** { *; }
+-keep class androidx.work.** { *; }
+-keep class be.tramckrijte.workmanager.** { *; }
