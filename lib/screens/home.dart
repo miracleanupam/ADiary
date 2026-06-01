@@ -48,22 +48,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: PinkColors.shade100,
-      appBar: AppBar(
-        flexibleSpace: constants.appBarBg,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title:
-            Text(constants.homePageWidgetTitleListsForAppBar[_drawerScreen]!),
-      ),
-      drawer: ADrawer(
-        onTapCallback: _onDrawerItemTapped,
-        selectedItem: _drawerScreen,
-      ),
-      body: Container(
-        decoration: constants.bgDecoration,
-        height: double.infinity,
-        child: constants.homePageWidgetListsForDrawer[_drawerScreen],
+    return PopScope(
+      canPop: _drawerScreen == 'dashboard',
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        if (context.mounted) {
+          setState(() {
+            _drawerScreen = 'dashboard';
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: PinkColors.shade100,
+        appBar: AppBar(
+          flexibleSpace: constants.appBarBg,
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title:
+              Text(constants.homePageWidgetTitleListsForAppBar[_drawerScreen]!),
+        ),
+        drawer: ADrawer(
+          onTapCallback: _onDrawerItemTapped,
+          selectedItem: _drawerScreen,
+        ),
+        body: Container(
+          decoration: constants.bgDecoration,
+          height: double.infinity,
+          child: constants.homePageWidgetListsForDrawer[_drawerScreen],
+        ),
       ),
     );
   }
