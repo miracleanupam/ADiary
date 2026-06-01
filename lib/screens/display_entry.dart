@@ -29,6 +29,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
   Map<String, dynamic>? _mood;
   String? _audioPath;
   String? _directory;
+  List<int> _visitedEntries = [];
 
   final _scrollController = ScrollController();
 
@@ -78,12 +79,13 @@ class _DisplayEntryState extends State<DisplayEntry> {
         _entry = entry;
         _mood = mood;
         _audioPath = audioPath;
+        _visitedEntries = [..._visitedEntries, entry.id as int];
       });
     }
   }
 
   Future<void> _loadRandomEntry() async {
-    final entry = await EntryProvider().getRandomEntry(_entry?.id);
+    final entry = await EntryProvider().getRandomEntry(_visitedEntries);
     final mood = _findMood(entry?.mood);
     final audioPath = await _resolveAudioPath(entry?.audio);
 
@@ -92,6 +94,9 @@ class _DisplayEntryState extends State<DisplayEntry> {
         _entry = entry;
         _mood = mood;
         _audioPath = audioPath;
+        if (entry != null) {
+          _visitedEntries = [..._visitedEntries, entry.id as int];
+        }
       });
     }
   }

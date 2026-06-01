@@ -204,10 +204,14 @@ class EntryProvider {
     }
   }
 
-  Future<Entry?> getRandomEntry(int? excludeId) async {
+  Future<Entry?> getRandomEntry(List<int>? excludeIds) async {
     await _open();
     try {
-      String whereCondition = excludeId == null ? '' : '_id != $excludeId and';
+      String whereCondition = '';
+      if (excludeIds != null && excludeIds.isNotEmpty) {
+        final ids = excludeIds.join(',');
+        whereCondition = '_id not in ($ids) and ';
+      }
       List<Map> maps = await db.rawQuery(
           '''select * from $tableEntry where $whereCondition $columnDiscardedAt is null order by random() limit 1;''');
       if (maps.isNotEmpty) {
