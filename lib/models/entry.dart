@@ -592,6 +592,22 @@ class EntryProvider {
     return Sqflite.firstIntValue(res) ?? 0;
   }
 
+  Future<List<Entry>>timelinePage(int page) async {
+    await _open();
+    final res = await db.rawQuery(
+      '''
+        SELECT * FROM $tableEntry where $columnDiscardedAt IS NULL ORDER BY $columnDate DESC LIMIT 10 OFFSET ${(page-1)*10};
+      '''
+    );
+
+    if (res.isNotEmpty) {
+      List<Entry> entries = res.map((e) => Entry.fromMap(e)).toList();
+      return entries;
+    }
+
+    return [];
+  }
+
   Future<Entry?> memoryFromLastYear() async {
     await _open();
     List<Map> result = await db.rawQuery('''

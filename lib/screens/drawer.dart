@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:adiary/constants.dart';
 import 'package:flutter/material.dart';
 
@@ -29,6 +31,12 @@ class _ADrawerState extends State<ADrawer> {
         'label': 'Visualization',
         'icon': Icons.stacked_line_chart_outlined
       },
+      {
+        'id': 'timeline',
+        'label': 'Timeline',
+        'icon': Icons.linear_scale_rounded,
+        'rotation': math.pi / 2 * 3,
+      }
     ],
     [
       {
@@ -111,7 +119,7 @@ class _ADrawerState extends State<ADrawer> {
               horizontalTitleGap: 4,
               leading: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [Icon(item['icon'] as IconData), VerticalDivider()],
+                children: [Transform.rotate(angle: item['rotation'] as double? ?? 0, child: Icon(item['icon'] as IconData)), VerticalDivider()],
               ),
               title: Text(item['label'] as String),
               selected: _currentSelection == item['id'],

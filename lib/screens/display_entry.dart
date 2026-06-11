@@ -306,7 +306,7 @@ class _DisplayEntryState extends State<DisplayEntry> {
                   Transform.scale(scale: 0.6, child: MoodPill(fn: () {}, mood: _mood)),
                 const SizedBox(height: 16),
                 Text('${_entry?.content}',
-                    style: const TextStyle(fontSize: 24)),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 24),
                 if (_entry?.images != null && _entry!.images!.isNotEmpty)
                   _buildImageSection(),

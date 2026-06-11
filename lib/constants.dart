@@ -5,6 +5,7 @@ import 'package:adiary/screens/import.dart';
 import 'package:adiary/screens/notification.dart';
 import 'package:adiary/screens/password.dart';
 import 'package:adiary/screens/summary.dart';
+import 'package:adiary/screens/timeline.dart';
 import 'package:adiary/screens/visualization.dart';
 import 'package:flutter/material.dart';
 
@@ -163,6 +164,7 @@ const homePageWidgetListsForDrawer = <String, Widget>{
   'notification': NotificationManager(),
   'summary': Summary(),
   'visualization': Visualization(),
+  'timeline': Timeline(),
 };
 
 const homePageWidgetTitleListsForAppBar = <String, String>{
@@ -174,6 +176,7 @@ const homePageWidgetTitleListsForAppBar = <String, String>{
   'notification': 'I know you forget...',
   'summary': 'At a Glance!!',
   'visualization': 'In Detail!!',
+  'timeline': 'Your Journey!!'
 };
 
 // ─── Decorations ──────────────────────────────────────────────────────────────

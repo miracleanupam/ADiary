@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:adiary/constants.dart';
 import 'package:adiary/services/player.dart';
@@ -28,6 +29,12 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
   bool get _hasFile => widget.filePath.isNotEmpty;
 
   static const _waveHeights = <double>[
+    6, 14, 10, 18, 8,  20, 12, 16, 6,  22,
+    10, 18, 14, 8,  20, 12, 16, 10, 14, 8,
+    18, 6,  20, 12, 10, 16, 8,  14, 18, 10,
+    6,  14, 10, 18, 8,  20, 12, 16, 6,  22,
+    10, 18, 14, 8,  20, 12, 16, 10, 14, 8,
+    18, 6,  20, 12, 10, 16, 8,  14, 18, 10,
     6, 14, 10, 18, 8,  20, 12, 16, 6,  22,
     10, 18, 14, 8,  20, 12, 16, 10, 14, 8,
     18, 6,  20, 12, 10, 16, 8,  14, 18, 10,
@@ -168,23 +175,23 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget>
       height: 24,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (!_hasFile) {
-            return const Placeholder(
-              color: Colors.transparent,
-            );
-          }
-          final count = _waveHeights.length;
-          final barW = ((constraints.maxWidth - (count - 1) * 2) / count)
-              .clamp(2.0, 8.0);
+          if (!_hasFile) return const SizedBox.shrink();
+
+          const barW = 2.0;
+          const gap = 2.0;
+          final count =
+              min(119, ((constraints.maxWidth + gap) / (barW + gap)).floor());
+
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: List.generate(count, (i) {
+              final h = _waveHeights[i % _waveHeights.length];
               return Padding(
-                padding: EdgeInsets.only(right: i < count - 1 ? 2 : 0),
+                padding: EdgeInsets.only(right: i < count - 1 ? gap : 0),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 80),
                   width: barW,
-                  height: _waveHeights[i],
+                  height: h,
                   decoration: BoxDecoration(
                     color: i / count < _progress
                         ? PinkColors.shade700
