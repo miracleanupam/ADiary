@@ -596,7 +596,7 @@ class EntryProvider {
     await _open();
     final res = await db.rawQuery(
       '''
-        SELECT * FROM $tableEntry where $columnDiscardedAt IS NULL ORDER BY $columnDate DESC LIMIT 10 OFFSET ${(page-1)*10};
+        SELECT * FROM $tableEntry where $columnDiscardedAt IS NULL ORDER BY $columnDate DESC, $columnId DESC LIMIT 10 OFFSET ${(page-1)*10};
       '''
     );
 

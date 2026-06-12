@@ -1,5 +1,6 @@
 import 'package:adiary/compnents/date_separator.dart';
 import 'package:adiary/compnents/timeline_card.dart';
+import 'package:adiary/constants.dart';
 import 'package:adiary/models/entry.dart';
 import 'package:flutter/material.dart';
 
@@ -87,18 +88,24 @@ class _TimelineState extends State<Timeline> {
                 Expanded(
                   child: Center(
                     child: entries.isEmpty
-                        ? Text("No data yet")
+                        ? Text(
+                          "There is no data yet!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: PinkColors.shade900),
+                        )
                         : ListView.builder(
                             reverse: true,
                             itemCount: entries.length,
                             controller: scrollController,
                             itemBuilder: (context, index) {
                               // Loading indicator at the bottom
-                              if (index == entries.length) {
+                              if (index == entries.length - 1 && hasMore) {
                                 return const Center(
                                     child: CircularProgressIndicator());
                               }
-
                               final item = entries[index];
 
                               // Date separator

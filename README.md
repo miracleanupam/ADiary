@@ -2,6 +2,13 @@
 Record your best memories and relive them when you're down. Cause we tend to forgot the good times and get stuck on the bad ones.
 
 # Release Notes
+## Version 3.1.0
+- Added Timeline feature that lets you see your happy moments chronologically
+- App Exeperience Enhancements
+
+## Version 3.0.1
+- Bug Fixes
+
 ## Version 3.0.0
 
 ### Features Added

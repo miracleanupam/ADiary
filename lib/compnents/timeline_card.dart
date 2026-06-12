@@ -145,7 +145,7 @@ class AudioSection extends StatelessWidget {
     return FutureBuilder<String?>(
         future: _resolveAudioPath(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const SizedBox.shrink();
+          if (!snapshot.hasData) return const SizedBox(height: 100,);
 
           return SizedBox(
               width: double.infinity,
@@ -214,15 +214,16 @@ class _StackedPhotosState extends State<StackedPhotos> {
 
     final availableWidth =
         MediaQuery.of(context).size.width - 40 - 16 - 16 - 16;
+    final dpr = MediaQuery.of(context).devicePixelRatio;
 
     return FutureBuilder<Directory>(
       future: _dirFuture,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox.shrink();
+        if (!snapshot.hasData) return SizedBox(height: availableWidth,);
         final basePath = snapshot.data!.path;
         final items = widget.images
             .take(count)
-            .map((p) => Image.file(File('$basePath/$p'), fit: BoxFit.cover))
+            .map((p) => Image.file(File('$basePath/$p'), fit: BoxFit.cover, cacheWidth: (availableWidth * dpr).toInt(),))
             .toList();
 
         return Padding(
