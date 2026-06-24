@@ -110,8 +110,11 @@ class NotificationService {
           channelId,
           channelName,
           channelDescription: desc,
-          importance: Importance.high,
-          priority: Priority.high,
+          importance: Importance.max,
+          priority: Priority.max,
+          playSound: true,
+          enableVibration: true,
+          icon: 'ic_launcher_foreground',
         ),
         iOS: const DarwinNotificationDetails(),
       );

@@ -20,7 +20,15 @@ class ADiaryPasswordService {
 
   // ─── Public API ───────────────────────────────────────────────────────────
 
-  Future<String?> getPassword() => _secureStorage.read(key: 'password');
+  Future<String?> getPassword() async {
+    try {
+      return await _secureStorage.read(key: 'password');
+    } catch(_) {
+        await _secureStorage.deleteAll();
+        return null;
+    }
+  }
+    
 
   Future<void> promptForPassword(bool cancelable) async {
     showDialog(

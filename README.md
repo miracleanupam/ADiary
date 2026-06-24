@@ -2,6 +2,11 @@
 Record your best memories and relive them when you're down. Cause we tend to forgot the good times and get stuck on the bad ones.
 
 # Release Notes
+## Version 3.1.1
+- Notification Icon fixes
+- Timeline Improvements
+- Android auto backing up and restoring app data is removed
+  
 ## Version 3.1.0
 - Added Timeline feature that lets you see your happy moments chronologically
 - App Exeperience Enhancements

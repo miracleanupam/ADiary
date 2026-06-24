@@ -58,7 +58,7 @@ class _TimelineState extends State<Timeline> {
 
     loadingMore = true;
     List<Entry> newEntries = await EntryProvider().timelinePage(page ?? 1);
-    hasMore = newEntries.isNotEmpty;
+    hasMore = newEntries.length == 10;
     currentPage = currentPage + (newEntries.isEmpty ? 0 : 1);
     final grouped = _groupEntriesByDate(newEntries);
     final List<dynamic> items = [];
